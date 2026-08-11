@@ -6,6 +6,7 @@ use App\Filament\Resources\Areas\AreaResource;
 use App\Filament\Resources\Areas\Pages\CreateArea;
 use App\Filament\Resources\Areas\Pages\EditArea;
 use App\Models\Area;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -43,5 +44,52 @@ class AdminPanelTest extends TestCase
             ->call('save')
             ->assertHasNoFormErrors()
             ->assertRedirect(AreaResource::getUrl('index'));
+    }
+
+    public function test_the_admin_panel_user_menu_has_a_native_profile_page_and_links_security_to_settings(): void
+    {
+        $panel = Filament::getPanel('admin');
+        $items = $panel->getUserMenuItems();
+
+        $this->assertTrue($panel->hasProfile());
+        $this->assertArrayHasKey('profile', $items);
+        $this->assertSame($panel->getProfileUrl(), $items['profile']->getUrl());
+
+        $this->assertArrayHasKey('security', $items);
+        $this->assertSame(route('security.edit'), $items['security']->getUrl());
+    }
+
+    public function test_the_app_panel_user_menu_has_a_native_profile_page_and_links_security_to_settings(): void
+    {
+        Filament::setCurrentPanel(Filament::getPanel('app'));
+
+        $panel = Filament::getPanel('app');
+        $items = $panel->getUserMenuItems();
+
+        $this->assertTrue($panel->hasProfile());
+        $this->assertArrayHasKey('profile', $items);
+        $this->assertSame($panel->getProfileUrl(), $items['profile']->getUrl());
+
+        $this->assertArrayHasKey('security', $items);
+        $this->assertSame(route('security.edit'), $items['security']->getUrl());
+    }
+
+    public function test_the_admin_native_profile_page_renders(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $response = $this->get(Filament::getPanel('admin')->getProfileUrl());
+
+        $response->assertOk();
+    }
+
+    public function test_the_app_native_profile_page_renders(): void
+    {
+        Filament::setCurrentPanel(Filament::getPanel('app'));
+        $this->actingAs(User::factory()->create());
+
+        $response = $this->get(Filament::getPanel('app')->getProfileUrl());
+
+        $response->assertOk();
     }
 }

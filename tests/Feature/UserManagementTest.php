@@ -1,0 +1,93 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Filament\Resources\Users\Pages\CreateUser;
+use App\Filament\Resources\Users\Pages\EditUser;
+use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\UserResource;
+use App\Models\User;
+use Filament\Actions\DeleteAction;
+use Filament\Facades\Filament;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
+use Tests\TestCase;
+
+class UserManagementTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
+    }
+
+    public function test_creating_a_user_auto_verifies_the_email_and_redirects_to_the_list(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        Livewire::test(CreateUser::class)
+            ->fillForm([
+                'name' => 'Budi Santoso',
+                'email' => 'budi@tangcity.com',
+                'password' => 'Pwnd@2022',
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors()
+            ->assertRedirect(UserResource::getUrl('index'));
+
+        $user = User::where('email', 'budi@tangcity.com')->first();
+
+        $this->assertNotNull($user);
+        $this->assertNotNull($user->email_verified_at);
+    }
+
+    public function test_a_role_can_be_assigned_when_creating_a_user(): void
+    {
+        $this->actingAsSuperAdmin();
+        $role = Role::where('name', 'super_admin')->firstOrFail();
+
+        Livewire::test(CreateUser::class)
+            ->fillForm([
+                'name' => 'Admin Baru',
+                'email' => 'admin.baru@tangcity.com',
+                'password' => 'Pwnd@2022',
+                'roles' => [$role->id],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $user = User::where('email', 'admin.baru@tangcity.com')->firstOrFail();
+
+        $this->assertTrue($user->hasRole('super_admin'));
+    }
+
+    public function test_leaving_the_password_blank_when_editing_keeps_the_existing_password(): void
+    {
+        $this->actingAsSuperAdmin();
+        $user = User::factory()->create();
+        $originalHash = $user->password;
+
+        Livewire::test(EditUser::class, ['record' => $user->getRouteKey()])
+            ->fillForm([
+                'name' => $user->name,
+                'email' => $user->email,
+                'password' => '',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame($originalHash, $user->fresh()->password);
+    }
+
+    public function test_an_admin_cannot_delete_their_own_account_from_the_list(): void
+    {
+        $admin = $this->actingAsSuperAdmin();
+
+        Livewire::test(ListUsers::class)
+            ->assertTableActionHidden(DeleteAction::class, $admin);
+    }
+}

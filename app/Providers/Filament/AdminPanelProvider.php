@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -11,6 +12,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -57,6 +59,17 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
+            ])
+            // Filament's own name/email/password page, rendered inside the panel
+            // shell (not the simple centered layout) so it feels native. 2FA and
+            // passkeys still live on the shared Fortify security page, linked
+            // below, since those aren't covered by this page.
+            ->profile(isSimple: false)
+            ->userMenuItems([
+                Action::make('security')
+                    ->label('Keamanan')
+                    ->icon(Heroicon::ShieldCheck)
+                    ->url(fn (): string => route('security.edit')),
             ])
             ->authMiddleware([
                 Authenticate::class,

@@ -161,7 +161,8 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Registration is off — NADI is an internal tool, accounts are created
+        // by an admin via the Users resource in /admin, not self-service signup.
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

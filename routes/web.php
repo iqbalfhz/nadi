@@ -2,7 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+// NADI is an internal tool, not a public product — there is no marketing
+// landing page. Guests land on login, authenticated users bounce onward
+// via the /dashboard route below.
+Route::redirect('/', '/dashboard')->name('home');
 
 // NADI has no standalone dashboard view of its own — this route only exists so
 // Fortify's post-login redirect (config('fortify.home')) and existing named-route
