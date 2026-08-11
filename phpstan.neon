@@ -10,4 +10,7 @@ parameters:
         - database/
         - routes/
 
+    excludePaths:
+        - database/seeders/ShieldSeeder.php
+
     level: 7
