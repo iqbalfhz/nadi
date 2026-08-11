@@ -1,0 +1,19 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import '../../../../vendor/guava/calendar/resources/css/theme.css';
+
+@source '../../../../app/Filament/App/**/*';
+@source '../../../../resources/views/filament/app/**/*';
+@source '../../../../vendor/guava/calendar/resources/**/*';
+
+/*
+ * guava's own theme.css ties this to Filament's --color-500, which depends on a
+ * color-scoping wrapper class resolving correctly. In the resource day/week views
+ * that ends up covering the entire visible column solid instead of a subtle tint
+ * (every cell in the sole visible day is "today"), so drop it entirely rather than
+ * chase the variable-resolution chain. !important because this overrides a
+ * third-party package's own CSS custom property, not our own component style.
+ */
+.ec-today {
+    --ec-day-bg-color: transparent !important;
+    background-color: transparent !important;
+}

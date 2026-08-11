@@ -4,8 +4,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+// NADI has no standalone dashboard view of its own — this route only exists so
+// Fortify's post-login redirect (config('fortify.home')) and existing named-route
+// references have somewhere to land, then bounces into the right Filament panel.
+Route::get('dashboard', function () {
+    $user = auth()->user();
+
+    return redirect($user->hasRole('super_admin') ? '/admin' : '/app');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 require __DIR__.'/settings.php';

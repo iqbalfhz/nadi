@@ -3,13 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\Area;
-use App\Models\Room;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Room>
+ * @extends Factory<Area>
  */
-class RoomFactory extends Factory
+class AreaFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,9 +18,7 @@ class RoomFactory extends Factory
     public function definition(): array
     {
         return [
-            'area_id' => Area::factory(),
-            'name' => 'Ruang '.fake()->unique()->city(),
-            'capacity' => fake()->numberBetween(4, 20),
+            'name' => fake()->unique()->streetName(),
         ];
     }
 }

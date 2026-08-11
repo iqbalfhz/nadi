@@ -8,13 +8,22 @@ use Guava\Calendar\ValueObjects\CalendarResource;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'capacity', 'location'])]
+#[Fillable(['area_id', 'name', 'capacity'])]
 class Room extends Model implements Resourceable
 {
     /** @use HasFactory<RoomFactory> */
     use HasFactory;
+
+    /**
+     * @return BelongsTo<Area, $this>
+     */
+    public function area(): BelongsTo
+    {
+        return $this->belongsTo(Area::class);
+    }
 
     /**
      * @return HasMany<RoomBooking, $this>
@@ -27,6 +36,6 @@ class Room extends Model implements Resourceable
     public function toCalendarResource(): CalendarResource
     {
         return CalendarResource::make((string) $this->id)
-            ->title($this->name);
+            ->title("{$this->area->name} — {$this->name}");
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RoomBookings\Schemas;
 
+use App\Models\Room;
 use App\Models\RoomBooking;
 use Carbon\Carbon;
 use Filament\Forms\Components\DateTimePicker;
@@ -9,6 +10,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Collection;
 
 class RoomBookingForm
 {
@@ -17,8 +19,15 @@ class RoomBookingForm
         return $schema
             ->components([
                 Select::make('room_id')
-                    ->relationship('room', 'name')
+                    ->label('Room')
+                    ->options(fn () => Room::query()
+                        ->with('area')
+                        ->orderBy('name')
+                        ->get()
+                        ->groupBy(fn (Room $room) => $room->area->name)
+                        ->map(fn (Collection $rooms) => $rooms->pluck('name', 'id')))
                     ->required()
+                    ->searchable()
                     ->live(),
                 Select::make('user_id')
                     ->relationship('user', 'name')

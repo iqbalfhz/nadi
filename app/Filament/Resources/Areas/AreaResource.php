@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Filament\Resources\Rooms;
+namespace App\Filament\Resources\Areas;
 
-use App\Filament\Resources\Rooms\Pages\CreateRoom;
-use App\Filament\Resources\Rooms\Pages\EditRoom;
-use App\Filament\Resources\Rooms\Pages\ListRooms;
-use App\Filament\Resources\Rooms\Schemas\RoomForm;
-use App\Filament\Resources\Rooms\Tables\RoomsTable;
-use App\Models\Room;
+use App\Filament\Resources\Areas\Pages\CreateArea;
+use App\Filament\Resources\Areas\Pages\EditArea;
+use App\Filament\Resources\Areas\Pages\ListAreas;
+use App\Filament\Resources\Areas\Schemas\AreaForm;
+use App\Filament\Resources\Areas\Tables\AreasTable;
+use App\Models\Area;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -15,9 +15,9 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
 
-class RoomResource extends Resource
+class AreaResource extends Resource
 {
-    protected static ?string $model = Room::class;
+    protected static ?string $model = Area::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
@@ -25,12 +25,12 @@ class RoomResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return RoomForm::configure($schema);
+        return AreaForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return RoomsTable::configure($table);
+        return AreasTable::configure($table);
     }
 
     public static function getRelations(): array
@@ -43,9 +43,9 @@ class RoomResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListRooms::route('/'),
-            'create' => CreateRoom::route('/create'),
-            'edit' => EditRoom::route('/{record}/edit'),
+            'index' => ListAreas::route('/'),
+            'create' => CreateArea::route('/create'),
+            'edit' => EditArea::route('/{record}/edit'),
         ];
     }
 }
