@@ -3,13 +3,26 @@
         <div
             wire:key="issued-{{ $this->issuedTicket->id }}"
             x-data
-            x-init="setTimeout(() => $wire.dismissTicket(), 8000)"
+            x-init="
+                setTimeout(() => window.print(), 300)
+                setTimeout(() => $wire.dismissTicket(), 8000)
+            "
             class="flex flex-col items-center gap-4 text-center"
         >
             <p class="text-xl text-white/60">Nomor Anda</p>
             <p class="text-8xl font-bold tracking-wide text-[#FFB020]">{{ $this->issuedTicket->formatted_number }}</p>
             <p class="text-lg text-white/70">{{ $this->issuedTicket->category->name }}</p>
             <p class="mt-6 text-sm text-white/40">Silakan tunggu nomor Anda dipanggil.</p>
+
+            {{-- Print-only receipt — invisible on screen, this is what actually
+            reaches the thermal printer when window.print() fires above. --}}
+            <div class="print-only">
+                <p style="margin: 0; font-size: 12px;">{{ config('app.name') }}</p>
+                <p style="margin: 4px 0 0; font-size: 11px;">NOMOR ANTRIAN</p>
+                <p style="margin: 8px 0; font-size: 32px; font-weight: bold;">{{ $this->issuedTicket->formatted_number }}</p>
+                <p style="margin: 0; font-size: 12px;">{{ $this->issuedTicket->category->name }}</p>
+                <p style="margin: 8px 0 0; font-size: 10px;">{{ $this->issuedTicket->created_at->translatedFormat('d M Y, H:i') }}</p>
+            </div>
         </div>
     @else
         <div class="flex flex-col items-center gap-3 text-center">
@@ -34,4 +47,25 @@
             @endforelse
         </div>
     @endif
+
+    <style>
+        .print-only { display: none; }
+
+        /* Default 80mm thermal receipt width — change to 58mm if your printer
+        uses the narrower paper roll. */
+        @media print {
+            body * { visibility: hidden; }
+            .print-only, .print-only * { visibility: visible; }
+            .print-only {
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                text-align: center;
+                font-family: monospace;
+            }
+            @page { size: 80mm auto; margin: 4mm; }
+        }
+    </style>
 </div>

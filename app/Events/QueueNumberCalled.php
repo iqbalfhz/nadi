@@ -5,10 +5,14 @@ namespace App\Events;
 use App\Models\QueueTicket;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 
-class QueueNumberCalled implements ShouldBroadcast
+// ShouldBroadcastNow (not ShouldBroadcast) — this must reach the display screen
+// the instant an operator calls a number, and a queued broadcast would silently
+// sit in the `jobs` table doing nothing until a `queue:work` process happens to
+// be running. Reverb itself still has to be running for it to go anywhere.
+class QueueNumberCalled implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets;
 

@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\App\Widgets\BookingCalendarWidget;
+use App\Providers\Filament\Concerns\HasNadiSidebarCustomizations;
 use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -22,11 +23,14 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AppPanelProvider extends PanelProvider
 {
+    use HasNadiSidebarCustomizations;
+
     public function panel(Panel $panel): Panel
     {
-        return $panel
+        $panel = $panel
             ->id('app')
             ->path('app')
+            ->sidebarCollapsibleOnDesktop()
             ->viteTheme('resources/css/filament/app/theme.css')
             ->favicon(asset('images/nadi-icon.png'))
             ->colors([
@@ -66,5 +70,7 @@ class AppPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+
+        return $this->withNadiSidebarCustomizations($panel);
     }
 }

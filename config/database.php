@@ -3,6 +3,10 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+// spatie/laravel-backup only backs up the Penomoran Dokumen module's data,
+// not the whole app — set on each connection's 'dump.include_tables' below.
+$backupTables = ['document_types', 'companies', 'departments', 'documents'];
+
 return [
 
     /*
@@ -42,6 +46,9 @@ return [
             'journal_mode' => null,
             'synchronous' => null,
             'transaction_mode' => 'DEFERRED',
+            'dump' => [
+                'include_tables' => $backupTables,
+            ],
         ],
 
         'mysql' => [
@@ -62,6 +69,9 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+            'dump' => [
+                'include_tables' => $backupTables,
+            ],
         ],
 
         'mariadb' => [

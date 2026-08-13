@@ -1,0 +1,57 @@
+/* Replaces Filament's default topbar sidebar-collapse button (which sat
+   before the NADI logo) with one placed right after it instead. Desktop
+   only — mobile keeps the topbar hamburger/close buttons untouched. */
+
+.fi-topbar-collapse-sidebar-btn-ctn {
+    display: none !important;
+}
+
+.nadi-sidebar-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin-inline-start: 0.75rem;
+    border-radius: 9999px;
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0;
+    transition:
+        color 0.15s ease,
+        background-color 0.15s ease;
+}
+
+.nadi-sidebar-toggle svg {
+    width: 1.375rem;
+    height: 1.375rem;
+    transition: transform 0.15s ease;
+}
+
+.nadi-sidebar-toggle.nadi-sidebar-toggle-collapsed svg {
+    transform: rotate(180deg);
+}
+
+.nadi-sidebar-toggle:hover {
+    color: #111827;
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+html.dark .nadi-sidebar-toggle {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #9ca3af;
+}
+
+html.dark .nadi-sidebar-toggle:hover {
+    color: #f3f4f6;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+@media (min-width: 1024px) {
+    .nadi-sidebar-toggle {
+        display: flex;
+    }
+}

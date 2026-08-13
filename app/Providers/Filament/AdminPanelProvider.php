@@ -2,12 +2,14 @@
 
 namespace App\Providers\Filament;
 
+use App\Providers\Filament\Concerns\HasNadiSidebarCustomizations;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -24,12 +26,15 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
+    use HasNadiSidebarCustomizations;
+
     public function panel(Panel $panel): Panel
     {
-        return $panel
+        $panel = $panel
             ->default()
             ->id('admin')
             ->path('admin')
+            ->sidebarCollapsibleOnDesktop()
             ->favicon(asset('images/nadi-icon.png'))
             ->colors([
                 'primary' => Color::Amber,
@@ -60,6 +65,29 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 FilamentShieldPlugin::make(),
             ])
+            // Quick-launch shortcuts to the Antrian module's non-Filament screens
+            // (public kiosk/display routes, and the operator page which lives in
+            // the /app panel) — open in a new tab so the admin session stays put.
+            ->navigationItems([
+                NavigationItem::make('Buka Kiosk (Ambil Nomor)')
+                    ->icon(Heroicon::OutlinedDevicePhoneMobile)
+                    ->url('/antrian/kiosk-pin')
+                    ->openUrlInNewTab()
+                    ->group('Antrian')
+                    ->sort(-3),
+                NavigationItem::make('Buka Layar Display (TV)')
+                    ->icon(Heroicon::OutlinedTv)
+                    ->url('/antrian/layar')
+                    ->openUrlInNewTab()
+                    ->group('Antrian')
+                    ->sort(-2),
+                NavigationItem::make('Buka Halaman Operator')
+                    ->icon(Heroicon::OutlinedSpeakerWave)
+                    ->url('/app/queue-operator')
+                    ->openUrlInNewTab()
+                    ->group('Antrian')
+                    ->sort(-1),
+            ])
             // Filament's own name/email/password page, rendered inside the panel
             // shell (not the simple centered layout) so it feels native. 2FA and
             // passkeys still live on the shared Fortify security page, linked
@@ -74,5 +102,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+
+        return $this->withNadiSidebarCustomizations($panel);
     }
 }

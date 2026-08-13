@@ -60,6 +60,14 @@ return [
             'report' => false,
         ],
 
+        // Credentials aren't read from here — the 'google' driver is
+        // registered in AppServiceProvider to pull them from BackupSettings
+        // (DB-backed) instead, so the destination account can be rotated
+        // from Pengaturan > Backup Otomatis without a deploy.
+        'google' => [
+            'driver' => 'google',
+        ],
+
     ],
 
     /*

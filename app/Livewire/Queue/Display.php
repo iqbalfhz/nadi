@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Queue;
 
+use App\Models\Advertisement;
 use App\Models\QueueCategory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -21,6 +22,19 @@ class Display extends Component
             ->where('is_active', true)
             ->with('latestCalledTicket')
             ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, Advertisement>
+     */
+    #[Computed]
+    public function advertisements(): Collection
+    {
+        return Advertisement::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->with('media')
             ->get();
     }
 

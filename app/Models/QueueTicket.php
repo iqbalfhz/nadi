@@ -12,6 +12,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property QueueTicketStatus $status
+ * @property Carbon|null $called_at
+ * @property Carbon|null $done_at
+ */
 #[Fillable(['queue_category_id', 'number', 'status', 'counter_label', 'called_by', 'called_at', 'done_at'])]
 class QueueTicket extends Model
 {

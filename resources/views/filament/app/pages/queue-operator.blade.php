@@ -17,7 +17,7 @@
                 <x-filament::input.wrapper>
                     <x-filament::input
                         type="text"
-                        wire:model="counterLabel"
+                        wire:model.live="counterLabel"
                         placeholder="Contoh: Loket 1"
                         :disabled="(bool) $this->currentTicket"
                     />

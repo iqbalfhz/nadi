@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Enums\QueueTicketStatus;
 use App\Filament\Resources\QueueCategories\Pages\CreateQueueCategory;
 use App\Filament\Resources\QueueCategories\Pages\EditQueueCategory;
 use App\Filament\Resources\QueueCategories\QueueCategoryResource;
+use App\Filament\Resources\QueueTickets\Pages\ListQueueTickets;
 use App\Filament\Resources\QueueTickets\QueueTicketResource;
 use App\Models\QueueCategory;
+use App\Models\QueueTicket;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -64,5 +67,68 @@ class QueueAdminTest extends TestCase
     {
         $this->assertFalse(QueueTicketResource::canCreate());
         $this->assertArrayNotHasKey('create', QueueTicketResource::getPages());
+    }
+
+    public function test_an_admin_can_force_resolve_a_ticket_stuck_as_called(): void
+    {
+        $this->actingAsSuperAdmin();
+        $category = QueueCategory::factory()->create();
+        $ticket = QueueTicket::factory()->create([
+            'queue_category_id' => $category->id,
+            'status' => QueueTicketStatus::Called,
+        ]);
+
+        Livewire::test(ListQueueTickets::class)
+            ->callTableAction('markDone', $ticket);
+
+        $this->assertSame(QueueTicketStatus::Done, $ticket->fresh()->status);
+        $this->assertNotNull($ticket->fresh()->done_at);
+    }
+
+    public function test_the_force_resolve_actions_are_hidden_for_tickets_that_are_not_called(): void
+    {
+        $this->actingAsSuperAdmin();
+        $category = QueueCategory::factory()->create();
+        $ticket = QueueTicket::factory()->create([
+            'queue_category_id' => $category->id,
+            'status' => QueueTicketStatus::Waiting,
+        ]);
+
+        Livewire::test(ListQueueTickets::class)
+            ->assertTableActionHidden('markDone', $ticket)
+            ->assertTableActionHidden('markSkipped', $ticket);
+    }
+
+    public function test_the_ticket_history_defaults_to_showing_only_todays_tickets(): void
+    {
+        $this->actingAsSuperAdmin();
+        $category = QueueCategory::factory()->create();
+        $today = QueueTicket::factory()->create([
+            'queue_category_id' => $category->id,
+            'created_at' => now(),
+        ]);
+        $yesterday = QueueTicket::factory()->create([
+            'queue_category_id' => $category->id,
+            'created_at' => now()->subDay(),
+        ]);
+
+        Livewire::test(ListQueueTickets::class)
+            ->assertCanSeeTableRecords([$today])
+            ->assertCanNotSeeTableRecords([$yesterday]);
+    }
+
+    public function test_widening_the_date_filter_reveals_older_tickets(): void
+    {
+        $this->actingAsSuperAdmin();
+        $category = QueueCategory::factory()->create();
+        $yesterday = QueueTicket::factory()->create([
+            'queue_category_id' => $category->id,
+            'created_at' => now()->subDay(),
+        ]);
+
+        Livewire::test(ListQueueTickets::class)
+            ->assertCanNotSeeTableRecords([$yesterday])
+            ->filterTable('created_at', ['from' => now()->subDays(2)->toDateString(), 'until' => now()->toDateString()])
+            ->assertCanSeeTableRecords([$yesterday]);
     }
 }

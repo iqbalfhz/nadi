@@ -8,6 +8,7 @@ use App\Models\QueueCategory;
 use App\Models\QueueTicket;
 use App\Models\User;
 use BackedEnum;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
@@ -33,6 +34,24 @@ class QueueOperator extends Page
 
     public function mount(): void
     {
+        // A page refresh (or a dropped connection reconnecting) used to lose
+        // track of the ticket this operator was serving — the ticket stayed
+        // stuck as "Called" in the database with no way to resolve it, since
+        // the ticket history in /admin is read-only. Restore it here instead.
+        $activeTicket = QueueTicket::query()
+            ->where('called_by', Auth::id())
+            ->where('status', QueueTicketStatus::Called)
+            ->latest('called_at')
+            ->first();
+
+        if ($activeTicket) {
+            $this->categoryId = $activeTicket->queue_category_id;
+            $this->currentTicketId = $activeTicket->id;
+            $this->counterLabel = $activeTicket->counter_label ?? '';
+
+            return;
+        }
+
         $this->categoryId = QueueCategory::query()->where('is_active', true)->orderBy('name')->value('id');
     }
 
@@ -68,7 +87,25 @@ class QueueOperator extends Page
 
     public function callNext(): void
     {
-        if (! $this->categoryId || $this->currentTicketId || trim($this->counterLabel) === '') {
+        if (! $this->categoryId) {
+            return;
+        }
+
+        if ($this->currentTicketId) {
+            Notification::make()
+                ->title('Selesaikan dulu tiket yang sedang dilayani sebelum memanggil berikutnya.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        if (trim($this->counterLabel) === '') {
+            Notification::make()
+                ->title('Isi dulu Nama Loket / Counter Anda.')
+                ->warning()
+                ->send();
+
             return;
         }
 
@@ -80,6 +117,11 @@ class QueueOperator extends Page
         $ticket = QueueTicket::callNextFor($category, $operator, trim($this->counterLabel));
 
         if (! $ticket) {
+            Notification::make()
+                ->title('Tidak ada lagi yang menunggu di loket ini.')
+                ->info()
+                ->send();
+
             return;
         }
 

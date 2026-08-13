@@ -43,7 +43,7 @@ class QueueOperatorTest extends TestCase
         Event::assertDispatched(QueueNumberCalled::class);
     }
 
-    public function test_calling_next_is_a_no_op_without_a_counter_label(): void
+    public function test_calling_next_without_a_counter_label_notifies_instead_of_silently_doing_nothing(): void
     {
         $user = User::factory()->create();
         $category = QueueCategory::factory()->create(['is_active' => true]);
@@ -53,9 +53,23 @@ class QueueOperatorTest extends TestCase
             ->test(QueueOperator::class)
             ->set('categoryId', $category->id)
             ->set('counterLabel', '')
-            ->call('callNext');
+            ->call('callNext')
+            ->assertNotified('Isi dulu Nama Loket / Counter Anda.');
 
         $this->assertSame(QueueTicketStatus::Waiting, $ticket->fresh()->status);
+    }
+
+    public function test_calling_next_with_nothing_waiting_notifies_instead_of_silently_doing_nothing(): void
+    {
+        $user = User::factory()->create();
+        $category = QueueCategory::factory()->create(['is_active' => true]);
+
+        Livewire::actingAs($user)
+            ->test(QueueOperator::class)
+            ->set('categoryId', $category->id)
+            ->set('counterLabel', 'Loket 1')
+            ->call('callNext')
+            ->assertNotified('Tidak ada lagi yang menunggu di loket ini.');
     }
 
     public function test_cannot_call_next_while_a_ticket_is_already_active(): void
@@ -70,7 +84,8 @@ class QueueOperatorTest extends TestCase
             ->set('categoryId', $category->id)
             ->set('counterLabel', 'Loket 1')
             ->call('callNext')
-            ->call('callNext');
+            ->call('callNext')
+            ->assertNotified('Selesaikan dulu tiket yang sedang dilayani sebelum memanggil berikutnya.');
 
         $this->assertSame(QueueTicketStatus::Waiting, $second->fresh()->status);
     }
@@ -124,5 +139,34 @@ class QueueOperatorTest extends TestCase
             ->call('recall');
 
         Event::assertDispatched(QueueNumberCalled::class, 2);
+    }
+
+    public function test_a_page_refresh_restores_the_operators_in_progress_ticket(): void
+    {
+        $user = User::factory()->create();
+        $category = QueueCategory::factory()->create(['is_active' => true]);
+        $ticket = QueueTicket::createNextFor($category);
+        QueueTicket::callNextFor($category, $user, 'Loket 2');
+
+        // Simulating a refresh: a fresh component instance re-runs mount()
+        // instead of reusing in-memory state from the previous one.
+        Livewire::actingAs($user)
+            ->test(QueueOperator::class)
+            ->assertSet('categoryId', $category->id)
+            ->assertSet('currentTicketId', $ticket->id)
+            ->assertSet('counterLabel', 'Loket 2');
+    }
+
+    public function test_mount_does_not_restore_a_ticket_claimed_by_a_different_operator(): void
+    {
+        $user = User::factory()->create();
+        $otherOperator = User::factory()->create();
+        $category = QueueCategory::factory()->create(['is_active' => true]);
+        QueueTicket::createNextFor($category);
+        QueueTicket::callNextFor($category, $otherOperator, 'Loket 3');
+
+        Livewire::actingAs($user)
+            ->test(QueueOperator::class)
+            ->assertSet('currentTicketId', null);
     }
 }

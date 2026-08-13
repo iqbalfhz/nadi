@@ -9,6 +9,7 @@
         "php": "^8.3",
         "bezhansalleh/filament-shield": "*",
         "filament/filament": "^5.0",
+        "filament/spatie-laravel-media-library-plugin": "*",
         "filament/spatie-laravel-settings-plugin": "*",
         "guava/calendar": "*",
         "laravel/chisel": "^0.1.0",
@@ -18,7 +19,10 @@
         "laravel/tinker": "^3.0",
         "livewire/blaze": "^1.0",
         "livewire/flux": "^2.13.1",
-        "livewire/livewire": "^4.1"
+        "livewire/livewire": "^4.1",
+        "masbug/flysystem-google-drive-ext": "*",
+        "pxlrbt/filament-excel": "*",
+        "spatie/laravel-backup": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.24",
