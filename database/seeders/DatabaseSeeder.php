@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(ShieldSeeder::class);
+        $this->call(AdminUserSeeder::class);
 
         // User::factory(10)->create();
 
