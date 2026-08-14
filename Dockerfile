@@ -88,3 +88,9 @@ ENV SERVER_NAME=:80
 EXPOSE 80
 
 ENTRYPOINT ["/entrypoint.sh"]
+# Setting our own ENTRYPOINT resets the base image's inherited CMD to empty
+# (documented Docker behavior) — without redeclaring it here, entrypoint.sh's
+# final `exec "$@"` has nothing to run and just exits 0, so the container
+# never actually starts serving and restarts in a loop. This is the same
+# command dunglas/frankenphp's own image defaults to.
+CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile", "--adapter", "caddyfile"]
