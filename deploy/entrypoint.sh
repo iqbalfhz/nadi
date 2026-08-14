@@ -9,6 +9,11 @@ if [ "$RUN_SETUP" = "true" ]; then
     php artisan package:discover --ansi
     php artisan filament:upgrade
     php artisan migrate --force
+    # Both seeders are idempotent (firstOrCreate/updateOrCreate), safe to
+    # run on every deploy. ShieldSeeder must run first — AdminUserSeeder
+    # assigns the super_admin role, which only exists after it.
+    php artisan db:seed --class=ShieldSeeder --force
+    php artisan db:seed --class=AdminUserSeeder --force
     php artisan storage:link || true
     php artisan config:cache
     php artisan route:cache
