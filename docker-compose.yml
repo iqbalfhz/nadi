@@ -10,8 +10,12 @@ services:
         VITE_REVERB_PORT: ${REVERB_PORT}
         VITE_REVERB_SCHEME: ${REVERB_SCHEME}
     restart: unless-stopped
+    # Published at a fixed host port (not left to Coolify's own proxy) —
+    # this setup routes public domains via Cloudflare Tunnel to specific
+    # host:port combinations, following the same pattern as this VPS's
+    # other apps (see the "Published application routes" list).
     ports:
-      - "80"
+      - "8085:80"
     environment:
       RUN_SETUP: "true"
     env_file:
@@ -26,7 +30,7 @@ services:
     restart: unless-stopped
     command: php artisan reverb:start --host=0.0.0.0
     ports:
-      - "8080"
+      - "8086:8080"
     depends_on:
       - app
     env_file:
