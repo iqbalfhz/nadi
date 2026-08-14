@@ -56,7 +56,10 @@ COPY --from=composer_builder /app/vendor /app/vendor
 RUN npm run build
 
 # ---- Stage 3: runtime image ----
-FROM dunglas/frankenphp:1-php8.3
+# php8.4, matching composer.lock's actually-resolved dependency versions
+# (Symfony 8.1 components require PHP >= 8.4.1) and local dev (Herd runs
+# 8.4.20) — composer.json's own "^8.3" constraint no longer reflects reality.
+FROM dunglas/frankenphp:1-php8.4
 
 RUN install-php-extensions \
     pdo_mysql \
