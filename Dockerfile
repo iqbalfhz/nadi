@@ -1,7 +1,11 @@
 # syntax=docker/dockerfile:1
 
 # ---- Stage 1: build frontend assets ----
-FROM node:22-alpine AS node_builder
+# Debian-based (glibc), not alpine: package.json's optionalDependencies pins
+# the "-gnu" native binaries for Rollup/Tailwind oxide/lightningcss (not
+# "-musl"), so building on musl-based Alpine leaves those binaries
+# unresolved and crashes Rolldown/Vite's build.
+FROM node:22-bookworm-slim AS node_builder
 WORKDIR /app
 
 # Vite bakes VITE_* values into the built JS at build time, not runtime — so
@@ -28,12 +32,17 @@ RUN npm run build
 FROM composer:2 AS composer_builder
 WORKDIR /app
 COPY composer.json composer.lock ./
+# --ignore-platform-reqs: this build stage uses the minimal official
+# composer:2 image, which lacks ext-intl/gd/exif that filament/support
+# checks for. It never executes app code, only resolves dependencies — the
+# real runtime (stage 3) does have these extensions installed.
 RUN composer install \
     --no-dev \
     --no-scripts \
     --no-autoloader \
     --no-interaction \
-    --prefer-dist
+    --prefer-dist \
+    --ignore-platform-reqs
 COPY . .
 # --no-scripts here too: package:discover/filament:upgrade (wired as
 # composer's post-autoload-dump hooks) need a real .env to boot the app,
