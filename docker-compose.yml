@@ -9,6 +9,7 @@ services:
         VITE_REVERB_HOST: ${REVERB_HOST}
         VITE_REVERB_PORT: ${REVERB_PORT}
         VITE_REVERB_SCHEME: ${REVERB_SCHEME}
+    image: nadi-app:latest
     restart: unless-stopped
     # Published at a fixed host port (not left to Coolify's own proxy) —
     # this setup routes public domains via Cloudflare Tunnel to specific
@@ -24,9 +25,7 @@ services:
       - storage_app:/app/storage/app
 
   reverb:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: nadi-app:latest
     restart: unless-stopped
     command: php artisan reverb:start --host=0.0.0.0
     ports:
@@ -39,9 +38,7 @@ services:
       - storage_app:/app/storage/app
 
   scheduler:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: nadi-app:latest
     restart: unless-stopped
     command: php artisan schedule:work
     depends_on:
