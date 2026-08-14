@@ -1,0 +1,109 @@
+<?php
+
+namespace App\Filament\Resources\Tickets\Tables;
+
+use App\Enums\TicketPaymentMethod;
+use App\Models\Event;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
+
+/**
+ * Shared between the admin ("Riwayat Penjualan") and /app ("Laporan
+ * Penjualan Tiket") resources — both list the same Ticket model, just with
+ * different query scoping, so the table definition itself isn't duplicated.
+ */
+class TicketsTable
+{
+    /**
+     * $defaultToLatestEvent: /app's cashier-facing report pre-selects the
+     * latest event so a cashier lands straight on "this event's" numbers.
+     * Admin's report deliberately does NOT do this — admins need full
+     * history visible by default, not narrowed to one event.
+     *
+     * $canEdit: only the admin resource registers an 'edit' page — passing
+     * true there (and only there) adds a correction action for data-entry
+     * mistakes (wrong payment method, mistaken Member toggle, etc). Kept as
+     * an explicit flag rather than relying on TicketPolicy::update() alone,
+     * since the /app resource has no edit route for Filament to link to.
+     */
+    public static function configure(Table $table, bool $defaultToLatestEvent = false, bool $canEdit = false): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('event.name')
+                    ->label('Event')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('buyer_name')
+                    ->label('Nama Pembeli')
+                    ->searchable(),
+                IconColumn::make('is_member')
+                    ->label('Member')
+                    ->boolean(),
+                TextColumn::make('member_reference')
+                    ->label('Barcode')
+                    ->placeholder('—'),
+                TextColumn::make('payment_method')
+                    ->label('Metode Bayar')
+                    ->badge()
+                    ->formatStateUsing(fn (TicketPaymentMethod $state): string => $state->label())
+                    ->color(fn (TicketPaymentMethod $state): string => $state->color()),
+                TextColumn::make('price')
+                    ->label('Harga')
+                    ->money('IDR', decimalPlaces: 0),
+                TextColumn::make('soldByUser.name')
+                    ->label('Kasir')
+                    ->searchable(),
+                TextColumn::make('created_at')
+                    ->label('Waktu')
+                    ->dateTime()
+                    ->sortable(),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->filters([
+                SelectFilter::make('event_id')
+                    ->label('Event')
+                    ->options(fn () => Event::query()->orderBy('name')->pluck('name', 'id'))
+                    ->default(fn () => $defaultToLatestEvent ? Event::query()->latest()->value('id') : null),
+                SelectFilter::make('payment_method')
+                    ->label('Metode Bayar')
+                    ->options(fn () => collect(TicketPaymentMethod::cases())
+                        ->mapWithKeys(fn (TicketPaymentMethod $method) => [$method->value => $method->label()])),
+                // Unlike Antrian's daily-churn report, this data only exists
+                // once a year — don't default this to "today" or admins
+                // would land on an empty report by default.
+                Filter::make('created_at')
+                    ->label('Tanggal')
+                    ->schema([
+                        DatePicker::make('from')->label('Dari Tanggal'),
+                        DatePicker::make('until')->label('Sampai Tanggal'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when($data['from'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '>=', $date))
+                        ->when($data['until'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '<=', $date)))
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+
+                        if ($data['from'] ?? null) {
+                            $indicators[] = 'Dari '.Carbon::parse($data['from'])->format('d M Y');
+                        }
+
+                        if ($data['until'] ?? null) {
+                            $indicators[] = 'Sampai '.Carbon::parse($data['until'])->format('d M Y');
+                        }
+
+                        return $indicators;
+                    }),
+            ])
+            ->recordActions([
+                ...($canEdit ? [EditAction::make()] : []),
+            ]);
+    }
+}

@@ -13,7 +13,7 @@ use UnitEnum;
 
 class ManageQueueKioskSettings extends SettingsPage
 {
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLockClosed;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
 
     protected static string|UnitEnum|null $navigationGroup = 'Antrian';
 

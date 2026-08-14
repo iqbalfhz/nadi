@@ -18,3 +18,4 @@ Route::get('dashboard', function () {
 
 require __DIR__.'/settings.php';
 require __DIR__.'/queue.php';
+require __DIR__.'/security.php';

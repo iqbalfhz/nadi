@@ -21,7 +21,7 @@ class RoomBookingResource extends Resource
 {
     protected static ?string $model = RoomBooking::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
     protected static string|UnitEnum|null $navigationGroup = 'Booking Room';
 
