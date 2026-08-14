@@ -1,6 +1,28 @@
 # syntax=docker/dockerfile:1
 
-# ---- Stage 1: build frontend assets ----
+# ---- Stage 1: install PHP dependencies ----
+FROM composer:2 AS composer_builder
+WORKDIR /app
+COPY composer.json composer.lock ./
+# --ignore-platform-reqs: this build stage uses the minimal official
+# composer:2 image, which lacks ext-intl/gd/exif that filament/support
+# checks for. It never executes app code, only resolves dependencies — the
+# real runtime (stage 3) does have these extensions installed.
+RUN composer install \
+    --no-dev \
+    --no-scripts \
+    --no-autoloader \
+    --no-interaction \
+    --prefer-dist \
+    --ignore-platform-reqs
+COPY . .
+# --no-scripts here too: package:discover/filament:upgrade (wired as
+# composer's post-autoload-dump hooks) need a real .env to boot the app,
+# which doesn't exist at build time — they run instead from entrypoint.sh,
+# once the container has real environment variables at hand.
+RUN composer dump-autoload --optimize --no-dev --classmap-authoritative --no-scripts
+
+# ---- Stage 2: build frontend assets ----
 # Debian-based (glibc), not alpine: package.json's optionalDependencies pins
 # the "-gnu" native binaries for Rollup/Tailwind oxide/lightningcss (not
 # "-musl"), so building on musl-based Alpine leaves those binaries
@@ -26,29 +48,12 @@ ENV VITE_APP_NAME=${VITE_APP_NAME} \
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+# resources/css/**/*.css imports Flux/Filament's own CSS straight out of
+# vendor/ (e.g. vendor/livewire/flux/dist/flux.css) — Vite needs that
+# directory on disk to resolve those imports, so it has to come from the
+# composer_builder stage before the build can run.
+COPY --from=composer_builder /app/vendor /app/vendor
 RUN npm run build
-
-# ---- Stage 2: install PHP dependencies ----
-FROM composer:2 AS composer_builder
-WORKDIR /app
-COPY composer.json composer.lock ./
-# --ignore-platform-reqs: this build stage uses the minimal official
-# composer:2 image, which lacks ext-intl/gd/exif that filament/support
-# checks for. It never executes app code, only resolves dependencies — the
-# real runtime (stage 3) does have these extensions installed.
-RUN composer install \
-    --no-dev \
-    --no-scripts \
-    --no-autoloader \
-    --no-interaction \
-    --prefer-dist \
-    --ignore-platform-reqs
-COPY . .
-# --no-scripts here too: package:discover/filament:upgrade (wired as
-# composer's post-autoload-dump hooks) need a real .env to boot the app,
-# which doesn't exist at build time — they run instead from entrypoint.sh,
-# once the container has real environment variables at hand.
-RUN composer dump-autoload --optimize --no-dev --classmap-authoritative --no-scripts
 
 # ---- Stage 3: runtime image ----
 FROM dunglas/frankenphp:1-php8.3
