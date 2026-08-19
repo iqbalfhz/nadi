@@ -5,6 +5,8 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Features;
 use Laravel\Passkeys\Contracts\PasskeyLoginResponse;
 use Tests\TestCase;
@@ -87,6 +89,35 @@ class AuthenticationTest extends TestCase
         ]);
 
         $response->assertRedirect(route('two-factor.login'));
+        $this->assertGuest();
+    }
+
+    public function test_deactivated_users_can_not_authenticate_using_the_login_screen(): void
+    {
+        $user = User::factory()->inactive()->create();
+
+        $response = $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertSessionHasErrorsIn('email');
+
+        $this->assertGuest();
+    }
+
+    public function test_the_login_event_listener_blocks_deactivated_users_regardless_of_auth_method(): void
+    {
+        $user = User::factory()->inactive()->create();
+
+        try {
+            Auth::login($user);
+            $this->fail('Expected a ValidationException to be thrown for a deactivated user.');
+        } catch (ValidationException) {
+            // expected — this is the safety net that also covers passkey
+            // login, which never goes through Fortify::authenticateUsing().
+        }
+
         $this->assertGuest();
     }
 

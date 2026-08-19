@@ -25,7 +25,7 @@ class UserManagementTest extends TestCase
         Filament::setCurrentPanel(Filament::getPanel('admin'));
     }
 
-    public function test_creating_a_user_auto_verifies_the_email_and_redirects_to_the_list(): void
+    public function test_creating_a_user_defaults_to_active_and_redirects_to_the_list(): void
     {
         $this->actingAsSuperAdmin();
 
@@ -42,7 +42,33 @@ class UserManagementTest extends TestCase
         $user = User::where('email', 'budi@tangcity.com')->first();
 
         $this->assertNotNull($user);
-        $this->assertNotNull($user->email_verified_at);
+        $this->assertTrue($user->is_active);
+    }
+
+    public function test_an_admin_can_deactivate_another_users_account(): void
+    {
+        $this->actingAsSuperAdmin();
+        $user = User::factory()->create();
+
+        Livewire::test(EditUser::class, ['record' => $user->getRouteKey()])
+            ->fillForm([
+                'name' => $user->name,
+                'email' => $user->email,
+                'password' => '',
+                'is_active' => false,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertFalse($user->fresh()->is_active);
+    }
+
+    public function test_an_admin_can_not_deactivate_their_own_account(): void
+    {
+        $admin = $this->actingAsSuperAdmin();
+
+        Livewire::test(EditUser::class, ['record' => $admin->getRouteKey()])
+            ->assertFormFieldIsDisabled('is_active');
     }
 
     public function test_a_role_can_be_assigned_when_creating_a_user(): void

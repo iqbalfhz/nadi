@@ -28,8 +28,8 @@ class UsersTable
                 TextColumn::make('roles.name')
                     ->label('Roles')
                     ->badge(),
-                IconColumn::make('email_verified_at')
-                    ->label('Terverifikasi')
+                IconColumn::make('is_active')
+                    ->label('Aktif')
                     ->boolean(),
                 TextColumn::make('created_at')
                     ->dateTime()

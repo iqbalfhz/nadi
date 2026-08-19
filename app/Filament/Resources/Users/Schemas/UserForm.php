@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Models\User;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
 
 class UserForm
 {
@@ -37,6 +40,13 @@ class UserForm
                     ->multiple()
                     ->preload()
                     ->searchable(),
+                Toggle::make('is_active')
+                    ->label('Aktif')
+                    ->default(true)
+                    ->disabled(fn (?User $record): bool => $record?->id === Auth::id())
+                    ->helperText(fn (?User $record): string => $record?->id === Auth::id()
+                        ? 'Tidak bisa menonaktifkan akun sendiri.'
+                        : 'User yang dinonaktifkan tidak bisa login sama sekali.'),
             ]);
     }
 }
