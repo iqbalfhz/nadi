@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Models\Department;
 use App\Models\User;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -19,6 +20,10 @@ class UserForm
                     ->label('Nama')
                     ->required()
                     ->maxLength(255),
+                Select::make('department_id')
+                    ->label('Departemen')
+                    ->options(fn () => Department::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id'))
+                    ->searchable(),
                 TextInput::make('email')
                     ->label('Email')
                     ->email()

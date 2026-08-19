@@ -10,6 +10,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class UsersTable
@@ -17,9 +18,15 @@ class UsersTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['department', 'roles']))
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('department.name')
+                    ->label('Departemen')
+                    ->placeholder('—')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('email')
