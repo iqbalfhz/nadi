@@ -6,7 +6,6 @@ use App\Filament\Resources\Areas\AreaResource;
 use App\Filament\Resources\Areas\Pages\CreateArea;
 use App\Filament\Resources\Areas\Pages\EditArea;
 use App\Models\Area;
-use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -86,7 +85,7 @@ class AdminPanelTest extends TestCase
     public function test_the_app_native_profile_page_renders(): void
     {
         Filament::setCurrentPanel(Filament::getPanel('app'));
-        $this->actingAs(User::factory()->create());
+        $this->actingAsEmployeeWithPermissions('ViewAny:RoomBooking');
 
         $response = $this->get(Filament::getPanel('app')->getProfileUrl());
 

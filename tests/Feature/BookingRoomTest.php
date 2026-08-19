@@ -23,11 +23,20 @@ class BookingRoomTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    public function test_any_authenticated_user_can_access_the_app_panel(): void
+    public function test_a_user_with_no_app_relevant_permissions_is_rejected_from_the_app_panel(): void
     {
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->get('/app');
+
+        $response->assertForbidden();
+    }
+
+    public function test_a_user_with_at_least_one_app_relevant_permission_can_access_the_app_panel(): void
+    {
+        $user = $this->actingAsEmployeeWithPermissions('ViewAny:RoomBooking');
+
+        $response = $this->get('/app');
 
         $response->assertOk();
     }
