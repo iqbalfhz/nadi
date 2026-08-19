@@ -4,11 +4,14 @@ namespace App\Filament\Widgets;
 
 use App\Enums\QueueTicketStatus;
 use App\Models\QueueTicket;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class QueueTicketsOverview extends StatsOverviewWidget
 {
+    use HasWidgetShield;
+
     protected function getStats(): array
     {
         $today = QueueTicket::query()->whereDate('created_at', today());

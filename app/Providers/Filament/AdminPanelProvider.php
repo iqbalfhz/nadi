@@ -22,6 +22,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -74,19 +75,22 @@ class AdminPanelProvider extends PanelProvider
                     ->url('/antrian/kiosk-pin')
                     ->openUrlInNewTab()
                     ->group('Antrian')
-                    ->sort(-3),
+                    ->sort(-3)
+                    ->visible(fn (): bool => Auth::user()?->can('View:ManageQueueKioskSettings') ?? false),
                 NavigationItem::make('Buka Layar Display (TV)')
                     ->icon(Heroicon::OutlinedTv)
                     ->url('/antrian/layar')
                     ->openUrlInNewTab()
                     ->group('Antrian')
-                    ->sort(-2),
+                    ->sort(-2)
+                    ->visible(fn (): bool => Auth::user()?->can('View:ManageQueueKioskSettings') ?? false),
                 NavigationItem::make('Buka Halaman Operator')
                     ->icon(Heroicon::OutlinedSpeakerWave)
                     ->url('/app/queue-operator')
                     ->openUrlInNewTab()
                     ->group('Antrian')
-                    ->sort(-1),
+                    ->sort(-1)
+                    ->visible(fn (): bool => Auth::user()?->can('View:QueueOperator') ?? false),
             ])
             // Filament's own name/email/password page, rendered inside the panel
             // shell (not the simple centered layout) so it feels native. 2FA and

@@ -5,11 +5,14 @@ namespace App\Filament\Widgets;
 use App\Enums\TicketPaymentMethod;
 use App\Models\Event;
 use App\Models\Ticket;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class TicketsOverview extends StatsOverviewWidget
 {
+    use HasWidgetShield;
+
     protected function getStats(): array
     {
         $event = Event::query()->where('is_open', true)->latest()->first()

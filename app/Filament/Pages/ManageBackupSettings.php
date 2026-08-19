@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Settings\BackupSettings;
 use App\Support\BackupDrive;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -19,6 +20,8 @@ use UnitEnum;
 
 class ManageBackupSettings extends SettingsPage
 {
+    use HasPageShield;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCircleStack;
 
     protected static string|UnitEnum|null $navigationGroup = 'Sistem';

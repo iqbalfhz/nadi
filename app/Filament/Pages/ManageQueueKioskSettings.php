@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Settings\QueueKioskSettings;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Pages\SettingsPage;
@@ -13,6 +14,8 @@ use UnitEnum;
 
 class ManageQueueKioskSettings extends SettingsPage
 {
+    use HasPageShield;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
 
     protected static string|UnitEnum|null $navigationGroup = 'Antrian';
