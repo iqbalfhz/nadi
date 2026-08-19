@@ -60,13 +60,16 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
      * Determine whether the user can access the given Filament panel.
      *
      * The /admin panel is for admin/HR staff (see docs/NADI.MD); /app is
-     * self-service and open to every logged-in employee.
+     * self-service and open to every logged-in employee. Panel entry itself
+     * is only gated by is_active — which admin resources/pages/widgets are
+     * actually visible inside /admin is controlled entirely by each one's
+     * Shield-generated policy (checking the user's role permissions), not
+     * here. A user with no relevant permissions simply sees an empty panel.
      */
     public function canAccessPanel(Panel $panel): bool
     {
         return match ($panel->getId()) {
-            'admin' => $this->is_active && $this->hasRole('super_admin'),
-            'app' => $this->is_active,
+            'admin', 'app' => $this->is_active,
             default => false,
         };
     }

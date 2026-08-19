@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\App\Widgets\BookingCalendarWidget;
+use App\Filament\Resources\Areas\AreaResource;
 use App\Models\Area;
 use App\Models\Room;
 use App\Models\RoomBooking;
@@ -31,12 +32,16 @@ class BookingRoomTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_users_without_the_super_admin_role_cannot_access_the_admin_panel(): void
+    public function test_a_user_with_no_admin_permissions_can_enter_the_panel_but_not_a_gated_resource(): void
     {
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->get('/admin');
+        $response->assertOk();
 
+        // Panel entry is only gated by is_active — each resource's own
+        // Shield policy is what actually restricts what's visible/usable.
+        $response = $this->actingAs($user)->get(AreaResource::getUrl('index'));
         $response->assertForbidden();
     }
 

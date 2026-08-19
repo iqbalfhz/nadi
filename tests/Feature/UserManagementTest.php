@@ -6,6 +6,7 @@ use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\UserResource;
+use App\Models\Department;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Facades\Filament;
@@ -69,6 +70,26 @@ class UserManagementTest extends TestCase
 
         Livewire::test(EditUser::class, ['record' => $admin->getRouteKey()])
             ->assertFormFieldIsDisabled('is_active');
+    }
+
+    public function test_a_department_can_be_assigned_when_creating_a_user(): void
+    {
+        $this->actingAsSuperAdmin();
+        $department = Department::factory()->create(['is_active' => true]);
+
+        Livewire::test(CreateUser::class)
+            ->fillForm([
+                'name' => 'Citra Dewi',
+                'email' => 'citra@tangcity.com',
+                'password' => 'Pwnd@2022',
+                'department_id' => $department->id,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $user = User::where('email', 'citra@tangcity.com')->firstOrFail();
+
+        $this->assertTrue($user->department->is($department));
     }
 
     public function test_a_role_can_be_assigned_when_creating_a_user(): void
