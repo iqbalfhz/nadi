@@ -38,4 +38,25 @@ abstract class TestCase extends BaseTestCase
 
         return $user;
     }
+
+    /**
+     * Create a plain employee holding exactly the given permission(s) — direct
+     * user permissions via Spatie, not a role, so each test can grant precisely
+     * what that scenario needs without depending on how any real role is
+     * configured. Mirrors actingAsSuperAdmin()'s need to seed ShieldSeeder
+     * first so the permission rows exist to attach in a fresh test database.
+     *
+     * @param  string|array<int, string>  $permissions
+     */
+    protected function actingAsEmployeeWithPermissions(string|array $permissions): User
+    {
+        $this->seed(ShieldSeeder::class);
+
+        $user = User::factory()->create();
+        $user->givePermissionTo($permissions);
+
+        $this->actingAs($user);
+
+        return $user;
+    }
 }

@@ -8,6 +8,7 @@ use App\Models\QueueCategory;
 use App\Models\QueueTicket;
 use App\Models\User;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
@@ -18,6 +19,8 @@ use Livewire\Attributes\Computed;
 
 class QueueOperator extends Page
 {
+    use HasPageShield;
+
     protected string $view = 'filament.app.pages.queue-operator';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSpeakerWave;

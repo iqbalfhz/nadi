@@ -6,6 +6,7 @@ use App\Enums\MessengerDeliveryStatus;
 use App\Models\MessengerDelivery;
 use App\Models\User;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -23,6 +24,8 @@ use UnitEnum;
  */
 class MessengerTasks extends Page
 {
+    use HasPageShield;
+
     protected string $view = 'filament.app.pages.messenger-tasks';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;

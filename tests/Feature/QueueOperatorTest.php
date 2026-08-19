@@ -29,7 +29,7 @@ class QueueOperatorTest extends TestCase
     {
         Event::fake();
 
-        $user = User::factory()->create();
+        $user = $this->actingAsEmployeeWithPermissions('View:QueueOperator');
         $category = QueueCategory::factory()->create(['is_active' => true]);
         $ticket = QueueTicket::createNextFor($category);
 
@@ -45,7 +45,7 @@ class QueueOperatorTest extends TestCase
 
     public function test_calling_next_without_a_counter_label_notifies_instead_of_silently_doing_nothing(): void
     {
-        $user = User::factory()->create();
+        $user = $this->actingAsEmployeeWithPermissions('View:QueueOperator');
         $category = QueueCategory::factory()->create(['is_active' => true]);
         $ticket = QueueTicket::createNextFor($category);
 
@@ -61,7 +61,7 @@ class QueueOperatorTest extends TestCase
 
     public function test_calling_next_with_nothing_waiting_notifies_instead_of_silently_doing_nothing(): void
     {
-        $user = User::factory()->create();
+        $user = $this->actingAsEmployeeWithPermissions('View:QueueOperator');
         $category = QueueCategory::factory()->create(['is_active' => true]);
 
         Livewire::actingAs($user)
@@ -74,7 +74,7 @@ class QueueOperatorTest extends TestCase
 
     public function test_cannot_call_next_while_a_ticket_is_already_active(): void
     {
-        $user = User::factory()->create();
+        $user = $this->actingAsEmployeeWithPermissions('View:QueueOperator');
         $category = QueueCategory::factory()->create(['is_active' => true]);
         QueueTicket::createNextFor($category);
         $second = QueueTicket::createNextFor($category);
@@ -92,7 +92,7 @@ class QueueOperatorTest extends TestCase
 
     public function test_marking_the_current_ticket_done_frees_up_the_operator(): void
     {
-        $user = User::factory()->create();
+        $user = $this->actingAsEmployeeWithPermissions('View:QueueOperator');
         $category = QueueCategory::factory()->create(['is_active' => true]);
         $ticket = QueueTicket::createNextFor($category);
 
@@ -109,7 +109,7 @@ class QueueOperatorTest extends TestCase
 
     public function test_marking_the_current_ticket_skipped(): void
     {
-        $user = User::factory()->create();
+        $user = $this->actingAsEmployeeWithPermissions('View:QueueOperator');
         $category = QueueCategory::factory()->create(['is_active' => true]);
         $ticket = QueueTicket::createNextFor($category);
 
@@ -127,7 +127,7 @@ class QueueOperatorTest extends TestCase
     {
         Event::fake();
 
-        $user = User::factory()->create();
+        $user = $this->actingAsEmployeeWithPermissions('View:QueueOperator');
         $category = QueueCategory::factory()->create(['is_active' => true]);
         QueueTicket::createNextFor($category);
 
@@ -143,7 +143,7 @@ class QueueOperatorTest extends TestCase
 
     public function test_a_page_refresh_restores_the_operators_in_progress_ticket(): void
     {
-        $user = User::factory()->create();
+        $user = $this->actingAsEmployeeWithPermissions('View:QueueOperator');
         $category = QueueCategory::factory()->create(['is_active' => true]);
         $ticket = QueueTicket::createNextFor($category);
         QueueTicket::callNextFor($category, $user, 'Loket 2');
@@ -159,7 +159,7 @@ class QueueOperatorTest extends TestCase
 
     public function test_mount_does_not_restore_a_ticket_claimed_by_a_different_operator(): void
     {
-        $user = User::factory()->create();
+        $user = $this->actingAsEmployeeWithPermissions('View:QueueOperator');
         $otherOperator = User::factory()->create();
         $category = QueueCategory::factory()->create(['is_active' => true]);
         QueueTicket::createNextFor($category);

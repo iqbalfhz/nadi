@@ -14,10 +14,7 @@ class RoomBookingPolicy
 
     public function viewAny(AuthUser $authUser): bool
     {
-        // Every authenticated user may view a list of bookings — the "My Bookings"
-        // resource on the /app panel scopes its query to the current user, so this
-        // only needs to gate reaching that list, not which rows appear in it.
-        return true;
+        return $authUser->can('ViewAny:RoomBooking');
     }
 
     public function view(AuthUser $authUser, RoomBooking $roomBooking): bool

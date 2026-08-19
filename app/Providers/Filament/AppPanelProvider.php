@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\App\Widgets\BookingCalendarWidget;
 use App\Providers\Filament\Concerns\HasNadiSidebarCustomizations;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -44,6 +45,9 @@ class AppPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/App/Widgets'), for: 'App\Filament\App\Widgets')
             ->widgets([
                 BookingCalendarWidget::class,
+            ])
+            ->plugins([
+                FilamentShieldPlugin::make(),
             ])
             // Filament's own name/email/password page, rendered inside the panel
             // shell (not the simple centered layout) so it feels native. 2FA and

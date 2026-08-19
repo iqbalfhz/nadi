@@ -27,8 +27,7 @@ class MessengerTasksTest extends TestCase
 
     public function test_a_messenger_can_claim_an_open_task(): void
     {
-        $messenger = User::factory()->create();
-        $this->actingAs($messenger);
+        $messenger = $this->actingAsEmployeeWithPermissions('View:MessengerTasks');
 
         $delivery = MessengerDelivery::factory()->create();
 
@@ -56,8 +55,7 @@ class MessengerTasksTest extends TestCase
 
     public function test_a_messenger_can_progress_a_claimed_task_through_to_delivered_with_a_photo(): void
     {
-        $messenger = User::factory()->create();
-        $this->actingAs($messenger);
+        $messenger = $this->actingAsEmployeeWithPermissions('View:MessengerTasks');
 
         $delivery = MessengerDelivery::factory()->create([
             'status' => MessengerDeliveryStatus::PickedUp,
@@ -86,8 +84,7 @@ class MessengerTasksTest extends TestCase
     public function test_a_messenger_cannot_advance_someone_elses_claimed_task(): void
     {
         $owner = User::factory()->create();
-        $intruder = User::factory()->create();
-        $this->actingAs($intruder);
+        $intruder = $this->actingAsEmployeeWithPermissions('View:MessengerTasks');
 
         $delivery = MessengerDelivery::factory()->create([
             'status' => MessengerDeliveryStatus::PickedUp,

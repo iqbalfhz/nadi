@@ -28,8 +28,7 @@ class ObChecklistTest extends TestCase
 
     public function test_an_employee_can_submit_a_checklist_with_photos(): void
     {
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $user = $this->actingAsEmployeeWithPermissions(['ViewAny:ObChecklist', 'Create:ObChecklist']);
 
         $area = ObArea::factory()->create(['is_active' => true]);
 
@@ -51,7 +50,7 @@ class ObChecklistTest extends TestCase
 
     public function test_submitting_without_a_photo_fails_validation(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAsEmployeeWithPermissions(['ViewAny:ObChecklist', 'Create:ObChecklist']);
 
         $area = ObArea::factory()->create(['is_active' => true]);
 
@@ -66,13 +65,11 @@ class ObChecklistTest extends TestCase
 
     public function test_the_list_only_shows_the_current_users_own_checklists(): void
     {
-        $me = User::factory()->create();
         $someoneElse = User::factory()->create();
+        $me = $this->actingAsEmployeeWithPermissions('ViewAny:ObChecklist');
 
         $myChecklist = ObChecklist::factory()->create(['user_id' => $me->id]);
         $otherChecklist = ObChecklist::factory()->create(['user_id' => $someoneElse->id]);
-
-        $this->actingAs($me);
 
         Livewire::test(ListObChecklists::class)
             ->assertCanSeeTableRecords([$myChecklist])

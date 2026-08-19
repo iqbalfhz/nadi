@@ -14,12 +14,11 @@ class TicketPolicy
 
     public function viewAny(AuthUser $authUser): bool
     {
-        // Every authenticated user may view the ticket sales report — the
-        // /app "Laporan Penjualan Tiket" resource is deliberately NOT scoped
-        // to the current user (any cashier needs to see the whole event's
-        // combined sales to close out, not just their own), so this only
-        // needs to gate reaching the list at all.
-        return true;
+        // The /app "Laporan Penjualan Tiket" resource is deliberately NOT
+        // scoped to the current user (any cashier needs to see the whole
+        // event's combined sales to close out, not just their own) — but
+        // reaching the list at all still requires this permission.
+        return $authUser->can('ViewAny:Ticket');
     }
 
     public function view(AuthUser $authUser, Ticket $ticket): bool
@@ -29,14 +28,12 @@ class TicketPolicy
 
     public function create(AuthUser $authUser): bool
     {
-        // Any authenticated user can sell a ticket from /app — there's no
-        // dedicated cashier role. Note this is mostly symbolic: SellTicket
-        // calls Ticket::sellFor() directly rather than going through a
-        // CreateRecord page, so this policy method is never actually
-        // invoked by that flow (same as QueueOperator/MessengerTasks never
-        // triggering their models' create() policy either). The real gate
-        // on "who can sell tickets" is simply reaching /app.
-        return true;
+        // Note this is mostly symbolic: SellTicket calls Ticket::sellFor()
+        // directly rather than going through a CreateRecord page, so this
+        // policy method is never actually invoked by that flow. The real
+        // gate on "who can sell tickets" is the SellTicket page's own
+        // HasPageShield-backed permission (View:SellTicket).
+        return $authUser->can('Create:Ticket');
     }
 
     public function update(AuthUser $authUser, Ticket $ticket): bool

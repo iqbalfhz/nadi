@@ -5,6 +5,7 @@ namespace App\Filament\App\Widgets;
 use App\Models\Area;
 use App\Models\Room;
 use App\Models\RoomBooking;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Closure;
@@ -25,6 +26,8 @@ use Illuminate\Support\Facades\Auth;
 
 class BookingCalendarWidget extends CalendarWidget
 {
+    use HasWidgetShield;
+
     protected string $view = 'filament.app.widgets.booking-calendar-widget';
 
     protected CalendarViewType $calendarView = CalendarViewType::ResourceTimeGridDay;

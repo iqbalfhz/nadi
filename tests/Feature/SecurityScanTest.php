@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Filament\App\Pages\SecurityScan;
 use App\Models\SecurityCheckpoint;
 use App\Models\SecurityPatrol;
-use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -27,8 +26,7 @@ class SecurityScanTest extends TestCase
 
     public function test_a_guard_can_submit_a_patrol_report_by_scanning_a_valid_checkpoint_code(): void
     {
-        $guard = User::factory()->create();
-        $this->actingAs($guard);
+        $guard = $this->actingAsEmployeeWithPermissions('View:SecurityScan');
 
         $checkpoint = SecurityCheckpoint::factory()->create(['is_active' => true]);
 
@@ -48,7 +46,7 @@ class SecurityScanTest extends TestCase
 
     public function test_an_inactive_checkpoints_code_is_rejected(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAsEmployeeWithPermissions('View:SecurityScan');
 
         $checkpoint = SecurityCheckpoint::factory()->create(['is_active' => false]);
 
@@ -60,7 +58,7 @@ class SecurityScanTest extends TestCase
 
     public function test_an_unknown_code_is_rejected(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAsEmployeeWithPermissions('View:SecurityScan');
 
         Livewire::test(SecurityScan::class, ['code' => 'not-a-real-code'])
             ->assertSet('checkpoint', null);

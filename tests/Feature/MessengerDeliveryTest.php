@@ -21,8 +21,7 @@ class MessengerDeliveryTest extends TestCase
     {
         Filament::setCurrentPanel(Filament::getPanel('app'));
 
-        $sender = User::factory()->create();
-        $this->actingAs($sender);
+        $sender = $this->actingAsEmployeeWithPermissions(['ViewAny:MessengerDelivery', 'Create:MessengerDelivery']);
 
         Livewire::test(CreateMessengerDelivery::class)
             ->fillForm([
@@ -43,13 +42,11 @@ class MessengerDeliveryTest extends TestCase
     {
         Filament::setCurrentPanel(Filament::getPanel('app'));
 
-        $me = User::factory()->create();
         $someoneElse = User::factory()->create();
+        $me = $this->actingAsEmployeeWithPermissions('ViewAny:MessengerDelivery');
 
         $mine = MessengerDelivery::factory()->create(['sender_id' => $me->id]);
         $theirs = MessengerDelivery::factory()->create(['sender_id' => $someoneElse->id]);
-
-        $this->actingAs($me);
 
         Livewire::test(ListMessengerDeliveries::class)
             ->assertCanSeeTableRecords([$mine])

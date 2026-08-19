@@ -14,10 +14,7 @@ class ObChecklistPolicy
 
     public function viewAny(AuthUser $authUser): bool
     {
-        // Every authenticated user may view a list of checklists — the "Checklist
-        // Saya" resource on the /app panel scopes its query to the current user,
-        // so this only needs to gate reaching that list, not which rows appear.
-        return true;
+        return $authUser->can('ViewAny:ObChecklist');
     }
 
     public function view(AuthUser $authUser, ObChecklist $obChecklist): bool
@@ -27,10 +24,7 @@ class ObChecklistPolicy
 
     public function create(AuthUser $authUser): bool
     {
-        // Any authenticated user can submit a checklist from /app — OB staff
-        // have no dedicated role/permissions yet, so this isn't gated behind
-        // Shield's Create:ObChecklist permission (which only admins hold).
-        return true;
+        return $authUser->can('Create:ObChecklist');
     }
 
     public function update(AuthUser $authUser, ObChecklist $obChecklist): bool

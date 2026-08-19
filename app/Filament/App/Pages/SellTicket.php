@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Ticket;
 use App\Models\User;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
@@ -18,6 +19,8 @@ use UnitEnum;
 
 class SellTicket extends Page
 {
+    use HasPageShield;
+
     protected string $view = 'filament.app.pages.sell-ticket';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;

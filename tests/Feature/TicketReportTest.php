@@ -16,12 +16,11 @@ class TicketReportTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_any_authenticated_employee_can_view_the_app_ticket_report_with_no_role_assigned(): void
+    public function test_an_employee_with_the_ticket_report_permission_can_view_the_app_ticket_report(): void
     {
         Filament::setCurrentPanel(Filament::getPanel('app'));
 
-        $employee = User::factory()->create();
-        $this->actingAs($employee);
+        $employee = $this->actingAsEmployeeWithPermissions('ViewAny:Ticket');
 
         $ticket = Ticket::factory()->create();
 
@@ -33,14 +32,12 @@ class TicketReportTest extends TestCase
     {
         Filament::setCurrentPanel(Filament::getPanel('app'));
 
-        $me = User::factory()->create();
         $someoneElse = User::factory()->create();
+        $me = $this->actingAsEmployeeWithPermissions('ViewAny:Ticket');
         $event = Event::factory()->create();
 
         $mine = Ticket::factory()->create(['event_id' => $event->id, 'sold_by' => $me->id]);
         $theirs = Ticket::factory()->create(['event_id' => $event->id, 'sold_by' => $someoneElse->id]);
-
-        $this->actingAs($me);
 
         Livewire::test(AppListTickets::class)
             ->assertCanSeeTableRecords([$mine, $theirs]);
@@ -50,7 +47,7 @@ class TicketReportTest extends TestCase
     {
         Filament::setCurrentPanel(Filament::getPanel('app'));
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAsEmployeeWithPermissions('ViewAny:Ticket');
 
         $eventA = Event::factory()->create();
         $eventB = Event::factory()->create();

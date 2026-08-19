@@ -25,7 +25,7 @@ class MyBookingsTest extends TestCase
 
     public function test_the_list_only_shows_the_current_users_own_bookings(): void
     {
-        $user = User::factory()->create();
+        $user = $this->actingAsEmployeeWithPermissions('ViewAny:RoomBooking');
         $otherUser = User::factory()->create();
         $room = Room::factory()->create();
 
@@ -40,7 +40,7 @@ class MyBookingsTest extends TestCase
 
     public function test_an_employee_can_cancel_their_own_booking(): void
     {
-        $user = User::factory()->create();
+        $user = $this->actingAsEmployeeWithPermissions('ViewAny:RoomBooking');
         $room = Room::factory()->create();
         $booking = RoomBooking::factory()->create(['room_id' => $room->id, 'user_id' => $user->id]);
 

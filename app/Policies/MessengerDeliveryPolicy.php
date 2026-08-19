@@ -14,11 +14,7 @@ class MessengerDeliveryPolicy
 
     public function viewAny(AuthUser $authUser): bool
     {
-        // Every authenticated user may view a list of deliveries — the
-        // "Pengiriman Saya" resource on the /app panel scopes its query to
-        // the current user (sender_id), so this only needs to gate reaching
-        // that list, not which rows appear in it.
-        return true;
+        return $authUser->can('ViewAny:MessengerDelivery');
     }
 
     public function view(AuthUser $authUser, MessengerDelivery $messengerDelivery): bool
@@ -30,11 +26,7 @@ class MessengerDeliveryPolicy
 
     public function create(AuthUser $authUser): bool
     {
-        // Any authenticated user can submit a delivery request from /app —
-        // employees have no dedicated role/permissions yet, so this isn't
-        // gated behind Shield's Create:MessengerDelivery permission (which
-        // only admins hold).
-        return true;
+        return $authUser->can('Create:MessengerDelivery');
     }
 
     public function update(AuthUser $authUser, MessengerDelivery $messengerDelivery): bool

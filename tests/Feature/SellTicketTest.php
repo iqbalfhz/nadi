@@ -6,7 +6,6 @@ use App\Enums\TicketPaymentMethod;
 use App\Filament\App\Pages\SellTicket;
 use App\Models\Event;
 use App\Models\Ticket;
-use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -25,8 +24,7 @@ class SellTicketTest extends TestCase
 
     public function test_a_cashier_can_sell_a_ticket(): void
     {
-        $cashier = User::factory()->create();
-        $this->actingAs($cashier);
+        $cashier = $this->actingAsEmployeeWithPermissions('View:SellTicket');
 
         $event = Event::factory()->create([
             'regular_price' => 25000,
@@ -51,7 +49,7 @@ class SellTicketTest extends TestCase
 
     public function test_member_pricing_applies_when_toggled(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAsEmployeeWithPermissions('View:SellTicket');
 
         $event = Event::factory()->create([
             'regular_price' => 25000,
@@ -76,7 +74,7 @@ class SellTicketTest extends TestCase
 
     public function test_only_open_events_appear_in_the_dropdown(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAsEmployeeWithPermissions('View:SellTicket');
 
         $open = Event::factory()->create(['is_open' => true]);
         $closed = Event::factory()->create(['is_open' => false]);
@@ -89,7 +87,7 @@ class SellTicketTest extends TestCase
 
     public function test_selling_as_member_without_a_barcode_does_not_create_a_ticket(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAsEmployeeWithPermissions('View:SellTicket');
 
         $event = Event::factory()->create(['is_open' => true]);
 
@@ -106,7 +104,7 @@ class SellTicketTest extends TestCase
 
     public function test_selling_without_an_event_does_not_create_a_ticket(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAsEmployeeWithPermissions('View:SellTicket');
 
         Livewire::test(SellTicket::class)
             ->set('buyerName', 'Budi')
@@ -118,7 +116,7 @@ class SellTicketTest extends TestCase
 
     public function test_next_sale_clears_the_receipt(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAsEmployeeWithPermissions('View:SellTicket');
 
         $event = Event::factory()->create(['is_open' => true]);
 

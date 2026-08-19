@@ -4,6 +4,7 @@ namespace App\Filament\App\Pages;
 
 use App\Models\SecurityCheckpoint;
 use App\Models\SecurityPatrol;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -21,6 +22,8 @@ use Illuminate\Support\Facades\Auth;
  */
 class SecurityScan extends Page
 {
+    use HasPageShield;
+
     protected static string $routePath = '/security-scan/{code}';
 
     // Reached only via QR scan, never from the sidebar.
