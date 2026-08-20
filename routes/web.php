@@ -13,9 +13,16 @@ Route::redirect('/', '/dashboard')->name('home');
 Route::get('dashboard', function () {
     $user = auth()->user();
 
-    return redirect($user->hasRole('super_admin') ? '/admin' : '/app');
+    // hasAnyAdminPermission() (not hardcoding hasRole('super_admin')) — any
+    // role holding an admin-relevant permission now lands on /admin, not
+    // just super_admin. canAccessPanel('admin') can't be used for this: it
+    // only checks is_active, since every active employee may attempt
+    // /admin by design, whether or not they have anything to do there.
+    return redirect($user->hasAnyAdminPermission() ? '/admin' : '/app');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/queue.php';
 require __DIR__.'/security.php';
+require __DIR__.'/short-links.php';
+require __DIR__.'/barcodes.php';

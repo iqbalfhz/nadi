@@ -64,7 +64,27 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
         'View:MessengerTasks',
         'View:SellTicket',
         'View:BookingCalendarWidget',
+        'ViewAny:ShortLink',
+        'Create:ShortLink',
+        'ViewAny:Barcode',
+        'View:GenerateBarcode',
     ];
+
+    /**
+     * Whether this user holds any permission that isn't purely /app
+     * self-service — used only to pick the post-login landing panel (see
+     * the `dashboard` route in routes/web.php), not as a real access gate.
+     * canAccessPanel('admin') can't answer this: it only checks is_active,
+     * by design every active employee may attempt /admin, whether or not
+     * they have anything to actually do there.
+     */
+    public function hasAnyAdminPermission(): bool
+    {
+        return $this->getAllPermissions()
+            ->pluck('name')
+            ->diff(self::APP_PANEL_PERMISSIONS)
+            ->isNotEmpty();
+    }
 
     /**
      * The migration's column default only takes effect once a row is

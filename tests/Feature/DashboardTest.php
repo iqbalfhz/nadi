@@ -35,4 +35,13 @@ class DashboardTest extends TestCase
 
         $response->assertRedirect('/admin');
     }
+
+    public function test_a_non_super_admin_role_with_an_admin_permission_is_also_redirected_to_the_admin_panel(): void
+    {
+        $this->actingAsEmployeeWithPermissions('ViewAny:Area');
+
+        $response = $this->get(route('dashboard'));
+
+        $response->assertRedirect('/admin');
+    }
 }
