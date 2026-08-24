@@ -37,6 +37,11 @@ class TicketsTable
     {
         return $table
             ->columns([
+                TextColumn::make('transaction_number')
+                    ->label('No. Transaksi')
+                    ->searchable()
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('event.name')
                     ->label('Event')
                     ->searchable()

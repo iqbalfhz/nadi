@@ -26,6 +26,7 @@
                     @endif
 
                     <p style="margin: 0; font-size: 11px; letter-spacing: 1px;">TIKET EVENT</p>
+                    <p style="margin: 4px 0 0; font-size: 10px;">Trx no: {{ $this->lastTicket->transaction_number }}</p>
 
                     <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
 

@@ -47,6 +47,19 @@ class TicketTest extends TestCase
         $this->assertSame(25000, $ticket->fresh()->price);
     }
 
+    public function test_a_transaction_number_is_auto_generated_and_unique(): void
+    {
+        $event = Event::factory()->create(['is_open' => true]);
+        $cashier = User::factory()->create();
+
+        $one = Ticket::sellFor($event, $cashier, 'Budi', false, null, TicketPaymentMethod::Cash);
+        $two = Ticket::sellFor($event, $cashier, 'Siti', false, null, TicketPaymentMethod::Cash);
+
+        $this->assertNotEmpty($one->transaction_number);
+        $this->assertNotEmpty($two->transaction_number);
+        $this->assertNotSame($one->transaction_number, $two->transaction_number);
+    }
+
     public function test_selling_for_a_closed_event_fails_and_creates_no_ticket(): void
     {
         $event = Event::factory()->create(['is_open' => false]);

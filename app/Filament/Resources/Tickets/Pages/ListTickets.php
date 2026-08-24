@@ -30,6 +30,7 @@ class ListTickets extends ListRecords
                     ExcelExport::make('tiket')
                         ->withFilename(fn (): string => 'penjualan-tiket-event-'.now()->format('Y-m-d'))
                         ->withColumns([
+                            ExportColumn::make('transaction_number')->heading('No. Transaksi'),
                             ExportColumn::make('event.name')->heading('Event'),
                             ExportColumn::make('buyer_name')->heading('Nama Pembeli'),
                             ExportColumn::make('is_member')->heading('Member'),

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 /**
@@ -19,6 +20,21 @@ class Ticket extends Model
 {
     /** @use HasFactory<TicketFactory> */
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $ticket): void {
+            // Random, not sequential — printed as a receipt reference only,
+            // not a serialized ticket number (see sellFor()'s own docblock:
+            // this app deliberately has no locking/counter for numbering
+            // tickets, only for the is_open check).
+            do {
+                $number = 'TRX'.now()->format('ymd').strtoupper(Str::random(6));
+            } while (static::query()->where('transaction_number', $number)->exists());
+
+            $ticket->transaction_number = $number;
+        });
+    }
 
     protected function casts(): array
     {
