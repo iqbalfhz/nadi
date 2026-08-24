@@ -17,6 +17,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'kiosk.unlocked' => EnsureKioskIsUnlocked::class,
         ]);
+
+        // Cloudflare Tunnel + Coolify terminate TLS at the edge and proxy
+        // plain HTTP to this container over a host-only port (not directly
+        // internet-reachable), so trusting every hop is safe. Without this,
+        // Laravel never reads X-Forwarded-Proto, sees requests as http://
+        // internally, and rejects signed URLs (e.g. Livewire file uploads)
+        // generated as https:// since the signature no longer matches.
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
