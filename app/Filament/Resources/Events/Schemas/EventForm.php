@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Events\Schemas;
 
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -16,6 +17,13 @@ class EventForm
                     ->label('Nama Event')
                     ->required()
                     ->maxLength(255),
+                SpatieMediaLibraryFileUpload::make('logo')
+                    ->label('Logo Event')
+                    ->helperText('Muncul di bagian atas struk tiket. Opsional.')
+                    ->collection('logo')
+                    ->image()
+                    ->imageEditor()
+                    ->maxSize(5120),
                 TextInput::make('regular_price')
                     ->label('Harga Reguler')
                     ->numeric()

@@ -19,15 +19,31 @@
                 {{-- Print-only receipt — invisible on screen, this is what
                 actually reaches the thermal printer when window.print() fires. --}}
                 <div class="print-only">
-                    <p style="margin: 0; font-size: 12px;">{{ config('app.name') }}</p>
-                    <p style="margin: 4px 0 0; font-size: 11px;">TIKET EVENT</p>
-                    <p style="margin: 8px 0 0; font-size: 16px; font-weight: bold;">{{ $this->lastTicket->event->name }}</p>
-                    <p style="margin: 4px 0 0; font-size: 12px;">{{ $this->lastTicket->buyer_name }}</p>
-                    <p style="margin: 4px 0 0; font-size: 12px;">{{ $this->lastTicket->is_member ? 'Member' : 'Reguler' }}</p>
-                    <p style="margin: 8px 0; font-size: 24px; font-weight: bold;">Rp {{ number_format($this->lastTicket->price, 0, ',', '.') }}</p>
-                    <p style="margin: 0; font-size: 12px;">{{ $this->lastTicket->payment_method->label() }}</p>
-                    <p style="margin: 8px 0 0; font-size: 10px;">{{ $this->lastTicket->created_at->translatedFormat('d M Y, H:i') }}</p>
-                    <p style="margin: 0; font-size: 10px;">Kasir: {{ $this->lastTicket->soldByUser->name }}</p>
+                    @if ($logoUrl = $this->lastTicket->event->logoUrl())
+                        <img src="{{ $logoUrl }}" alt="" style="display: block; max-width: 45mm; max-height: 30mm; margin: 0 auto 6px;" />
+                    @else
+                        <p style="margin: 0; font-size: 12px;">{{ config('app.name') }}</p>
+                    @endif
+
+                    <p style="margin: 0; font-size: 11px; letter-spacing: 1px;">TIKET EVENT</p>
+
+                    <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
+
+                    <p style="margin: 0; font-size: 16px; font-weight: bold;">{{ $this->lastTicket->event->name }}</p>
+                    <p style="margin: 6px 0 0; font-size: 12px;">{{ $this->lastTicket->buyer_name }}</p>
+                    <p style="margin: 2px 0 0; font-size: 12px;">{{ $this->lastTicket->is_member ? 'Member' : 'Reguler' }}</p>
+
+                    <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
+
+                    <p style="margin: 0; font-size: 24px; font-weight: bold;">Rp {{ number_format($this->lastTicket->price, 0, ',', '.') }}</p>
+                    <p style="margin: 4px 0 0; font-size: 12px;">{{ $this->lastTicket->payment_method->label() }}</p>
+
+                    <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
+
+                    <p style="margin: 0; font-size: 10px;">{{ $this->lastTicket->created_at->translatedFormat('d M Y, H:i') }}</p>
+                    <p style="margin: 2px 0 0; font-size: 10px;">Kasir: {{ $this->lastTicket->soldByUser->name }}</p>
+
+                    <p style="margin: 10px 0 0; font-size: 11px; font-weight: bold;">Terima Kasih</p>
                 </div>
 
                 <div class="mt-4 flex gap-2">

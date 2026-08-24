@@ -13,6 +13,8 @@ use App\Models\Event;
 use App\Models\Ticket;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -25,6 +27,34 @@ class EventAdminTest extends TestCase
         parent::setUp();
 
         Filament::setCurrentPanel(Filament::getPanel('admin'));
+        Storage::fake('public');
+    }
+
+    public function test_an_event_with_no_logo_has_a_null_logo_url(): void
+    {
+        $event = Event::factory()->create();
+
+        $this->assertNull($event->logoUrl());
+    }
+
+    public function test_an_admin_can_upload_a_logo_when_creating_an_event(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        Livewire::test(CreateEvent::class)
+            ->fillForm([
+                'name' => 'Nonton Bareng dengan Logo',
+                'regular_price' => 25000,
+                'member_price' => 15000,
+                'logo' => [UploadedFile::fake()->image('logo.jpg')],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $event = Event::query()->where('name', 'Nonton Bareng dengan Logo')->firstOrFail();
+
+        $this->assertNotNull($event->logoUrl());
+        $this->assertCount(1, $event->getMedia('logo'));
     }
 
     public function test_an_admin_can_create_an_event(): void
