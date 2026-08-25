@@ -41,7 +41,7 @@ class TicketResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return TicketsTable::configure($table, defaultToLatestEvent: true);
+        return TicketsTable::configure($table, defaultToLatestEvent: true, defaultToToday: true);
     }
 
     public static function getPages(): array

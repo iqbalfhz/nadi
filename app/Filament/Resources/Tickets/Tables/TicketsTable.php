@@ -27,13 +27,18 @@ class TicketsTable
      * Admin's report deliberately does NOT do this — admins need full
      * history visible by default, not narrowed to one event.
      *
+     * $defaultToToday: /app's report also defaults the date filter to
+     * today, since a cashier closing the register only cares about today's
+     * transactions. Admin's report deliberately does NOT do this — admins
+     * often need to look up past events, not just today.
+     *
      * $canEdit: only the admin resource registers an 'edit' page — passing
      * true there (and only there) adds a correction action for data-entry
      * mistakes (wrong payment method, mistaken Member toggle, etc). Kept as
      * an explicit flag rather than relying on TicketPolicy::update() alone,
      * since the /app resource has no edit route for Filament to link to.
      */
-    public static function configure(Table $table, bool $defaultToLatestEvent = false, bool $canEdit = false): Table
+    public static function configure(Table $table, bool $defaultToLatestEvent = false, bool $defaultToToday = false, bool $canEdit = false): Table
     {
         return $table
             ->columns([
@@ -81,27 +86,37 @@ class TicketsTable
                     ->label('Metode Bayar')
                     ->options(fn () => collect(TicketPaymentMethod::cases())
                         ->mapWithKeys(fn (TicketPaymentMethod $method) => [$method->value => $method->label()])),
-                // Unlike Antrian's daily-churn report, this data only exists
-                // once a year — don't default this to "today" or admins
-                // would land on an empty report by default.
                 Filter::make('created_at')
                     ->label('Tanggal')
                     ->schema([
-                        DatePicker::make('from')->label('Dari Tanggal'),
-                        DatePicker::make('until')->label('Sampai Tanggal'),
+                        DatePicker::make('from')
+                            ->label('Dari Tanggal')
+                            ->default(fn () => $defaultToToday ? now()->toDateString() : null),
+                        DatePicker::make('until')
+                            ->label('Sampai Tanggal')
+                            ->default(fn () => $defaultToToday ? now()->toDateString() : null),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
                         ->when($data['from'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '>=', $date))
                         ->when($data['until'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '<=', $date)))
                     ->indicateUsing(function (array $data): array {
-                        $indicators = [];
+                        $from = $data['from'] ?? null;
+                        $until = $data['until'] ?? null;
 
-                        if ($data['from'] ?? null) {
-                            $indicators[] = 'Dari '.Carbon::parse($data['from'])->format('d M Y');
+                        // Collapse the untouched "today" default into one
+                        // readable chip instead of two separate ones.
+                        if ($from === now()->toDateString() && $until === now()->toDateString()) {
+                            return ['Hari ini ('.now()->format('d M Y').')'];
                         }
 
-                        if ($data['until'] ?? null) {
-                            $indicators[] = 'Sampai '.Carbon::parse($data['until'])->format('d M Y');
+                        $indicators = [];
+
+                        if ($from) {
+                            $indicators[] = 'Dari '.Carbon::parse($from)->format('d M Y');
+                        }
+
+                        if ($until) {
+                            $indicators[] = 'Sampai '.Carbon::parse($until)->format('d M Y');
                         }
 
                         return $indicators;
