@@ -61,14 +61,24 @@ class DocumentsTable
                         ->when($data['from'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '>=', $date))
                         ->when($data['until'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '<=', $date)))
                     ->indicateUsing(function (array $data): array {
-                        $indicators = [];
+                        $from = $data['from'] ?? null;
+                        $until = $data['until'] ?? null;
 
-                        if ($data['from'] ?? null) {
-                            $indicators[] = 'Dari '.Carbon::parse($data['from'])->format('d M Y');
+                        // Collapse the untouched default (start of this month
+                        // through today) into one readable chip instead of
+                        // two separate "Dari"/"Sampai" ones.
+                        if ($from === now()->startOfMonth()->toDateString() && $until === now()->toDateString()) {
+                            return ['Bulan ini ('.now()->format('M Y').')'];
                         }
 
-                        if ($data['until'] ?? null) {
-                            $indicators[] = 'Sampai '.Carbon::parse($data['until'])->format('d M Y');
+                        $indicators = [];
+
+                        if ($from) {
+                            $indicators[] = 'Dari '.Carbon::parse($from)->format('d M Y');
+                        }
+
+                        if ($until) {
+                            $indicators[] = 'Sampai '.Carbon::parse($until)->format('d M Y');
                         }
 
                         return $indicators;
