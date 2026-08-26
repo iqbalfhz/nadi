@@ -13,6 +13,15 @@ class TicketsOverview extends StatsOverviewWidget
 {
     use HasWidgetShield;
 
+    /**
+     * /app's cashier-facing page sets this to true so the cards match the
+     * "Hari ini" default on the table below them — a cashier closing the
+     * register wants today's total, not the whole event's running total.
+     * Admin's page leaves this false: the whole event's total is what's
+     * useful there.
+     */
+    public bool $scopeToToday = false;
+
     protected function getStats(): array
     {
         $event = Event::query()->where('is_open', true)->latest()->first()
@@ -26,7 +35,9 @@ class TicketsOverview extends StatsOverviewWidget
             $eventId = $event->id;
         }
 
-        $scope = Ticket::query()->where('event_id', $eventId);
+        $scope = Ticket::query()
+            ->where('event_id', $eventId)
+            ->when($this->scopeToToday, fn ($query) => $query->whereDate('created_at', today()));
 
         $total = (clone $scope)->count();
         $revenue = (int) (clone $scope)->sum('price');

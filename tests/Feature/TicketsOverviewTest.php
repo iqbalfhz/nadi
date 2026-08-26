@@ -80,4 +80,30 @@ class TicketsOverviewTest extends TestCase
 
         $this->assertSame('1', $total->getValue());
     }
+
+    public function test_scope_to_today_excludes_tickets_sold_on_other_days(): void
+    {
+        $event = Event::factory()->create(['is_open' => true]);
+
+        Ticket::factory()->create([
+            'event_id' => $event->id,
+            'price' => 20000,
+            'created_at' => now()->subDay(),
+        ]);
+
+        Ticket::factory()->create([
+            'event_id' => $event->id,
+            'price' => 15000,
+        ]);
+
+        $widget = new TicketsOverview;
+        $widget->scopeToToday = true;
+
+        $stats = (new ReflectionMethod(TicketsOverview::class, 'getStats'))->invoke($widget);
+
+        [$total, $revenue] = $stats;
+
+        $this->assertSame('1', $total->getValue());
+        $this->assertSame('Rp 15.000', $revenue->getValue());
+    }
 }

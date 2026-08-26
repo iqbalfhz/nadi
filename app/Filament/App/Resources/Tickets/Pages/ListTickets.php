@@ -17,7 +17,7 @@ class ListTickets extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            TicketsOverview::class,
+            TicketsOverview::make(['scopeToToday' => true]),
         ];
     }
 
