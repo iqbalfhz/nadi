@@ -42,7 +42,7 @@ class BazaarAdminTest extends TestCase
                     [
                         'name' => 'Kios A',
                         'products' => [
-                            ['name' => 'Duren Montong', 'pricing_unit' => PricingUnit::PerHundredGrams->value, 'price' => 45000],
+                            ['name' => 'Duren Montong', 'pricing_unit' => PricingUnit::PerHundredGrams->value, 'price' => 45000, 'initial_stock' => 5000],
                             ['name' => 'Es Duren', 'pricing_unit' => PricingUnit::PerPiece->value, 'price' => 10000],
                         ],
                     ],
@@ -69,10 +69,12 @@ class BazaarAdminTest extends TestCase
             'name' => 'Duren Montong',
             'pricing_unit' => PricingUnit::PerHundredGrams->value,
             'price' => 45000,
+            'initial_stock' => 5000,
         ]);
         $this->assertDatabaseHas('vendor_products', [
             'vendor_id' => $kiosA->id,
             'name' => 'Es Duren',
+            'initial_stock' => null,
             'pricing_unit' => PricingUnit::PerPiece->value,
             'price' => 10000,
         ]);

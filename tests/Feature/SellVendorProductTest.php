@@ -150,6 +150,66 @@ class SellVendorProductTest extends TestCase
             ->assertSet('cart', []);
     }
 
+    public function test_adding_more_than_the_remaining_stock_to_the_cart_is_rejected(): void
+    {
+        $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
+
+        $product = VendorProduct::factory()->create(['initial_stock' => 5]);
+
+        Livewire::test(SellVendorProduct::class)
+            ->set('vendorProductId', $product->id)
+            ->set('quantity', 6)
+            ->call('addToCart')
+            ->assertSet('cart', []);
+    }
+
+    public function test_adding_within_stock_to_the_cart_succeeds(): void
+    {
+        $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
+
+        $product = VendorProduct::factory()->create(['initial_stock' => 5]);
+
+        $component = Livewire::test(SellVendorProduct::class)
+            ->set('vendorProductId', $product->id)
+            ->set('quantity', 5)
+            ->call('addToCart');
+
+        $this->assertCount(1, $component->get('cart'));
+    }
+
+    public function test_a_product_with_unlimited_stock_can_always_be_added(): void
+    {
+        $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
+
+        $product = VendorProduct::factory()->create(['initial_stock' => null]);
+
+        $component = Livewire::test(SellVendorProduct::class)
+            ->set('vendorProductId', $product->id)
+            ->set('quantity', 999999)
+            ->call('addToCart');
+
+        $this->assertCount(1, $component->get('cart'));
+    }
+
+    public function test_adding_the_same_product_twice_respects_the_combined_stock_limit(): void
+    {
+        $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
+
+        $product = VendorProduct::factory()->create(['initial_stock' => 10]);
+
+        $component = Livewire::test(SellVendorProduct::class)
+            ->set('vendorProductId', $product->id)
+            ->set('quantity', 6)
+            ->call('addToCart')
+            ->set('vendorProductId', $product->id)
+            ->set('quantity', 6)
+            ->call('addToCart');
+
+        // 6 + 6 = 12 exceeds the stock of 10 — the second add must be
+        // rejected, leaving only the first item in the cart.
+        $this->assertCount(1, $component->get('cart'));
+    }
+
     public function test_only_open_bazaars_appear_in_the_dropdown(): void
     {
         $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');

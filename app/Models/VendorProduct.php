@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property PricingUnit $pricing_unit
  */
-#[Fillable(['vendor_id', 'name', 'pricing_unit', 'price'])]
+#[Fillable(['vendor_id', 'name', 'pricing_unit', 'price', 'initial_stock'])]
 class VendorProduct extends Model
 {
     /** @use HasFactory<VendorProductFactory> */
@@ -24,6 +24,7 @@ class VendorProduct extends Model
         return [
             'pricing_unit' => PricingUnit::class,
             'price' => 'integer',
+            'initial_stock' => 'integer',
         ];
     }
 
@@ -50,5 +51,26 @@ class VendorProduct extends Model
     public function priceFor(int $quantity): int
     {
         return $this->pricing_unit->priceFor($this->price, $quantity);
+    }
+
+    /**
+     * Total quantity sold across every VendorSale row for this product,
+     * regardless of bazaar/transaction — there's only ever one bazaar per
+     * product anyway, since products aren't reusable master data.
+     */
+    public function soldQuantity(): int
+    {
+        return (int) $this->sales()->sum('quantity');
+    }
+
+    /**
+     * Null means initial_stock was never set — unlimited/untracked, per an
+     * explicit admin choice for items that don't need a stock cap.
+     */
+    public function remainingStock(): ?int
+    {
+        return $this->initial_stock === null
+            ? null
+            : $this->initial_stock - $this->soldQuantity();
     }
 }

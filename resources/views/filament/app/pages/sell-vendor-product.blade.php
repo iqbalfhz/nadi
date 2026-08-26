@@ -111,13 +111,17 @@
                                         @else
                                             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
                                                 @foreach ($this->productsForSelectedVendor as $product)
+                                                    @php($remaining = $product->remainingStock())
+                                                    @php($outOfStock = $remaining !== null && $remaining <= 0)
                                                     <button
                                                         type="button"
-                                                        wire:click="$set('vendorProductId', {{ $product->id }})"
+                                                        @unless ($outOfStock) wire:click="$set('vendorProductId', {{ $product->id }})" @endunless
+                                                        @disabled($outOfStock)
                                                         @class([
                                                             'flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-colors',
-                                                            'border-primary-600 ring-2 ring-primary-600 bg-primary-50 dark:bg-primary-500/10' => $vendorProductId === $product->id,
-                                                            'border-gray-200 hover:border-primary-400 dark:border-white/10 dark:hover:border-primary-400' => $vendorProductId !== $product->id,
+                                                            'border-primary-600 ring-2 ring-primary-600 bg-primary-50 dark:bg-primary-500/10' => ! $outOfStock && $vendorProductId === $product->id,
+                                                            'border-gray-200 hover:border-primary-400 dark:border-white/10 dark:hover:border-primary-400' => ! $outOfStock && $vendorProductId !== $product->id,
+                                                            'cursor-not-allowed border-gray-200 opacity-50 dark:border-white/10' => $outOfStock,
                                                         ])
                                                     >
                                                         <span class="font-medium leading-tight">{{ $product->name }}</span>
@@ -127,6 +131,13 @@
                                                         <span class="text-sm font-semibold text-primary-600 dark:text-primary-400">
                                                             Rp {{ number_format($product->price, 0, ',', '.') }}
                                                         </span>
+                                                        @if ($outOfStock)
+                                                            <x-filament::badge color="danger" size="xs">Stok habis</x-filament::badge>
+                                                        @elseif ($remaining !== null)
+                                                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                                                Sisa {{ number_format($remaining, 0, ',', '.') }} {{ $product->pricing_unit->unitSuffix() }}
+                                                            </span>
+                                                        @endif
                                                     </button>
                                                 @endforeach
                                             </div>

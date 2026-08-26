@@ -201,4 +201,79 @@ class VendorSaleTest extends TestCase
 
         $this->assertDatabaseCount('vendor_sales', 0);
     }
+
+    public function test_selling_within_stock_succeeds(): void
+    {
+        $bazaar = Bazaar::factory()->create(['is_open' => true]);
+        $vendor = Vendor::factory()->create(['bazaar_id' => $bazaar->id]);
+        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id, 'initial_stock' => 10]);
+        $cashier = User::factory()->create();
+
+        $sale = VendorSale::sellCartFor($bazaar, [['product' => $product, 'quantity' => 10]], $cashier, TicketPaymentMethod::Cash)->first();
+
+        $this->assertNotNull($sale->id);
+    }
+
+    public function test_selling_more_than_the_remaining_stock_fails_and_creates_no_sale(): void
+    {
+        $bazaar = Bazaar::factory()->create(['is_open' => true]);
+        $vendor = Vendor::factory()->create(['bazaar_id' => $bazaar->id]);
+        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id, 'initial_stock' => 5]);
+        $cashier = User::factory()->create();
+
+        $this->expectException(RuntimeException::class);
+
+        try {
+            VendorSale::sellCartFor($bazaar, [['product' => $product, 'quantity' => 6]], $cashier, TicketPaymentMethod::Cash);
+        } finally {
+            $this->assertDatabaseCount('vendor_sales', 0);
+        }
+    }
+
+    public function test_a_null_initial_stock_means_unlimited(): void
+    {
+        $bazaar = Bazaar::factory()->create(['is_open' => true]);
+        $vendor = Vendor::factory()->create(['bazaar_id' => $bazaar->id]);
+        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id, 'initial_stock' => null]);
+        $cashier = User::factory()->create();
+
+        $sale = VendorSale::sellCartFor($bazaar, [['product' => $product, 'quantity' => 999999]], $cashier, TicketPaymentMethod::Cash)->first();
+
+        $this->assertNotNull($sale->id);
+    }
+
+    public function test_stock_check_accounts_for_previously_sold_quantity(): void
+    {
+        $bazaar = Bazaar::factory()->create(['is_open' => true]);
+        $vendor = Vendor::factory()->create(['bazaar_id' => $bazaar->id]);
+        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id, 'initial_stock' => 10]);
+        $cashier = User::factory()->create();
+
+        VendorSale::sellCartFor($bazaar, [['product' => $product, 'quantity' => 7]], $cashier, TicketPaymentMethod::Cash);
+
+        $this->expectException(RuntimeException::class);
+
+        VendorSale::sellCartFor($bazaar, [['product' => $product, 'quantity' => 4]], $cashier, TicketPaymentMethod::Cash);
+    }
+
+    public function test_stock_check_accounts_for_earlier_items_of_the_same_product_within_one_cart(): void
+    {
+        $bazaar = Bazaar::factory()->create(['is_open' => true]);
+        $vendor = Vendor::factory()->create(['bazaar_id' => $bazaar->id]);
+        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id, 'initial_stock' => 10]);
+        $cashier = User::factory()->create();
+
+        $this->expectException(RuntimeException::class);
+
+        try {
+            VendorSale::sellCartFor($bazaar, [
+                ['product' => $product, 'quantity' => 6],
+                ['product' => $product, 'quantity' => 6],
+            ], $cashier, TicketPaymentMethod::Cash);
+        } finally {
+            // All-or-nothing — the first line item's stock-check-passing
+            // write must be rolled back too, not left dangling.
+            $this->assertDatabaseCount('vendor_sales', 0);
+        }
+    }
 }

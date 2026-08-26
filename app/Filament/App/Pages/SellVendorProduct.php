@@ -201,6 +201,28 @@ class SellVendorProduct extends Page
             return;
         }
 
+        $product = VendorProduct::query()->findOrFail($this->vendorProductId);
+
+        // Informational check only — sellCartFor() re-checks stock for real
+        // (locked, fresh from the DB) at checkout, since stock can change
+        // between adding to cart and paying. This just gives the cashier
+        // immediate feedback instead of a surprise at checkout. Quantities
+        // already staged in the cart for this same product count against the
+        // limit too.
+        if ($product->initial_stock !== null) {
+            $alreadyInCart = collect($this->cart)
+                ->where('vendorProductId', $product->id)
+                ->sum('quantity');
+
+            $remaining = $product->initial_stock - $product->soldQuantity() - $alreadyInCart;
+
+            if ($this->quantity > $remaining) {
+                Notification::make()->warning()->title("Stok {$product->name} tidak cukup (sisa {$remaining}).")->send();
+
+                return;
+            }
+        }
+
         $this->cart[] = [
             'vendorProductId' => $this->vendorProductId,
             'quantity' => $this->quantity,

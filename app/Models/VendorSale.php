@@ -128,6 +128,20 @@ class VendorSale extends Model
                     /** @var VendorProduct $lockedProduct */
                     $lockedProduct = VendorProduct::query()->whereKey($item['product']->id)->lockForUpdate()->firstOrFail();
 
+                    // Recomputed fresh after the lock (not from the caller's
+                    // possibly-stale $item['product']) so it sees every sale
+                    // already written earlier in this same cart/transaction,
+                    // and can't race a concurrent checkout of the same
+                    // product — the second checkout blocks on lockForUpdate()
+                    // until the first commits, then sees its sold total.
+                    if ($lockedProduct->initial_stock !== null) {
+                        $remaining = $lockedProduct->initial_stock - $lockedProduct->soldQuantity();
+
+                        if ($item['quantity'] > $remaining) {
+                            throw new RuntimeException("Stok {$lockedProduct->name} tidak cukup (sisa {$remaining}).");
+                        }
+                    }
+
                     // transaction_number isn't in #[Fillable], on purpose (it
                     // shouldn't be settable through any form) — create()
                     // would silently drop it, leaving the booted() hook to

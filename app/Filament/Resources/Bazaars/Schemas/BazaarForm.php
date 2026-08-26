@@ -57,8 +57,14 @@ class BazaarForm
                                     ->minValue(0)
                                     ->prefix('Rp')
                                     ->columnSpan(1),
+                                TextInput::make('initial_stock')
+                                    ->label(fn (Get $get): string => 'Stok Awal ('.(PricingUnit::tryFrom($get('pricing_unit'))?->unitSuffix() ?? 'opsional').')')
+                                    ->helperText('Kosongkan jika tidak ingin membatasi stok.')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->columnSpan(1),
                             ])
-                            ->columns(3)
+                            ->columns(2)
                             ->defaultItems(1)
                             ->addActionLabel('Tambah Produk')
                             ->collapsible(),
