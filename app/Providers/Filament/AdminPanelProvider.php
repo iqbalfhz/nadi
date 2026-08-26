@@ -9,6 +9,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
@@ -51,6 +52,32 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
+            ])
+            // Explicit order + icon per group, grouped in tiers: (1) the core
+            // operational modules from docs/NADI.MD, in that doc's own
+            // numbering order; (2) standalone POS/sales features built
+            // outside NADI.MD; (3) generic office tools; (4) administration
+            // (who has access, then their roles/permissions, then
+            // system-wide settings). Without this, Filament falls back to
+            // resource-discovery order, which is arbitrary and was the whole
+            // reason this sidebar felt disorganized.
+            ->navigationGroups([
+                NavigationGroup::make('Penomoran Dokumen')->icon(Heroicon::OutlinedDocumentDuplicate),
+                NavigationGroup::make('Booking Room')->icon(Heroicon::OutlinedCalendarDays),
+                NavigationGroup::make('Antrian')->icon(Heroicon::OutlinedQueueList),
+                NavigationGroup::make('OB')->icon(Heroicon::OutlinedClipboardDocumentCheck),
+                NavigationGroup::make('Security')->icon(Heroicon::OutlinedShieldCheck),
+                NavigationGroup::make('Messenger')->icon(Heroicon::OutlinedTruck),
+                NavigationGroup::make('Tiket Event')->icon(Heroicon::OutlinedTicket),
+                NavigationGroup::make('Bazar')->icon(Heroicon::OutlinedBuildingStorefront),
+                NavigationGroup::make('Tools')->icon(Heroicon::OutlinedWrenchScrewdriver),
+                NavigationGroup::make('Pengguna')->icon(Heroicon::OutlinedUsers),
+                // No ->icon() override — this only controls where the
+                // Shield plugin's own group lands in the order, not its
+                // appearance. Mixing bare strings into this array (rather
+                // than NavigationGroup instances) throws at render time.
+                NavigationGroup::make('Filament Shield'),
+                NavigationGroup::make('Sistem')->icon(Heroicon::OutlinedCog6Tooth),
             ])
             ->middleware([
                 EncryptCookies::class,
