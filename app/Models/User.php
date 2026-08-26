@@ -63,6 +63,7 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
         'View:SecurityScan',
         'View:MessengerTasks',
         'View:SellTicket',
+        'View:BookingCalendar',
         'View:BookingCalendarWidget',
         'ViewAny:ShortLink',
         'Create:ShortLink',

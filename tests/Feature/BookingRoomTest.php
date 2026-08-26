@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Filament\App\Pages\BookingCalendar;
 use App\Filament\App\Widgets\BookingCalendarWidget;
 use App\Filament\Resources\Areas\AreaResource;
 use App\Models\Area;
 use App\Models\Room;
 use App\Models\RoomBooking;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -39,6 +41,26 @@ class BookingRoomTest extends TestCase
         $response = $this->get('/app');
 
         $response->assertOk();
+    }
+
+    public function test_a_user_without_the_permission_is_forbidden_from_the_booking_calendar_page(): void
+    {
+        Filament::setCurrentPanel(Filament::getPanel('app'));
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(BookingCalendar::getUrl())
+            ->assertForbidden();
+    }
+
+    public function test_a_user_with_the_permission_can_access_the_booking_calendar_page(): void
+    {
+        Filament::setCurrentPanel(Filament::getPanel('app'));
+
+        $this->actingAsEmployeeWithPermissions('View:BookingCalendar');
+
+        $this->get(BookingCalendar::getUrl())->assertOk();
     }
 
     public function test_a_user_with_no_admin_permissions_can_enter_the_panel_but_not_a_gated_resource(): void

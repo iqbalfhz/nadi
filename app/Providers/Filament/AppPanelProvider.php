@@ -55,10 +55,11 @@ class AppPanelProvider extends PanelProvider
             // Same tiering as the admin panel (see AdminPanelProvider): core
             // operational modules, then standalone POS features, then
             // tools, then admin/meta — just scoped to whichever of those
-            // groups actually have self-service pages here. RoomBooking,
-            // Antrian, and Security have no grouped /app pages, so they
-            // aren't listed — they render as flat top-level items instead.
+            // groups actually have self-service pages here. Antrian and
+            // Security have no grouped /app pages, so they aren't listed —
+            // they render as flat top-level items instead.
             ->navigationGroups([
+                NavigationGroup::make('Booking Room')->icon(Heroicon::OutlinedCalendarDays),
                 NavigationGroup::make('OB')->icon(Heroicon::OutlinedClipboardDocumentCheck),
                 NavigationGroup::make('Messenger')->icon(Heroicon::OutlinedTruck),
                 NavigationGroup::make('Tiket Event')->icon(Heroicon::OutlinedTicket),
