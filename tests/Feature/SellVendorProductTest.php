@@ -26,7 +26,7 @@ class SellVendorProductTest extends TestCase
         Filament::setCurrentPanel(Filament::getPanel('app'));
     }
 
-    public function test_a_cashier_can_sell_a_per_piece_product(): void
+    public function test_a_cashier_can_checkout_a_single_item_cart(): void
     {
         $cashier = $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
 
@@ -43,8 +43,9 @@ class SellVendorProductTest extends TestCase
             ->set('vendorId', $vendor->id)
             ->set('vendorProductId', $product->id)
             ->set('quantity', 3)
+            ->call('addToCart')
             ->set('paymentMethod', TicketPaymentMethod::Cash->value)
-            ->call('sell');
+            ->call('checkout');
 
         $sale = VendorSale::query()->where('vendor_product_id', $product->id)->firstOrFail();
 
@@ -52,30 +53,101 @@ class SellVendorProductTest extends TestCase
         $this->assertSame($cashier->id, $sale->sold_by);
     }
 
-    public function test_a_cashier_can_sell_a_per_100g_product(): void
+    public function test_a_cashier_can_checkout_a_cart_with_multiple_different_products(): void
     {
         $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
 
         $bazaar = Bazaar::factory()->create(['is_open' => true]);
         $vendor = Vendor::factory()->create(['bazaar_id' => $bazaar->id]);
-        $product = VendorProduct::factory()->create([
+        $durian = VendorProduct::factory()->create([
             'vendor_id' => $vendor->id,
             'pricing_unit' => PricingUnit::PerHundredGrams,
             'price' => 45000,
         ]);
+        $esDuren = VendorProduct::factory()->create([
+            'vendor_id' => $vendor->id,
+            'pricing_unit' => PricingUnit::PerPiece,
+            'price' => 10000,
+        ]);
+
+        $component = Livewire::test(SellVendorProduct::class)
+            ->set('bazaarId', $bazaar->id)
+            ->set('vendorId', $vendor->id)
+            ->set('vendorProductId', $durian->id)
+            ->set('quantity', 250)
+            ->call('addToCart')
+            ->set('vendorProductId', $esDuren->id)
+            ->set('quantity', 2)
+            ->call('addToCart');
+
+        $this->assertCount(2, $component->get('cart'));
+
+        $component
+            ->set('paymentMethod', TicketPaymentMethod::Qris->value)
+            ->call('checkout');
+
+        $durianSale = VendorSale::query()->where('vendor_product_id', $durian->id)->firstOrFail();
+        $esDurenSale = VendorSale::query()->where('vendor_product_id', $esDuren->id)->firstOrFail();
+
+        $this->assertSame(112500, $durianSale->price);
+        $this->assertSame(20000, $esDurenSale->price);
+        $this->assertSame($durianSale->transaction_number, $esDurenSale->transaction_number);
+    }
+
+    public function test_adding_to_cart_keeps_the_bazaar_and_vendor_selected_for_the_next_item(): void
+    {
+        $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
+
+        $bazaar = Bazaar::factory()->create(['is_open' => true]);
+        $vendor = Vendor::factory()->create(['bazaar_id' => $bazaar->id]);
+        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id]);
 
         Livewire::test(SellVendorProduct::class)
             ->set('bazaarId', $bazaar->id)
             ->set('vendorId', $vendor->id)
             ->set('vendorProductId', $product->id)
-            ->set('quantity', 250)
-            ->set('paymentMethod', TicketPaymentMethod::Qris->value)
-            ->call('sell');
+            ->set('quantity', 1)
+            ->call('addToCart')
+            ->assertSet('bazaarId', $bazaar->id)
+            ->assertSet('vendorId', $vendor->id)
+            ->assertSet('vendorProductId', null)
+            ->assertSet('quantity', null);
+    }
 
-        $sale = VendorSale::query()->where('vendor_product_id', $product->id)->firstOrFail();
+    public function test_removing_an_item_from_the_cart(): void
+    {
+        $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
 
-        $this->assertSame(112500, $sale->price);
-        $this->assertSame(250, $sale->quantity);
+        $vendor = Vendor::factory()->create();
+        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id]);
+
+        $component = Livewire::test(SellVendorProduct::class)
+            ->set('vendorProductId', $product->id)
+            ->set('quantity', 1)
+            ->call('addToCart');
+
+        $this->assertCount(1, $component->get('cart'));
+
+        $component->call('removeFromCart', 0);
+
+        $this->assertCount(0, $component->get('cart'));
+    }
+
+    public function test_switching_bazaars_clears_the_cart(): void
+    {
+        $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
+
+        $bazaarA = Bazaar::factory()->create(['is_open' => true]);
+        $vendor = Vendor::factory()->create(['bazaar_id' => $bazaarA->id]);
+        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id]);
+        $bazaarB = Bazaar::factory()->create(['is_open' => true]);
+
+        Livewire::test(SellVendorProduct::class)
+            ->set('vendorProductId', $product->id)
+            ->set('quantity', 1)
+            ->call('addToCart')
+            ->set('bazaarId', $bazaarB->id)
+            ->assertSet('cart', []);
     }
 
     public function test_only_open_bazaars_appear_in_the_dropdown(): void
@@ -121,22 +193,6 @@ class SellVendorProductTest extends TestCase
         $this->assertFalse($component->get('productsForSelectedVendor')->contains('id', $productB->id));
     }
 
-    public function test_selecting_a_new_bazaar_resets_the_vendor_and_product_selection(): void
-    {
-        $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
-
-        $vendor = Vendor::factory()->create();
-        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id]);
-        $anotherBazaar = Bazaar::factory()->create();
-
-        Livewire::test(SellVendorProduct::class)
-            ->set('vendorId', $vendor->id)
-            ->set('vendorProductId', $product->id)
-            ->set('bazaarId', $anotherBazaar->id)
-            ->assertSet('vendorId', null)
-            ->assertSet('vendorProductId', null);
-    }
-
     public function test_the_selected_products_pricing_unit_drives_the_quantity_field_label(): void
     {
         $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
@@ -150,19 +206,17 @@ class SellVendorProductTest extends TestCase
         $this->assertSame('Berat (gram)', $component->get('selectedProduct')->pricing_unit->quantityFieldLabel());
     }
 
-    public function test_selling_without_selecting_a_product_does_not_create_a_sale(): void
+    public function test_adding_to_cart_without_selecting_a_product_does_not_add_anything(): void
     {
         $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
 
         Livewire::test(SellVendorProduct::class)
             ->set('quantity', 1)
-            ->set('paymentMethod', TicketPaymentMethod::Cash->value)
-            ->call('sell');
-
-        $this->assertDatabaseCount('vendor_sales', 0);
+            ->call('addToCart')
+            ->assertSet('cart', []);
     }
 
-    public function test_selling_zero_quantity_does_not_create_a_sale(): void
+    public function test_adding_zero_quantity_to_cart_does_not_add_anything(): void
     {
         $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
 
@@ -171,8 +225,17 @@ class SellVendorProductTest extends TestCase
         Livewire::test(SellVendorProduct::class)
             ->set('vendorProductId', $product->id)
             ->set('quantity', 0)
+            ->call('addToCart')
+            ->assertSet('cart', []);
+    }
+
+    public function test_checking_out_an_empty_cart_does_not_create_a_sale(): void
+    {
+        $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
+
+        Livewire::test(SellVendorProduct::class)
             ->set('paymentMethod', TicketPaymentMethod::Cash->value)
-            ->call('sell');
+            ->call('checkout');
 
         $this->assertDatabaseCount('vendor_sales', 0);
     }
@@ -181,16 +244,20 @@ class SellVendorProductTest extends TestCase
     {
         $this->actingAsEmployeeWithPermissions('View:SellVendorProduct');
 
-        $product = VendorProduct::factory()->create();
+        $vendor = Vendor::factory()->create();
+        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id]);
 
         $component = Livewire::test(SellVendorProduct::class)
+            ->set('bazaarId', $vendor->bazaar_id)
+            ->set('vendorId', $vendor->id)
             ->set('vendorProductId', $product->id)
             ->set('quantity', 1)
+            ->call('addToCart')
             ->set('paymentMethod', TicketPaymentMethod::Cash->value)
-            ->call('sell')
-            ->assertSet('lastSaleId', fn (?int $id) => $id !== null);
+            ->call('checkout')
+            ->assertSet('lastTransactionNumber', fn (?string $number) => $number !== null);
 
-        $component->call('nextSale')->assertSet('lastSaleId', null);
+        $component->call('nextSale')->assertSet('lastTransactionNumber', null);
     }
 
     public function test_a_cashier_without_the_permission_is_forbidden_from_the_sell_page(): void

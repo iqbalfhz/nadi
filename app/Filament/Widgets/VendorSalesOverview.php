@@ -37,12 +37,15 @@ class VendorSalesOverview extends StatsOverviewWidget
             ->where('bazaar_id', $bazaarId)
             ->when($this->scopeToToday, fn ($query) => $query->whereDate('created_at', today()));
 
-        $total = (clone $scope)->count();
+        // A cart checkout writes one VendorSale row per line item sharing one
+        // transaction_number, so "how many transactions" means distinct
+        // transaction_number, not raw row count.
+        $total = (clone $scope)->distinct('transaction_number')->count('transaction_number');
         $revenue = (int) (clone $scope)->sum('price');
 
         $paymentCounts = collect(TicketPaymentMethod::cases())
             ->mapWithKeys(fn (TicketPaymentMethod $method): array => [
-                $method->value => (clone $scope)->where('payment_method', $method)->count(),
+                $method->value => (clone $scope)->where('payment_method', $method)->distinct('transaction_number')->count('transaction_number'),
             ]);
 
         return [

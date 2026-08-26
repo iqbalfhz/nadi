@@ -1,45 +1,45 @@
 <x-filament-panels::page>
-    @if ($this->lastSale)
+    @if ($this->lastTransactionNumber)
+        @php($items = $this->lastSaleItems)
+        @php($first = $items->first())
         <x-filament::section>
             <div
-                wire:key="receipt-{{ $this->lastSale->id }}"
+                wire:key="receipt-{{ $this->lastTransactionNumber }}"
                 x-data
                 x-init="setTimeout(() => window.print(), 300)"
                 class="flex flex-col items-center gap-2 py-6 text-center"
             >
                 <span class="text-sm text-gray-500 dark:text-gray-400">Penjualan berhasil dicatat</span>
-                <span class="text-2xl font-bold">{{ $this->lastSale->vendorProduct->name }}</span>
-                <span class="text-lg">Kios {{ $this->lastSale->vendor->name }}</span>
-                <span class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ number_format($this->lastSale->quantity, 0, ',', '.') }} {{ $this->lastSale->pricing_unit->unitSuffix() }} —
-                    Rp {{ number_format($this->lastSale->price, 0, ',', '.') }} —
-                    {{ $this->lastSale->payment_method->label() }}
-                </span>
+                <span class="text-2xl font-bold">{{ $items->count() }} item — Rp {{ number_format($items->sum('price'), 0, ',', '.') }}</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ $first->payment_method->label() }}</span>
 
                 {{-- Print-only receipt — invisible on screen, this is what
                 actually reaches the thermal printer when window.print() fires. --}}
                 <div class="print-only">
                     <p style="margin: 0; font-size: 12px;">{{ config('app.name') }}</p>
-                    <p style="margin: 0; font-size: 11px; letter-spacing: 1px;">{{ $this->lastSale->bazaar->name }}</p>
-                    <p style="margin: 4px 0 0; font-size: 10px;">Trx no: {{ $this->lastSale->transaction_number }}</p>
+                    <p style="margin: 0; font-size: 11px; letter-spacing: 1px;">{{ $first->bazaar->name }}</p>
+                    <p style="margin: 4px 0 0; font-size: 10px;">Trx no: {{ $this->lastTransactionNumber }}</p>
 
                     <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
 
-                    <p style="margin: 0; font-size: 12px;">Kios: {{ $this->lastSale->vendor->name }}</p>
-                    <p style="margin: 6px 0 0; font-size: 16px; font-weight: bold;">{{ $this->lastSale->vendorProduct->name }}</p>
-                    <p style="margin: 2px 0 0; font-size: 12px;">
-                        {{ number_format($this->lastSale->quantity, 0, ',', '.') }} {{ $this->lastSale->pricing_unit->unitSuffix() }}
-                    </p>
+                    @foreach ($items as $item)
+                        <p style="margin: 6px 0 0; font-size: 12px; font-weight: bold;">{{ $item->vendorProduct->name }}</p>
+                        <p style="margin: 0; font-size: 11px;">
+                            Kios {{ $item->vendor->name }} —
+                            {{ number_format($item->quantity, 0, ',', '.') }} {{ $item->pricing_unit->unitSuffix() }}
+                        </p>
+                        <p style="margin: 0; font-size: 12px;">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
+                    @endforeach
 
                     <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
 
-                    <p style="margin: 0; font-size: 24px; font-weight: bold;">Rp {{ number_format($this->lastSale->price, 0, ',', '.') }}</p>
-                    <p style="margin: 4px 0 0; font-size: 12px;">{{ $this->lastSale->payment_method->label() }}</p>
+                    <p style="margin: 0; font-size: 24px; font-weight: bold;">Rp {{ number_format($items->sum('price'), 0, ',', '.') }}</p>
+                    <p style="margin: 4px 0 0; font-size: 12px;">{{ $first->payment_method->label() }}</p>
 
                     <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
 
-                    <p style="margin: 0; font-size: 10px;">{{ $this->lastSale->created_at->translatedFormat('d M Y, H:i') }}</p>
-                    <p style="margin: 2px 0 0; font-size: 10px;">Kasir: {{ $this->lastSale->soldByUser->name }}</p>
+                    <p style="margin: 0; font-size: 10px;">{{ $first->created_at->translatedFormat('d M Y, H:i') }}</p>
+                    <p style="margin: 2px 0 0; font-size: 10px;">Kasir: {{ $first->soldByUser->name }}</p>
 
                     <p style="margin: 10px 0 0; font-size: 11px; font-weight: bold;">Terima Kasih</p>
                 </div>
@@ -118,6 +118,46 @@
                         @endif
                     </div>
 
+                    <div>
+                        <x-filament::button color="gray" wire:click="addToCart">
+                            Tambah ke Keranjang
+                        </x-filament::button>
+                    </div>
+                @endif
+            </div>
+        </x-filament::section>
+
+        @if (count($this->cartItems) > 0)
+            <x-filament::section class="mt-4">
+                <div class="flex flex-col gap-3">
+                    <span class="text-sm font-medium">Keranjang</span>
+
+                    @foreach ($this->cartItems as $item)
+                        <div class="flex items-center justify-between gap-2 border-b border-gray-100 pb-2 dark:border-white/10">
+                            <div class="flex flex-col">
+                                <span class="font-medium">{{ $item['productName'] }}</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">
+                                    Kios {{ $item['vendorName'] }} — {{ number_format($item['quantity'], 0, ',', '.') }} {{ $item['unitSuffix'] }}
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <span class="font-medium">Rp {{ number_format($item['price'], 0, ',', '.') }}</span>
+                                <x-filament::icon-button
+                                    icon="heroicon-o-trash"
+                                    color="danger"
+                                    wire:click="removeFromCart({{ $item['index'] }})"
+                                    label="Hapus"
+                                />
+                            </div>
+                        </div>
+                    @endforeach
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-lg font-bold">Total</span>
+                        <span class="text-lg font-bold">Rp {{ number_format($this->cartTotal, 0, ',', '.') }}</span>
+                    </div>
+
                     <div class="flex flex-col gap-2">
                         <label class="text-sm font-medium">Metode Pembayaran</label>
                         <x-filament::input.wrapper>
@@ -131,13 +171,13 @@
                     </div>
 
                     <div>
-                        <x-filament::button wire:click="sell">
+                        <x-filament::button wire:click="checkout">
                             Bayar &amp; Cetak
                         </x-filament::button>
                     </div>
-                @endif
-            </div>
-        </x-filament::section>
+                </div>
+            </x-filament::section>
+        @endif
     @endif
 
     <style>

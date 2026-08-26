@@ -43,7 +43,17 @@ class SellVendorProduct extends Page
 
     public ?string $paymentMethod = null;
 
-    public ?int $lastSaleId = null;
+    /**
+     * The cart being built up before checkout — a plain list of
+     * {vendorProductId, quantity} pairs. Display info (names, price) is
+     * always recomputed from the DB via cartItems() rather than cached
+     * here, so it can never go stale if a product happens to change mid-cart.
+     *
+     * @var array<int, array{vendorProductId: int, quantity: int}>
+     */
+    public array $cart = [];
+
+    public ?string $lastTransactionNumber = null;
 
     /**
      * @return Collection<int, Bazaar>
@@ -85,7 +95,7 @@ class SellVendorProduct extends Page
     }
 
     /**
-     * Live preview only — VendorSale::sellFor() is still the sole
+     * Live preview only — VendorSale::sellCartFor() is still the sole
      * authoritative computation, recomputed server-side from a locked row.
      */
     #[Computed]
@@ -98,12 +108,60 @@ class SellVendorProduct extends Page
             : null;
     }
 
+    /**
+     * Hydrates $cart into display-ready rows (vendor name, product name,
+     * quantity + unit, computed price) plus its own array index so the
+     * "hapus" button can target the right entry.
+     *
+     * @return array<int, array{index: int, vendorName: string, productName: string, quantity: int, unitSuffix: string, price: int}>
+     */
     #[Computed]
-    public function lastSale(): ?VendorSale
+    public function cartItems(): array
     {
-        return $this->lastSaleId
-            ? VendorSale::query()->with(['bazaar', 'vendor', 'vendorProduct', 'soldByUser'])->find($this->lastSaleId)
-            : null;
+        $productIds = collect($this->cart)->pluck('vendorProductId')->unique();
+
+        $products = VendorProduct::query()->with('vendor')->whereIn('id', $productIds)->get()->keyBy('id');
+
+        return collect($this->cart)
+            ->map(function (array $entry, int $index) use ($products): ?array {
+                $product = $products->get($entry['vendorProductId']);
+
+                if (! $product) {
+                    return null;
+                }
+
+                return [
+                    'index' => $index,
+                    'vendorName' => $product->vendor->name,
+                    'productName' => $product->name,
+                    'quantity' => $entry['quantity'],
+                    'unitSuffix' => $product->pricing_unit->unitSuffix(),
+                    'price' => $product->priceFor($entry['quantity']),
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    #[Computed]
+    public function cartTotal(): int
+    {
+        return collect($this->cartItems())->sum('price');
+    }
+
+    /**
+     * @return Collection<int, VendorSale>
+     */
+    #[Computed]
+    public function lastSaleItems(): Collection
+    {
+        return $this->lastTransactionNumber
+            ? VendorSale::query()
+                ->with(['bazaar', 'vendor', 'vendorProduct', 'soldByUser'])
+                ->where('transaction_number', $this->lastTransactionNumber)
+                ->get()
+            : VendorSale::hydrate([]);
     }
 
     /**
@@ -119,7 +177,9 @@ class SellVendorProduct extends Page
 
     public function updatedBazaarId(): void
     {
-        $this->reset(['vendorId', 'vendorProductId']);
+        // A cart only ever belongs to one bazaar — switching bazaars mid-cart
+        // would leave stale items that sellCartFor() can't check out together.
+        $this->reset(['vendorId', 'vendorProductId', 'cart']);
     }
 
     public function updatedVendorId(): void
@@ -127,7 +187,7 @@ class SellVendorProduct extends Page
         $this->reset(['vendorProductId']);
     }
 
-    public function sell(): void
+    public function addToCart(): void
     {
         if (! $this->vendorProductId) {
             Notification::make()->warning()->title('Pilih produk dulu.')->send();
@@ -141,22 +201,76 @@ class SellVendorProduct extends Page
             return;
         }
 
+        $this->cart[] = [
+            'vendorProductId' => $this->vendorProductId,
+            'quantity' => $this->quantity,
+        ];
+
+        // Keep bazaarId/vendorId selected — a cashier typically adds several
+        // items from the same kios in a row. Only the item-specific fields
+        // reset, ready for the next product.
+        $this->reset(['vendorProductId', 'quantity']);
+    }
+
+    public function removeFromCart(int $index): void
+    {
+        unset($this->cart[$index]);
+
+        $this->cart = array_values($this->cart);
+    }
+
+    public function checkout(): void
+    {
+        if ($this->cart === []) {
+            Notification::make()->warning()->title('Keranjang masih kosong.')->send();
+
+            return;
+        }
+
         if (! $this->paymentMethod) {
             Notification::make()->warning()->title('Pilih metode pembayaran dulu.')->send();
 
             return;
         }
 
-        $product = VendorProduct::query()->findOrFail($this->vendorProductId);
+        $bazaar = Bazaar::query()->findOrFail($this->bazaarId);
+
+        $products = VendorProduct::query()
+            ->whereIn('id', collect($this->cart)->pluck('vendorProductId'))
+            ->get()
+            ->keyBy('id');
+
+        // A product could have been removed from the bazaar (via the admin
+        // Repeater) while it was still sitting in this cart — fail loudly
+        // rather than passing a null product into sellCartFor().
+        $missingProduct = collect($this->cart)->contains(fn (array $entry): bool => ! $products->has($entry['vendorProductId']));
+
+        if ($missingProduct) {
+            Notification::make()->warning()->title('Salah satu produk di keranjang sudah tidak tersedia. Hapus dari keranjang lalu coba lagi.')->send();
+
+            return;
+        }
+
+        $items = collect($this->cart)
+            ->map(function (array $entry) use ($products): array {
+                $product = $products->get($entry['vendorProductId']);
+
+                if (! $product) {
+                    throw new RuntimeException('Salah satu produk di keranjang sudah tidak tersedia. Hapus dari keranjang lalu coba lagi.');
+                }
+
+                return ['product' => $product, 'quantity' => $entry['quantity']];
+            })
+            ->all();
 
         /** @var User $cashier */
         $cashier = Auth::user();
 
         try {
-            $sale = VendorSale::sellFor(
-                product: $product,
+            $sales = VendorSale::sellCartFor(
+                bazaar: $bazaar,
+                items: $items,
                 cashier: $cashier,
-                quantity: $this->quantity,
                 paymentMethod: TicketPaymentMethod::from($this->paymentMethod),
             );
         } catch (RuntimeException $exception) {
@@ -165,16 +279,13 @@ class SellVendorProduct extends Page
             return;
         }
 
-        $this->lastSaleId = $sale->id;
+        $this->lastTransactionNumber = $sales->first()->transaction_number;
 
-        // Keep bazaarId/vendorId/vendorProductId selected — a cashier
-        // typically sells the same product repeatedly to a queue of buyers,
-        // only quantity/paymentMethod reset (mirrors SellTicket::sell()).
-        $this->reset(['quantity', 'paymentMethod']);
+        $this->reset(['bazaarId', 'vendorId', 'vendorProductId', 'quantity', 'paymentMethod', 'cart']);
     }
 
     public function nextSale(): void
     {
-        $this->lastSaleId = null;
+        $this->lastTransactionNumber = null;
     }
 }

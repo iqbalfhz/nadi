@@ -97,6 +97,30 @@ class VendorSalesOverviewTest extends TestCase
         $this->assertSame('1', $total->getValue());
     }
 
+    public function test_multiple_line_items_sharing_one_transaction_number_count_as_one_transaction(): void
+    {
+        $bazaar = Bazaar::factory()->create(['is_open' => true]);
+
+        VendorSale::factory()->create([
+            'bazaar_id' => $bazaar->id,
+            'price' => 15000,
+            'transaction_number' => 'BZR-SHARED',
+        ]);
+        VendorSale::factory()->create([
+            'bazaar_id' => $bazaar->id,
+            'price' => 25000,
+            'transaction_number' => 'BZR-SHARED',
+        ]);
+
+        $stats = (new ReflectionMethod(VendorSalesOverview::class, 'getStats'))
+            ->invoke(new VendorSalesOverview);
+
+        [$total, $revenue] = $stats;
+
+        $this->assertSame('1', $total->getValue());
+        $this->assertSame('Rp 40.000', $revenue->getValue());
+    }
+
     public function test_scope_to_today_excludes_sales_from_other_days(): void
     {
         $bazaar = Bazaar::factory()->create(['is_open' => true]);

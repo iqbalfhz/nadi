@@ -51,8 +51,13 @@ class VendorSettlementOverview extends TableWidget
             ->columns([
                 TextColumn::make('name')
                     ->label('Kios'),
+                // Deliberately a raw row count (line items sold), not a
+                // distinct transaction_number count — a vendor's own tally
+                // cares about units sold, not how many carts they were part
+                // of, unlike VendorSalesOverview's bazaar-wide "Total
+                // Transaksi" stat.
                 TextColumn::make('sales_count')
-                    ->label('Jumlah Transaksi'),
+                    ->label('Jumlah Item Terjual'),
                 TextColumn::make('sales_revenue')
                     ->label('Total Pendapatan')
                     ->money('IDR', decimalPlaces: 0),
