@@ -10,6 +10,7 @@ use App\Models\Room;
 use App\Models\RoomBooking;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Filament\Widgets\WidgetConfiguration;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -61,6 +62,21 @@ class BookingRoomTest extends TestCase
         $this->actingAsEmployeeWithPermissions('View:BookingCalendar');
 
         $this->get(BookingCalendar::getUrl())->assertOk();
+    }
+
+    public function test_the_calendar_widget_does_not_reappear_on_the_dashboard(): void
+    {
+        // Regression test: discoverWidgets() auto-registers every widget
+        // class it finds under Filament/App/Widgets onto the Dashboard's
+        // widget list, regardless of what's explicitly passed to
+        // ->widgets([...]) — BookingCalendarWidget lives in that scanned
+        // directory (needed there for BookingCalendar's getHeaderWidgets()),
+        // so without $isDiscovered = false it silently reappears on the
+        // Dashboard even after being removed from ->widgets([...]).
+        $widgets = collect(Filament::getPanel('app')->getWidgets())
+            ->map(fn (string|WidgetConfiguration $widget): string => is_string($widget) ? $widget : $widget->widget);
+
+        $this->assertFalse($widgets->contains(BookingCalendarWidget::class));
     }
 
     public function test_a_user_with_no_admin_permissions_can_enter_the_panel_but_not_a_gated_resource(): void

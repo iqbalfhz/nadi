@@ -28,6 +28,13 @@ class BookingCalendarWidget extends CalendarWidget
 {
     use HasWidgetShield;
 
+    // discoverWidgets() auto-registers every widget class it finds under
+    // Filament/App/Widgets onto the Dashboard's widget list — this one is
+    // deliberately only used via BookingCalendar's getHeaderWidgets(), not
+    // the Dashboard, so it has to opt out of that auto-registration or it
+    // reappears on the Dashboard regardless of what's in ->widgets([...]).
+    protected static bool $isDiscovered = false;
+
     protected string $view = 'filament.app.widgets.booking-calendar-widget';
 
     protected CalendarViewType $calendarView = CalendarViewType::ResourceTimeGridDay;
