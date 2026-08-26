@@ -20,6 +20,15 @@ class VendorSettlementOverview extends TableWidget
     use HasWidgetShield;
 
     /**
+     * Belongs on the Bazar report pages (both panels' ListVendorSales
+     * header), not on /admin's Dashboard — settlement is a per-bazaar
+     * closing report, not a daily overview. Without this, discoverWidgets()
+     * would register it onto the Dashboard purely because the class lives in
+     * a scanned directory.
+     */
+    protected static bool $isDiscovered = false;
+
+    /**
      * /app's cashier-facing page sets this to true so the breakdown matches
      * the "Hari ini" default elsewhere on the page. Admin's page leaves this
      * false: the whole bazaar's running total per vendor is what's useful

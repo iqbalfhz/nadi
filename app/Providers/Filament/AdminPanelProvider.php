@@ -2,6 +2,14 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Dashboard;
+use App\Filament\Widgets\Dashboard\DocumentsByTypeChart;
+use App\Filament\Widgets\Dashboard\MessengerStatusChart;
+use App\Filament\Widgets\Dashboard\ModuleActivityChart;
+use App\Filament\Widgets\Dashboard\OperationalOverviewStats;
+use App\Filament\Widgets\Dashboard\QueueByCategoryChart;
+use App\Filament\Widgets\Dashboard\RevenueChart;
+use App\Filament\Widgets\Dashboard\SalesOverviewStats;
 use App\Providers\Filament\Concerns\HasNadiSidebarCustomizations;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Actions\Action;
@@ -11,13 +19,10 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Icons\Heroicon;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -45,13 +50,27 @@ class AdminPanelProvider extends PanelProvider
             ->resourceEditPageRedirect('index')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            // App\Filament\Pages\Dashboard, not Filament's own — it adds the
+            // period filter every dashboard widget reads.
             ->pages([
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+            // Listed explicitly (rather than left to discovery alone) so the
+            // dashboard's composition is readable in one place; ->widgets()
+            // and discovery are deduplicated by Filament, and the visual
+            // order comes from each widget's own $sort. Filament's stock
+            // AccountWidget/FilamentInfoWidget are deliberately gone — they
+            // showed framework branding and a logout button the user menu
+            // already provides, not information about the office.
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                OperationalOverviewStats::class,
+                SalesOverviewStats::class,
+                ModuleActivityChart::class,
+                RevenueChart::class,
+                QueueByCategoryChart::class,
+                DocumentsByTypeChart::class,
+                MessengerStatusChart::class,
             ])
             // Explicit order + icon per group, grouped in tiers: (1) the core
             // operational modules from docs/NADI.MD, in that doc's own

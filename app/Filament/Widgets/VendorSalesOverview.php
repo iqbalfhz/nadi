@@ -14,6 +14,15 @@ class VendorSalesOverview extends StatsOverviewWidget
     use HasWidgetShield;
 
     /**
+     * Belongs on the Bazar report pages (both panels' ListVendorSales
+     * header), not on /admin's Dashboard — which has its own sales cards
+     * scoped to the dashboard's period filter. Without this, discoverWidgets()
+     * would register it onto the Dashboard purely because the class lives in
+     * a scanned directory.
+     */
+    protected static bool $isDiscovered = false;
+
+    /**
      * /app's cashier-facing page sets this to true so the cards match the
      * "Hari ini" default on the table below them. Admin's page leaves this
      * false: the whole bazaar's running total is what's useful there.

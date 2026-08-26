@@ -12,6 +12,15 @@ class QueueTicketsOverview extends StatsOverviewWidget
 {
     use HasWidgetShield;
 
+    /**
+     * Belongs on the Antrian report page (ListQueueTickets' header widget),
+     * not on the dashboard. Without this, discoverWidgets() would register it
+     * onto /admin's Dashboard too, purely because the class lives inside a
+     * scanned directory — see App\Filament\App\Widgets\BookingCalendarWidget
+     * for the same opt-out.
+     */
+    protected static bool $isDiscovered = false;
+
     protected function getStats(): array
     {
         $today = QueueTicket::query()->whereDate('created_at', today());
