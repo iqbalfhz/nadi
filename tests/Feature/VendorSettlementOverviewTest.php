@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Filament\Widgets\VendorSettlementOverview;
 use App\Models\Bazaar;
 use App\Models\Vendor;
+use App\Models\VendorProduct;
 use App\Models\VendorSale;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -18,9 +19,10 @@ class VendorSettlementOverviewTest extends TestCase
     {
         $bazaar = Bazaar::factory()->create(['is_open' => true]);
         $vendor = Vendor::factory()->create(['bazaar_id' => $bazaar->id]);
+        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id]);
 
-        VendorSale::factory()->create(['bazaar_id' => $bazaar->id, 'vendor_id' => $vendor->id, 'price' => 15000]);
-        VendorSale::factory()->create(['bazaar_id' => $bazaar->id, 'vendor_id' => $vendor->id, 'price' => 25000]);
+        VendorSale::factory()->create(['bazaar_id' => $bazaar->id, 'vendor_id' => $vendor->id, 'vendor_product_id' => $product->id, 'price' => 15000]);
+        VendorSale::factory()->create(['bazaar_id' => $bazaar->id, 'vendor_id' => $vendor->id, 'vendor_product_id' => $product->id, 'price' => 25000]);
 
         Livewire::test(VendorSettlementOverview::class)
             ->assertCanSeeTableRecords([$vendor])
@@ -33,10 +35,12 @@ class VendorSettlementOverviewTest extends TestCase
         $bazaar = Bazaar::factory()->create(['is_open' => true]);
         $vendorA = Vendor::factory()->create(['bazaar_id' => $bazaar->id]);
         $vendorB = Vendor::factory()->create(['bazaar_id' => $bazaar->id]);
+        $productA = VendorProduct::factory()->create(['vendor_id' => $vendorA->id]);
+        $productB = VendorProduct::factory()->create(['vendor_id' => $vendorB->id]);
 
-        VendorSale::factory()->create(['bazaar_id' => $bazaar->id, 'vendor_id' => $vendorA->id, 'price' => 10000]);
-        VendorSale::factory()->create(['bazaar_id' => $bazaar->id, 'vendor_id' => $vendorA->id, 'price' => 10000]);
-        VendorSale::factory()->create(['bazaar_id' => $bazaar->id, 'vendor_id' => $vendorB->id, 'price' => 99000]);
+        VendorSale::factory()->create(['bazaar_id' => $bazaar->id, 'vendor_id' => $vendorA->id, 'vendor_product_id' => $productA->id, 'price' => 10000]);
+        VendorSale::factory()->create(['bazaar_id' => $bazaar->id, 'vendor_id' => $vendorA->id, 'vendor_product_id' => $productA->id, 'price' => 10000]);
+        VendorSale::factory()->create(['bazaar_id' => $bazaar->id, 'vendor_id' => $vendorB->id, 'vendor_product_id' => $productB->id, 'price' => 99000]);
 
         Livewire::test(VendorSettlementOverview::class)
             ->assertTableColumnStateSet('sales_revenue', 20000, $vendorA)
@@ -60,10 +64,12 @@ class VendorSettlementOverviewTest extends TestCase
     {
         $bazaar = Bazaar::factory()->create(['is_open' => true]);
         $vendor = Vendor::factory()->create(['bazaar_id' => $bazaar->id]);
+        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id]);
 
         VendorSale::factory()->create([
             'bazaar_id' => $bazaar->id,
             'vendor_id' => $vendor->id,
+            'vendor_product_id' => $product->id,
             'price' => 20000,
             'created_at' => now()->subDay(),
         ]);
@@ -71,6 +77,7 @@ class VendorSettlementOverviewTest extends TestCase
         VendorSale::factory()->create([
             'bazaar_id' => $bazaar->id,
             'vendor_id' => $vendor->id,
+            'vendor_product_id' => $product->id,
             'price' => 15000,
         ]);
 

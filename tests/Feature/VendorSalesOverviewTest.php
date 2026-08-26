@@ -21,14 +21,28 @@ class VendorSalesOverviewTest extends TestCase
         $openBazaar = Bazaar::factory()->create(['is_open' => true]);
         $closedBazaar = Bazaar::factory()->create(['is_open' => false]);
 
+        // vendor_id/vendor_product_id pinned to their intended bazaar — left
+        // at factory defaults, each call would spawn its own incidental
+        // Vendor/Bazaar chain (Bazaar's default is_open: true too), any of
+        // which could win the widget's own "latest open bazaar" query and
+        // make this assertion flaky.
+        $vendorInOpen = Vendor::factory()->create(['bazaar_id' => $openBazaar->id]);
+        $productInOpen = VendorProduct::factory()->create(['vendor_id' => $vendorInOpen->id]);
+        $vendorInClosed = Vendor::factory()->create(['bazaar_id' => $closedBazaar->id]);
+        $productInClosed = VendorProduct::factory()->create(['vendor_id' => $vendorInClosed->id]);
+
         VendorSale::factory()->create([
             'bazaar_id' => $openBazaar->id,
+            'vendor_id' => $vendorInOpen->id,
+            'vendor_product_id' => $productInOpen->id,
             'price' => 15000,
             'payment_method' => TicketPaymentMethod::Cash,
         ]);
 
         VendorSale::factory()->create([
             'bazaar_id' => $openBazaar->id,
+            'vendor_id' => $vendorInOpen->id,
+            'vendor_product_id' => $productInOpen->id,
             'price' => 25000,
             'payment_method' => TicketPaymentMethod::Qris,
         ]);
@@ -36,6 +50,8 @@ class VendorSalesOverviewTest extends TestCase
         // Belongs to a different (closed) bazaar — must not be counted.
         VendorSale::factory()->create([
             'bazaar_id' => $closedBazaar->id,
+            'vendor_id' => $vendorInClosed->id,
+            'vendor_product_id' => $productInClosed->id,
             'price' => 25000,
         ]);
 
@@ -100,14 +116,20 @@ class VendorSalesOverviewTest extends TestCase
     public function test_multiple_line_items_sharing_one_transaction_number_count_as_one_transaction(): void
     {
         $bazaar = Bazaar::factory()->create(['is_open' => true]);
+        $vendor = Vendor::factory()->create(['bazaar_id' => $bazaar->id]);
+        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id]);
 
         VendorSale::factory()->create([
             'bazaar_id' => $bazaar->id,
+            'vendor_id' => $vendor->id,
+            'vendor_product_id' => $product->id,
             'price' => 15000,
             'transaction_number' => 'BZR-SHARED',
         ]);
         VendorSale::factory()->create([
             'bazaar_id' => $bazaar->id,
+            'vendor_id' => $vendor->id,
+            'vendor_product_id' => $product->id,
             'price' => 25000,
             'transaction_number' => 'BZR-SHARED',
         ]);
@@ -124,15 +146,21 @@ class VendorSalesOverviewTest extends TestCase
     public function test_scope_to_today_excludes_sales_from_other_days(): void
     {
         $bazaar = Bazaar::factory()->create(['is_open' => true]);
+        $vendor = Vendor::factory()->create(['bazaar_id' => $bazaar->id]);
+        $product = VendorProduct::factory()->create(['vendor_id' => $vendor->id]);
 
         VendorSale::factory()->create([
             'bazaar_id' => $bazaar->id,
+            'vendor_id' => $vendor->id,
+            'vendor_product_id' => $product->id,
             'price' => 20000,
             'created_at' => now()->subDay(),
         ]);
 
         VendorSale::factory()->create([
             'bazaar_id' => $bazaar->id,
+            'vendor_id' => $vendor->id,
+            'vendor_product_id' => $product->id,
             'price' => 15000,
         ]);
 
