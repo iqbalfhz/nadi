@@ -10,6 +10,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -48,6 +49,20 @@ class AppPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
+            ])
+            // Same tiering as the admin panel (see AdminPanelProvider): core
+            // operational modules, then standalone POS features, then
+            // tools, then admin/meta — just scoped to whichever of those
+            // groups actually have self-service pages here. RoomBooking,
+            // Antrian, and Security have no grouped /app pages, so they
+            // aren't listed — they render as flat top-level items instead.
+            ->navigationGroups([
+                NavigationGroup::make('OB')->icon(Heroicon::OutlinedClipboardDocumentCheck),
+                NavigationGroup::make('Messenger')->icon(Heroicon::OutlinedTruck),
+                NavigationGroup::make('Tiket Event')->icon(Heroicon::OutlinedTicket),
+                NavigationGroup::make('Bazar')->icon(Heroicon::OutlinedBuildingStorefront),
+                NavigationGroup::make('Tools')->icon(Heroicon::OutlinedWrenchScrewdriver),
+                NavigationGroup::make('Filament Shield'),
             ])
             // Filament's own name/email/password page, rendered inside the panel
             // shell (not the simple centered layout) so it feels native. 2FA and
