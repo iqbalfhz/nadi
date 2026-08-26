@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\App\Widgets\BookingCalendarWidget;
+use App\Filament\App\Widgets\QuickLinksWidget;
 use App\Providers\Filament\Concerns\HasNadiSidebarCustomizations;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Actions\Action;
@@ -45,6 +46,7 @@ class AppPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/App/Widgets'), for: 'App\Filament\App\Widgets')
             ->widgets([
+                QuickLinksWidget::class,
                 BookingCalendarWidget::class,
             ])
             ->plugins([
