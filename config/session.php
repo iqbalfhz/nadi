@@ -166,10 +166,16 @@ return [
     | By setting this option to true, session cookies will only be sent back
     | to the server if the browser has a HTTPS connection. This will keep
     | the cookie from being sent to you when it can't be done securely.
+    | This defaults to true in production rather than to null: left unset,
+    | whether the cookie gets the Secure flag depends on Laravel correctly
+    | detecting HTTPS, which behind Cloudflare Tunnel depends in turn on
+    | trustProxies (see bootstrap/app.php). Production is only ever served
+    | over HTTPS, so make that explicit instead of inferred — local dev on
+    | http://nadi.test keeps it off and keeps working.
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    'secure' => env('SESSION_SECURE_COOKIE', env('APP_ENV') === 'production'),
 
     /*
     |--------------------------------------------------------------------------
