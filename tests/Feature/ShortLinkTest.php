@@ -33,15 +33,23 @@ class ShortLinkTest extends TestCase
         $this->assertSame(url("/s/{$shortLink->code}"), $shortLink->short_url);
     }
 
-    public function test_visiting_a_valid_code_redirects_to_the_target_and_records_a_click(): void
+    public function test_visiting_a_valid_code_records_a_click_and_offers_the_destination(): void
     {
         $shortLink = ShortLink::factory()->create(['target_url' => 'https://example.com/dokumen-panjang']);
 
-        $response = $this->get("/s/{$shortLink->code}");
+        // example.com isn't on the trusted list, so the destination is shown
+        // for confirmation rather than followed silently — see
+        // SecurityHardeningTest for why. The click still counts: someone did
+        // follow the link to get here.
+        $this->get("/s/{$shortLink->code}")
+            ->assertOk()
+            ->assertSee('https://example.com/dokumen-panjang');
 
-        $response->assertRedirect('https://example.com/dokumen-panjang');
         $this->assertSame(1, $shortLink->fresh()->clicks);
         $this->assertNotNull($shortLink->fresh()->last_clicked_at);
+
+        $this->get("/s/{$shortLink->code}?lanjut=1")
+            ->assertRedirect('https://example.com/dokumen-panjang');
     }
 
     public function test_visiting_an_unknown_code_returns_a_404(): void

@@ -22,6 +22,10 @@ class ShortLinkForm
                         TextInput::make('target_url')
                             ->label('URL yang mau dipendekkan')
                             ->url()
+                            // Laravel's bare "url" rule accepts any scheme,
+                            // including javascript: and data:. Pin it to the
+                            // two that make sense for a redirect target.
+                            ->rule('url:http,https')
                             ->required()
                             ->maxLength(2048)
                             ->placeholder('https://drive.google.com/...')

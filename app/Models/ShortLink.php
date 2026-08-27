@@ -30,6 +30,59 @@ class ShortLink extends Model
         });
     }
 
+    /**
+     * Whether this link may redirect straight through without showing the
+     * destination first.
+     *
+     * A short link lends this office's domain to somewhere else entirely, so
+     * an unknown destination is confirmed with whoever clicked rather than
+     * followed silently — see config/short-links.php.
+     */
+    public function hasTrustedDestination(): bool
+    {
+        $host = parse_url($this->target_url, PHP_URL_HOST);
+
+        if (! is_string($host) || $host === '') {
+            return false;
+        }
+
+        $host = strtolower($host);
+
+        $trusted = config('short-links.trusted_hosts', []);
+        $trusted = is_array($trusted) ? $trusted : [];
+
+        // The app's own domain is always trusted — a short link pointing back
+        // into NADI can't lead anywhere the person isn't already.
+        $ownHost = parse_url((string) config('app.url'), PHP_URL_HOST);
+
+        if (is_string($ownHost) && $ownHost !== '') {
+            $trusted[] = $ownHost;
+        }
+
+        foreach ($trusted as $trustedHost) {
+            $trustedHost = strtolower((string) $trustedHost);
+
+            // Suffix match on a dot boundary only, so "google.com" matches
+            // "drive.google.com" but never "google.com.attacker.test".
+            if ($host === $trustedHost || str_ends_with($host, '.'.$trustedHost)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Anything that isn't plain http/https — javascript:, data:, file: — has
+     * no business being a redirect target, whatever slipped past the form.
+     */
+    public function hasFollowableScheme(): bool
+    {
+        $scheme = parse_url($this->target_url, PHP_URL_SCHEME);
+
+        return is_string($scheme) && in_array(strtolower($scheme), ['http', 'https'], true);
+    }
+
     protected function casts(): array
     {
         return [
