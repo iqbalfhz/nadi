@@ -22,3 +22,10 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Written by Laravel Herd, which bundles its own nvm and pins each site's Node
+# version here. It records this machine's Node (23), not the project's — CI and
+# the Dockerfile both build with Node 22 — so committing it would advertise a
+# version nothing is ever tested or shipped against. Herd recreates the file
+# on its own; ignoring it just keeps it out of git status and out of commits.
+.nvmrc
