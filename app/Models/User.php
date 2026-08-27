@@ -47,7 +47,9 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
     /**
      * Every Shield permission tied to an /app module — used only to decide
      * whether a role should be let into the /app panel at all. Keep this in
-     * sync whenever a new /app resource, page, or widget is added.
+     * sync whenever a new /app resource or page is added. Widgets never
+     * belong here — they carry no permission of their own (see any widget
+     * with $isDiscovered = false for why).
      *
      * @var list<string>
      */
@@ -64,7 +66,6 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
         'View:MessengerTasks',
         'View:SellTicket',
         'View:BookingCalendar',
-        'View:BookingCalendarWidget',
         'ViewAny:ShortLink',
         'Create:ShortLink',
         'ViewAny:Barcode',
@@ -75,11 +76,9 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
 
     /**
      * Whether this user holds any permission that isn't purely /app
-     * self-service — used only to pick the post-login landing panel (see
-     * the `dashboard` route in routes/web.php), not as a real access gate.
-     * canAccessPanel('admin') can't answer this: it only checks is_active,
-     * by design every active employee may attempt /admin, whether or not
-     * they have anything to actually do there.
+     * self-service. Two jobs: it gates entry to /admin (see
+     * canAccessPanel()), and it picks the panel to land on after login (the
+     * `dashboard` route in routes/web.php).
      */
     public function hasAnyAdminPermission(): bool
     {

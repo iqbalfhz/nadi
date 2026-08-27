@@ -4,20 +4,24 @@ namespace App\Filament\Widgets;
 
 use App\Enums\QueueTicketStatus;
 use App\Models\QueueTicket;
-use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class QueueTicketsOverview extends StatsOverviewWidget
 {
-    use HasWidgetShield;
-
     /**
      * Belongs on the Antrian report page (ListQueueTickets' header widget),
      * not on the dashboard. Without this, discoverWidgets() would register it
      * onto /admin's Dashboard too, purely because the class lives inside a
      * scanned directory — see App\Filament\App\Widgets\BookingCalendarWidget
      * for the same opt-out.
+     *
+     * It also deliberately does NOT use HasWidgetShield. A permission of its
+     * own would be unreachable: Shield's role UI lists widgets from the
+     * panel's discovered set, which $isDiscovered = false removes it from, so
+     * the permission could never be granted to a new role while still being
+     * enforced. It is redundant anyway — this widget only renders inside a
+     * page that is already gated by its own permission.
      */
     protected static bool $isDiscovered = false;
 

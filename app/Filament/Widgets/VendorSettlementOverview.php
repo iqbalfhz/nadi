@@ -4,7 +4,6 @@ namespace App\Filament\Widgets;
 
 use App\Models\Bazaar;
 use App\Models\Vendor;
-use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
@@ -17,14 +16,19 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class VendorSettlementOverview extends TableWidget
 {
-    use HasWidgetShield;
-
     /**
      * Belongs on the Bazar report pages (both panels' ListVendorSales
      * header), not on /admin's Dashboard — settlement is a per-bazaar
      * closing report, not a daily overview. Without this, discoverWidgets()
      * would register it onto the Dashboard purely because the class lives in
      * a scanned directory.
+     *
+     * It also deliberately does NOT use HasWidgetShield. A permission of its
+     * own would be unreachable: Shield's role UI lists widgets from the
+     * panel's discovered set, which $isDiscovered = false removes it from, so
+     * the permission could never be granted to a new role while still being
+     * enforced. It is redundant anyway — this widget only renders inside a
+     * page that is already gated by its own permission.
      */
     protected static bool $isDiscovered = false;
 

@@ -5,7 +5,6 @@ namespace App\Filament\App\Widgets;
 use App\Models\Area;
 use App\Models\Room;
 use App\Models\RoomBooking;
-use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Closure;
@@ -26,8 +25,6 @@ use Illuminate\Support\Facades\Auth;
 
 class BookingCalendarWidget extends CalendarWidget
 {
-    use HasWidgetShield;
-
     // discoverWidgets() auto-registers every widget class it finds under
     // Filament/App/Widgets onto the Dashboard's widget list — this one is
     // deliberately only used via BookingCalendar's getHeaderWidgets(), not

@@ -166,7 +166,7 @@ class BookingRoomTest extends TestCase
 
     public function test_an_employee_can_create_a_booking_through_the_calendar_widget_action(): void
     {
-        $user = $this->actingAsEmployeeWithPermissions(['View:BookingCalendarWidget', 'Create:RoomBooking']);
+        $user = $this->actingAsEmployeeWithPermissions(['View:BookingCalendar', 'Create:RoomBooking']);
         $room = Room::factory()->create();
 
         Livewire::actingAs($user)
@@ -190,7 +190,7 @@ class BookingRoomTest extends TestCase
 
     public function test_the_calendar_widget_action_rejects_an_overlapping_booking(): void
     {
-        $user = $this->actingAsEmployeeWithPermissions(['View:BookingCalendarWidget', 'Create:RoomBooking']);
+        $user = $this->actingAsEmployeeWithPermissions(['View:BookingCalendar', 'Create:RoomBooking']);
         $room = Room::factory()->create();
 
         RoomBooking::factory()->create([
@@ -218,7 +218,7 @@ class BookingRoomTest extends TestCase
 
     public function test_the_calendar_widget_defaults_to_a_daily_view_starting_at_7am(): void
     {
-        $user = $this->actingAsEmployeeWithPermissions('View:BookingCalendarWidget');
+        $user = $this->actingAsEmployeeWithPermissions('View:BookingCalendar');
 
         $component = Livewire::actingAs($user)->test(BookingCalendarWidget::class);
 
@@ -233,7 +233,7 @@ class BookingRoomTest extends TestCase
     public function test_the_widget_renders_the_area_filter_and_mini_calendar(): void
     {
         $area = Area::factory()->create(['name' => 'Basement 2']);
-        $user = $this->actingAsEmployeeWithPermissions('View:BookingCalendarWidget');
+        $user = $this->actingAsEmployeeWithPermissions('View:BookingCalendar');
 
         Livewire::actingAs($user)
             ->test(BookingCalendarWidget::class)
@@ -250,7 +250,7 @@ class BookingRoomTest extends TestCase
         $roomA = Room::factory()->create(['area_id' => $areaA->id]);
         $roomB = Room::factory()->create(['area_id' => $areaB->id]);
 
-        $user = $this->actingAsEmployeeWithPermissions('View:BookingCalendarWidget');
+        $user = $this->actingAsEmployeeWithPermissions('View:BookingCalendar');
 
         $component = Livewire::actingAs($user)
             ->test(BookingCalendarWidget::class)
@@ -265,7 +265,7 @@ class BookingRoomTest extends TestCase
 
     public function test_mini_calendar_builds_full_weeks_covering_the_selected_month(): void
     {
-        $user = $this->actingAsEmployeeWithPermissions('View:BookingCalendarWidget');
+        $user = $this->actingAsEmployeeWithPermissions('View:BookingCalendar');
 
         $component = Livewire::actingAs($user)
             ->test(BookingCalendarWidget::class)
@@ -284,7 +284,7 @@ class BookingRoomTest extends TestCase
 
     public function test_a_single_click_on_a_date_cell_prefills_and_creates_a_booking(): void
     {
-        $user = $this->actingAsEmployeeWithPermissions(['View:BookingCalendarWidget', 'Create:RoomBooking']);
+        $user = $this->actingAsEmployeeWithPermissions(['View:BookingCalendar', 'Create:RoomBooking']);
         $room = Room::factory()->create();
 
         Livewire::actingAs($user)
