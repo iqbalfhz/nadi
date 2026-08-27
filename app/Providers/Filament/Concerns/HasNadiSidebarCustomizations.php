@@ -43,6 +43,14 @@ trait HasNadiSidebarCustomizations
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn (): string => '<script src="'.e(asset('js/nadi-sidebar-accordion.js')).'" defer></script>',
+            )
+            // Developer credit, pinned under the navigation in both panels —
+            // visible without competing with the menu, and the one place in
+            // the app where it belongs. Icons are inlined rather than pulled
+            // from an icon set so this costs no extra request.
+            ->renderHook(
+                PanelsRenderHook::SIDEBAR_FOOTER,
+                fn (): string => view('filament.partials.sidebar-credit')->render(),
             );
     }
 }

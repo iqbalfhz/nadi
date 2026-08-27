@@ -55,3 +55,70 @@ html.dark .nadi-sidebar-toggle:hover {
         display: flex;
     }
 }
+
+/* Credit + social links pinned to the bottom of the sidebar (rendered via
+   PanelsRenderHook::SIDEBAR_FOOTER). Plain CSS rather than Tailwind for the
+   same reason as the toggle above: the admin panel has no Vite theme of its
+   own, so utility classes written here would never get compiled. */
+
+.nadi-sidebar-credit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 0.75rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.nadi-sidebar-credit-label {
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    color: #9ca3af;
+    text-align: center;
+}
+
+.nadi-sidebar-credit-links {
+    display: flex;
+    gap: 0.375rem;
+}
+
+.nadi-sidebar-credit-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.875rem;
+    height: 1.875rem;
+    border-radius: 9999px;
+    color: #9ca3af;
+    transition:
+        color 0.15s ease,
+        background-color 0.15s ease;
+}
+
+.nadi-sidebar-credit-links a:hover {
+    color: #b45309;
+    background-color: rgba(245, 158, 11, 0.12);
+}
+
+.nadi-sidebar-credit-links svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+html.dark .nadi-sidebar-credit {
+    border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+html.dark .nadi-sidebar-credit-links a:hover {
+    color: #fbbf24;
+}
+
+/* Collapsed sidebar is barely wider than the icons, so the wording would
+   wrap into an unreadable column — keep just the icons, stacked. */
+.fi-sidebar:not(.fi-sidebar-open) .nadi-sidebar-credit-label {
+    display: none;
+}
+
+.fi-sidebar:not(.fi-sidebar-open) .nadi-sidebar-credit-links {
+    flex-direction: column;
+}
