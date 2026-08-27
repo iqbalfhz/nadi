@@ -19,6 +19,12 @@ if [ "$RUN_SETUP" = "true" ]; then
     php artisan route:cache
     php artisan view:cache
     php artisan event:cache
+    # Without this, Filament re-discovers every resource, page and widget by
+    # walking app/Filament (160+ files, across both panels) on every single
+    # request. Safe to cache here because each deploy is a fresh container,
+    # so this always rebuilds — never run it on a dev machine, where a stale
+    # cache hides newly added or removed components.
+    php artisan filament:optimize
 fi
 
 exec "$@"

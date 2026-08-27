@@ -68,7 +68,15 @@ RUN install-php-extensions \
     intl \
     bcmath \
     opcache \
-    pcntl
+    pcntl \
+    redis
+
+# The official PHP image (which dunglas/frankenphp builds on) ships
+# php.ini-production but leaves no php.ini in place, so PHP falls back to its
+# compiled-in defaults — 2MB uploads, 128M memory, unconfigured OPcache.
+# Activate that production baseline, then layer this app's overrides on top.
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY deploy/php.ini /usr/local/etc/php/conf.d/zz-nadi.ini
 
 WORKDIR /app
 

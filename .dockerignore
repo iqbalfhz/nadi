@@ -25,3 +25,11 @@ tests
 .phpunit.result.cache
 Dockerfile
 docker-compose.yml
+
+# Never bake a locally generated bootstrap cache into the image. entrypoint.sh
+# rebuilds config/route/view/event/Filament caches at container start anyway,
+# and a stale bootstrap/cache/filament/ copied in from a developer machine
+# would silently pin the panel's resources and widgets to whatever that machine
+# had at the time.
+bootstrap/cache/*
+!bootstrap/cache/.gitignore
