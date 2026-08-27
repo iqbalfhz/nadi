@@ -104,18 +104,25 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
     /**
      * Determine whether the user can access the given Filament panel.
      *
-     * The /admin panel is for admin/HR staff (see docs/NADI.MD) — entry is
-     * only gated by is_active; which resources/pages/widgets are actually
-     * visible inside is controlled entirely by each one's Shield-generated
-     * policy. /app is self-service, used daily by every regular employee,
-     * so a misconfigured role should get a clear "no access" instead of a
-     * confusing empty dashboard — entry there additionally requires holding
-     * at least one permission relevant to an /app module.
+     * Both panels require holding a permission that actually belongs to
+     * them, so a misconfigured role gets a clear "no access" rather than a
+     * confusing half-empty panel.
+     *
+     * For /admin that isn't only about tidiness. Several permissions are
+     * shared between the two panels by necessity — an employee needs
+     * ViewAny:RoomBooking to see their *own* bookings in /app — but the
+     * matching /admin resource is deliberately unscoped, listing everyone's
+     * records. Gating entry on is_active alone therefore handed every
+     * employee the company-wide view of room bookings, OB checklists (and
+     * their photos), courier deliveries, short links and barcodes, since
+     * their own /app permission satisfied the resource policy on the way in.
+     * hasAnyAdminPermission() is what separates the two populations: it
+     * ignores anything in APP_PANEL_PERMISSIONS.
      */
     public function canAccessPanel(Panel $panel): bool
     {
         return match ($panel->getId()) {
-            'admin' => $this->is_active,
+            'admin' => $this->is_active && $this->hasAnyAdminPermission(),
             'app' => $this->is_active && $this->hasAnyPermission(self::APP_PANEL_PERMISSIONS),
             default => false,
         };

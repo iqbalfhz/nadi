@@ -79,17 +79,51 @@ class BookingRoomTest extends TestCase
         $this->assertFalse($widgets->contains(BookingCalendarWidget::class));
     }
 
-    public function test_a_user_with_no_admin_permissions_can_enter_the_panel_but_not_a_gated_resource(): void
+    public function test_a_user_with_no_admin_permissions_is_refused_at_the_panel_door(): void
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get('/admin');
-        $response->assertOk();
+        $this->actingAs($user)->get('/admin')->assertForbidden();
+    }
 
-        // Panel entry is only gated by is_active — each resource's own
-        // Shield policy is what actually restricts what's visible/usable.
-        $response = $this->actingAs($user)->get(AreaResource::getUrl('index'));
-        $response->assertForbidden();
+    /**
+     * The exposure this closes: an employee needs ViewAny:RoomBooking to see
+     * their *own* bookings in /app, and that same permission satisfies the
+     * policy on /admin's booking list — which is deliberately unscoped and
+     * shows the whole company's. The same pairing exists for OB checklists
+     * (and their photos), courier deliveries, short links and barcodes, so
+     * the gate has to be at the panel door rather than per resource.
+     */
+    public function test_an_app_only_employee_cannot_reach_the_company_wide_lists(): void
+    {
+        $someoneElse = User::factory()->create();
+        $room = Room::factory()->create();
+
+        RoomBooking::factory()->create([
+            'room_id' => $room->id,
+            'user_id' => $someoneElse->id,
+            'title' => 'Rapat Direksi',
+            'starts_at' => '2026-09-01 10:00:00',
+            'ends_at' => '2026-09-01 11:00:00',
+        ]);
+
+        // Exactly what a regular employee holds so /app works for them.
+        $this->actingAsEmployeeWithPermissions(['ViewAny:RoomBooking', 'Create:RoomBooking']);
+
+        $this->get('/admin')->assertForbidden();
+        $this->get('/admin/room-bookings')->assertForbidden();
+        $this->get('/admin/ob-checklists')->assertForbidden();
+
+        // ...while their own panel still works.
+        $this->get('/app')->assertOk();
+    }
+
+    public function test_an_admin_permission_is_enough_to_enter_but_still_gates_each_resource(): void
+    {
+        $this->actingAsEmployeeWithPermissions('ViewAny:Document');
+
+        $this->get('/admin')->assertOk();
+        $this->get(AreaResource::getUrl('index'))->assertForbidden();
     }
 
     public function test_super_admins_can_access_the_admin_panel(): void
