@@ -24,6 +24,7 @@
         "masbug/flysystem-google-drive-ext": "*",
         "picqer/php-barcode-generator": "*",
         "pxlrbt/filament-excel": "*",
+        "spatie/laravel-activitylog": "*",
         "spatie/laravel-backup": "*"
     },
     "require-dev": {

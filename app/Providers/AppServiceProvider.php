@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\LogAccessActivity;
 use App\Settings\BackupSettings;
 use Carbon\CarbonImmutable;
 use Google\Client as GoogleClient;
@@ -9,12 +10,14 @@ use Google\Service\Drive as GoogleDrive;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use League\Flysystem\Filesystem;
 use Masbug\Flysystem\GoogleDriveAdapter;
+use Spatie\Activitylog\Models\Activity;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configureGoogleDriveDisk();
+        $this->configureActivityLog();
     }
 
     /**
@@ -60,6 +64,33 @@ class AppServiceProvider extends ServiceProvider
             );
 
             return new FilesystemAdapter(new Filesystem($adapter), $adapter);
+        });
+    }
+
+    /**
+     * Wires up the Riwayat Aktivitas feature.
+     *
+     * Model edits log themselves through App\Concerns\LogsNadiActivity. The
+     * two things that can't work that way are handled here: access events
+     * (logins, role grants) have no model event to hang off, and the client
+     * IP has to be stamped onto every entry regardless of where it came
+     * from — an audit trail that can't say *from where* is half a trail.
+     */
+    protected function configureActivityLog(): void
+    {
+        Event::subscribe(LogAccessActivity::class);
+
+        Activity::creating(function (Activity $activity): void {
+            // Console runs (scheduler, seeders, artisan) have no request and
+            // so no meaningful IP — leave it off rather than record a
+            // misleading one.
+            if (app()->runningInConsole()) {
+                return;
+            }
+
+            $properties = $activity->properties ?? collect();
+
+            $activity->properties = $properties->put('ip', request()->ip());
         });
     }
 

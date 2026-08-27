@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use Database\Factories\AdvertisementFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,12 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class Advertisement extends Model implements HasMedia
 {
     /** @use HasFactory<AdvertisementFactory> */
-    use HasFactory, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, LogsNadiActivity;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Iklan Layar';
+    }
 
     protected function casts(): array
     {

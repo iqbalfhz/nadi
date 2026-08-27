@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use App\Enums\MessengerDeliveryStatus;
 use Database\Factories\MessengerDeliveryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -25,7 +26,12 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class MessengerDelivery extends Model implements HasMedia
 {
     /** @use HasFactory<MessengerDeliveryFactory> */
-    use HasFactory, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, LogsNadiActivity;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Pengiriman Dokumen';
+    }
 
     protected static function booted(): void
     {

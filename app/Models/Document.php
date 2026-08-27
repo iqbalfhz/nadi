@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use Database\Factories\DocumentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -14,7 +15,12 @@ use Illuminate\Support\Facades\DB;
 class Document extends Model
 {
     /** @use HasFactory<DocumentFactory> */
-    use HasFactory;
+    use HasFactory, LogsNadiActivity;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Dokumen';
+    }
 
     /**
      * @return BelongsTo<DocumentType, $this>

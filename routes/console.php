@@ -35,3 +35,10 @@ Schedule::command('backup:monitor')
     ->at('03:00')
     ->when(fn (): bool => app(BackupSettings::class)->enabled)
     ->onOneServer();
+
+// Retention for Riwayat Aktivitas — 365 days, set in config/activitylog.php.
+// Without this the log is the one table in NADI that only ever grows.
+Schedule::command('activitylog:clean')
+    ->daily()
+    ->at('04:00')
+    ->onOneServer();

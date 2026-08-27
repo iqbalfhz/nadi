@@ -134,9 +134,12 @@ return [
      * \Spatie\Permission\Events\PermissionAttachedEvent
      * \Spatie\Permission\Events\PermissionDetachedEvent
      *
-     * To enable, set to true, and then create listeners to watch these events.
+     * Enabled because App\Listeners\LogAccessActivity listens for all four:
+     * granting or revoking access is exactly the kind of change Riwayat
+     * Aktivitas exists to record, and it happens on a pivot table, so no
+     * model event would ever see it.
      */
-    'events_enabled' => false,
+    'events_enabled' => true,
 
     /*
      * Teams Feature.

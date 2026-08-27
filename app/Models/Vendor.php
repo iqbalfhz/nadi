@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use Database\Factories\VendorFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Vendor extends Model
 {
     /** @use HasFactory<VendorFactory> */
-    use HasFactory;
+    use HasFactory, LogsNadiActivity;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Kios';
+    }
 
     /**
      * @return BelongsTo<Bazaar, $this>

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Concerns\LogsSettingsChanges;
 use App\Settings\QueueKioskSettings;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
@@ -15,7 +16,12 @@ use UnitEnum;
 
 class ManageQueueKioskSettings extends SettingsPage
 {
-    use HasPageShield;
+    use HasPageShield, LogsSettingsChanges;
+
+    public static function getSettingsLabel(): string
+    {
+        return 'Pengaturan Kiosk Antrian';
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
 

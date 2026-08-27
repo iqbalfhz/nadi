@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use Carbon\CarbonInterface;
 use Database\Factories\RoomBookingFactory;
 use Guava\Calendar\Contracts\Eventable;
@@ -16,7 +17,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class RoomBooking extends Model implements Eventable
 {
     /** @use HasFactory<RoomBookingFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, LogsNadiActivity, SoftDeletes;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Booking Ruangan';
+    }
 
     protected function casts(): array
     {

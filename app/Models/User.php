@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
@@ -42,7 +43,12 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+    use HasFactory, HasRoles, LogsNadiActivity, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Pengguna';
+    }
 
     /**
      * Every Shield permission tied to an /app module — used only to decide

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use App\Enums\TicketPaymentMethod;
 use Database\Factories\TicketFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -19,7 +20,20 @@ use RuntimeException;
 class Ticket extends Model
 {
     /** @use HasFactory<TicketFactory> */
-    use HasFactory;
+    use HasFactory, LogsNadiActivity;
+
+    /**
+     * Written many times a day, and each row already records who created it
+     * and when — logging creation again would bury the edits worth reading.
+     *
+     * @var array<int, string>
+     */
+    protected static array $recordEvents = ['updated', 'deleted'];
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Tiket Event';
+    }
 
     protected static function booted(): void
     {

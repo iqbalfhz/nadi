@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use Database\Factories\ShortLinkFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -15,7 +16,12 @@ use Illuminate\Support\Str;
 class ShortLink extends Model
 {
     /** @use HasFactory<ShortLinkFactory> */
-    use HasFactory;
+    use HasFactory, LogsNadiActivity;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Short Link';
+    }
 
     protected static function booted(): void
     {

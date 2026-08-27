@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use Database\Factories\SecurityCheckpointFactory;
 use Endroid\QrCode\Builder\Builder;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -16,7 +17,12 @@ use Illuminate\Support\Str;
 class SecurityCheckpoint extends Model
 {
     /** @use HasFactory<SecurityCheckpointFactory> */
-    use HasFactory;
+    use HasFactory, LogsNadiActivity;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Titik Patroli';
+    }
 
     protected static function booted(): void
     {

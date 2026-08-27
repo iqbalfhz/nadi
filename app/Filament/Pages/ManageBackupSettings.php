@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Concerns\LogsSettingsChanges;
 use App\Settings\BackupSettings;
 use App\Support\BackupDrive;
 use BackedEnum;
@@ -21,7 +22,12 @@ use UnitEnum;
 
 class ManageBackupSettings extends SettingsPage
 {
-    use HasPageShield;
+    use HasPageShield, LogsSettingsChanges;
+
+    public static function getSettingsLabel(): string
+    {
+        return 'Pengaturan Backup Penomoran Dokumen';
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCircleStack;
 

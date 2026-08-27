@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use Database\Factories\DocumentTypeFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class DocumentType extends Model
 {
     /** @use HasFactory<DocumentTypeFactory> */
-    use HasFactory;
+    use HasFactory, LogsNadiActivity;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Jenis Dokumen';
+    }
 
     protected function casts(): array
     {

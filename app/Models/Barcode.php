@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use App\Enums\BarcodeFormat;
 use Database\Factories\BarcodeFactory;
 use Endroid\QrCode\Builder\Builder;
@@ -19,7 +20,12 @@ use Picqer\Barcode\BarcodeGeneratorPNG;
 class Barcode extends Model
 {
     /** @use HasFactory<BarcodeFactory> */
-    use HasFactory;
+    use HasFactory, LogsNadiActivity;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Barcode';
+    }
 
     protected function casts(): array
     {

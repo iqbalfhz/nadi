@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use Database\Factories\SecurityPatrolFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,12 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class SecurityPatrol extends Model implements HasMedia
 {
     /** @use HasFactory<SecurityPatrolFactory> */
-    use HasFactory, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, LogsNadiActivity;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Patroli Security';
+    }
 
     public function registerMediaCollections(): void
     {

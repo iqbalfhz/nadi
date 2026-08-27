@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use App\Enums\QueueTicketStatus;
 use Database\Factories\QueueCategoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -14,7 +15,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class QueueCategory extends Model
 {
     /** @use HasFactory<QueueCategoryFactory> */
-    use HasFactory;
+    use HasFactory, LogsNadiActivity;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Loket Antrian';
+    }
 
     protected function casts(): array
     {

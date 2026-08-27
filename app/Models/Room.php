@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use Database\Factories\RoomFactory;
 use Guava\Calendar\Contracts\Resourceable;
 use Guava\Calendar\ValueObjects\CalendarResource;
@@ -15,7 +16,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Room extends Model implements Resourceable
 {
     /** @use HasFactory<RoomFactory> */
-    use HasFactory;
+    use HasFactory, LogsNadiActivity;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Ruangan';
+    }
 
     /**
      * @return BelongsTo<Area, $this>

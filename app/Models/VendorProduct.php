@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsNadiActivity;
 use App\Enums\PricingUnit;
 use Database\Factories\VendorProductFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -17,7 +18,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class VendorProduct extends Model
 {
     /** @use HasFactory<VendorProductFactory> */
-    use HasFactory;
+    use HasFactory, LogsNadiActivity;
+
+    public static function activitySubjectLabel(): string
+    {
+        return 'Produk Kios';
+    }
 
     protected function casts(): array
     {
