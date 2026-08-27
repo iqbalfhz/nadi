@@ -29,17 +29,29 @@
         </x-filament::section>
     @else
         <x-filament::section>
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col gap-2">
-                    <label class="text-sm font-medium">Jenis</label>
-                    <x-filament::input.wrapper>
-                        <x-filament::input.select wire:model.live="format">
-                            <option value="">— Pilih jenis —</option>
-                            @foreach ($this->formats as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
-                        </x-filament::input.select>
-                    </x-filament::input.wrapper>
+            <div class="flex flex-col gap-6">
+                {{-- Jenis and Label pair up on a desktop; Konten keeps the full
+                row since a URL or long code needs the room. Everything stacks
+                again below sm. --}}
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">Jenis</label>
+                        <x-filament::input.wrapper>
+                            <x-filament::input.select wire:model.live="format">
+                                <option value="">— Pilih jenis —</option>
+                                @foreach ($this->formats as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </x-filament::input.select>
+                        </x-filament::input.wrapper>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">Label (opsional)</label>
+                        <x-filament::input.wrapper>
+                            <x-filament::input type="text" wire:model.live="label" placeholder="Nama untuk memudahkan cari lagi nanti" />
+                        </x-filament::input.wrapper>
+                    </div>
                 </div>
 
                 <div class="flex flex-col gap-2">
@@ -56,15 +68,8 @@
                     </p>
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <label class="text-sm font-medium">Label (opsional)</label>
-                    <x-filament::input.wrapper>
-                        <x-filament::input type="text" wire:model.live="label" placeholder="Nama untuk memudahkan cari lagi nanti" />
-                    </x-filament::input.wrapper>
-                </div>
-
-                <div>
-                    <x-filament::button wire:click="generate">
+                <div class="flex justify-end border-t border-gray-100 pt-4 dark:border-white/10">
+                    <x-filament::button size="lg" wire:click="generate">
                         Generate
                     </x-filament::button>
                 </div>

@@ -11,6 +11,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -36,35 +37,50 @@ class ManageBackupSettings extends SettingsPage
     {
         return $schema
             ->components([
-                Toggle::make('enabled')
-                    ->label('Backup Otomatis Aktif')
-                    ->helperText('Hanya mencadangkan data modul Penomoran Dokumen (jenis dokumen, PT, departemen, dokumen) — bukan seluruh fitur NADI. Kalau nonaktif, jadwal backup harian tetap ada tapi tidak akan benar-benar jalan.')
-                    ->live()
-                    ->columnSpanFull(),
-                TextInput::make('notify_email')
-                    ->label('Email Google Drive & Notifikasi')
-                    ->helperText('Akun Google Drive tujuan backup, sekaligus alamat yang menerima notifikasi kalau backup gagal.')
-                    ->email()
-                    ->required(fn (Get $get): bool => (bool) $get('enabled'))
-                    ->columnSpanFull(),
-                TextInput::make('client_id')
-                    ->label('Google Client ID')
-                    ->required(fn (Get $get): bool => (bool) $get('enabled')),
-                TextInput::make('client_secret')
-                    ->label('Google Client Secret')
-                    ->password()
-                    ->revealable()
-                    ->required(fn (Get $get): bool => (bool) $get('enabled')),
-                TextInput::make('refresh_token')
-                    ->label('Google Refresh Token')
-                    ->password()
-                    ->revealable()
-                    ->required(fn (Get $get): bool => (bool) $get('enabled'))
-                    ->columnSpanFull(),
-                TextInput::make('folder')
-                    ->label('Folder di Google Drive')
-                    ->helperText('Dibuat otomatis kalau belum ada. Kosongkan untuk simpan langsung di folder utama (root) Drive.')
-                    ->columnSpanFull(),
+                Section::make('Backup Otomatis')
+                    ->description('Berjalan tiap hari lewat scheduler. Hanya modul Penomoran Dokumen yang dicadangkan — bukan seluruh data NADI.')
+                    ->icon(Heroicon::OutlinedCircleStack)
+                    ->columnSpanFull()
+                    ->schema([
+                        Toggle::make('enabled')
+                            ->label('Backup Otomatis Aktif')
+                            ->helperText('Hanya mencadangkan data modul Penomoran Dokumen (jenis dokumen, PT, departemen, dokumen) — bukan seluruh fitur NADI. Kalau nonaktif, jadwal backup harian tetap ada tapi tidak akan benar-benar jalan.')
+                            ->live()
+                            ->columnSpanFull(),
+                        TextInput::make('notify_email')
+                            ->label('Email Google Drive & Notifikasi')
+                            ->helperText('Akun Google Drive tujuan backup, sekaligus alamat yang menerima notifikasi kalau backup gagal.')
+                            ->email()
+                            ->required(fn (Get $get): bool => (bool) $get('enabled'))
+                            ->columnSpanFull(),
+                        TextInput::make('folder')
+                            ->label('Folder di Google Drive')
+                            ->helperText('Dibuat otomatis kalau belum ada. Kosongkan untuk simpan langsung di folder utama (root) Drive.')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Kredensial Google Drive')
+                    ->description('Diambil dari Google Cloud Console. Disimpan di database, bukan di .env, supaya bisa diganti tanpa deploy ulang.')
+                    ->icon(Heroicon::OutlinedKey)
+                    ->columnSpanFull()
+                    ->columns(2)
+                    ->collapsible()
+                    ->schema([
+                        TextInput::make('client_id')
+                            ->label('Google Client ID')
+                            ->required(fn (Get $get): bool => (bool) $get('enabled')),
+                        TextInput::make('client_secret')
+                            ->label('Google Client Secret')
+                            ->password()
+                            ->revealable()
+                            ->required(fn (Get $get): bool => (bool) $get('enabled')),
+                        TextInput::make('refresh_token')
+                            ->label('Google Refresh Token')
+                            ->password()
+                            ->revealable()
+                            ->required(fn (Get $get): bool => (bool) $get('enabled'))
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 

@@ -7,7 +7,9 @@ use App\Models\Department;
 use App\Models\DocumentType;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class DocumentForm
 {
@@ -15,26 +17,34 @@ class DocumentForm
     {
         return $schema
             ->components([
-                Select::make('document_type_id')
-                    ->label('Jenis Dokumen')
-                    ->options(fn () => DocumentType::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id'))
-                    ->required()
-                    ->searchable(),
-                Select::make('company_id')
-                    ->label('PT')
-                    ->options(fn () => Company::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id'))
-                    ->required()
-                    ->searchable(),
-                Select::make('department_id')
-                    ->label('Departemen')
-                    ->options(fn () => Department::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id'))
-                    ->required()
-                    ->searchable(),
-                Textarea::make('subject')
-                    ->label('Perihal')
-                    ->required()
-                    ->maxLength(255)
-                    ->columnSpanFull(),
+                Section::make('Data Dokumen')
+                    ->description('Nomor urut dibuat otomatis dari jenis dokumen + PT, dan direset tiap bulan.')
+                    ->icon(Heroicon::OutlinedDocumentDuplicate)
+                    ->columnSpanFull()
+                    ->columns(3)
+                    ->schema([
+                        Select::make('document_type_id')
+                            ->label('Jenis Dokumen')
+                            ->options(fn () => DocumentType::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id'))
+                            ->required()
+                            ->searchable(),
+                        Select::make('company_id')
+                            ->label('PT')
+                            ->options(fn () => Company::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id'))
+                            ->required()
+                            ->searchable(),
+                        Select::make('department_id')
+                            ->label('Departemen')
+                            ->options(fn () => Department::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id'))
+                            ->required()
+                            ->searchable(),
+                        Textarea::make('subject')
+                            ->label('Perihal')
+                            ->required()
+                            ->maxLength(255)
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 }

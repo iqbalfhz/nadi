@@ -60,65 +60,70 @@
         </x-filament::section>
     @else
         <x-filament::section>
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col gap-2">
-                    <label class="text-sm font-medium">Event</label>
-                    <x-filament::input.wrapper>
-                        <x-filament::input.select wire:model.live="eventId">
-                            <option value="">— Pilih event —</option>
-                            @foreach ($this->openEvents as $event)
-                                <option value="{{ $event->id }}">{{ $event->name }}</option>
-                            @endforeach
-                        </x-filament::input.select>
-                    </x-filament::input.wrapper>
-
-                    @if ($this->selectedEvent)
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Reguler Rp {{ number_format($this->selectedEvent->regular_price, 0, ',', '.') }} —
-                            Member Rp {{ number_format($this->selectedEvent->member_price, 0, ',', '.') }}
-                        </p>
-                    @endif
-                </div>
-
-                <div class="flex flex-col gap-2">
-                    <label class="text-sm font-medium">Nama Pembeli</label>
-                    <x-filament::input.wrapper>
-                        <x-filament::input type="text" wire:model.live="buyerName" placeholder="Nama pembeli" />
-                    </x-filament::input.wrapper>
-                </div>
-
-                <label class="flex items-center gap-2">
-                    <x-filament::input.checkbox wire:model.live="isMember" />
-                    <span class="text-sm font-medium">Member</span>
-                </label>
-
-                @if ($isMember)
+            <div class="flex flex-col gap-6">
+                {{-- Two columns from sm up: on a desktop these fields used to
+                run one per row at full page width, leaving most of the screen
+                empty. Still stacks on the phone or tablet a cashier actually
+                works from. --}}
+                <div class="grid gap-4 sm:grid-cols-2">
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium">Barcode Member</label>
+                        <label class="text-sm font-medium">Event</label>
                         <x-filament::input.wrapper>
-                            <x-filament::input
-                                type="text"
-                                wire:model.live="memberReference"
-                                placeholder="Scan atau ketik barcode member"
-                            />
+                            <x-filament::input.select wire:model.live="eventId">
+                                <option value="">— Pilih event —</option>
+                                @foreach ($this->openEvents as $event)
+                                    <option value="{{ $event->id }}">{{ $event->name }}</option>
+                                @endforeach
+                            </x-filament::input.select>
+                        </x-filament::input.wrapper>
+
+                        @if ($this->selectedEvent)
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Reguler Rp {{ number_format($this->selectedEvent->regular_price, 0, ',', '.') }} —
+                                Member Rp {{ number_format($this->selectedEvent->member_price, 0, ',', '.') }}
+                            </p>
+                        @endif
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">Nama Pembeli</label>
+                        <x-filament::input.wrapper>
+                            <x-filament::input type="text" wire:model.live="buyerName" placeholder="Nama pembeli" />
                         </x-filament::input.wrapper>
                     </div>
-                @endif
 
-                <div class="flex flex-col gap-2">
-                    <label class="text-sm font-medium">Metode Pembayaran</label>
-                    <x-filament::input.wrapper>
-                        <x-filament::input.select wire:model.live="paymentMethod">
-                            <option value="">— Pilih metode —</option>
-                            @foreach ($this->paymentMethods as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
-                        </x-filament::input.select>
-                    </x-filament::input.wrapper>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">Metode Pembayaran</label>
+                        <x-filament::input.wrapper>
+                            <x-filament::input.select wire:model.live="paymentMethod">
+                                <option value="">— Pilih metode —</option>
+                                @foreach ($this->paymentMethods as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </x-filament::input.select>
+                        </x-filament::input.wrapper>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="flex items-center gap-2">
+                            <x-filament::input.checkbox wire:model.live="isMember" />
+                            <span class="text-sm font-medium">Member</span>
+                        </label>
+
+                        @if ($isMember)
+                            <x-filament::input.wrapper>
+                                <x-filament::input
+                                    type="text"
+                                    wire:model.live="memberReference"
+                                    placeholder="Scan atau ketik barcode member"
+                                />
+                            </x-filament::input.wrapper>
+                        @endif
+                    </div>
                 </div>
 
-                <div>
-                    <x-filament::button wire:click="sell">
+                <div class="flex justify-end border-t border-gray-100 pt-4 dark:border-white/10">
+                    <x-filament::button size="lg" wire:click="sell">
                         Bayar &amp; Cetak
                     </x-filament::button>
                 </div>

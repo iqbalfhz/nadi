@@ -4,7 +4,9 @@ namespace App\Filament\Resources\SecurityCheckpoints\Schemas;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class SecurityCheckpointForm
 {
@@ -12,14 +14,22 @@ class SecurityCheckpointForm
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->label('Nama Titik Patroli')
-                    ->required()
-                    ->maxLength(255),
-                Toggle::make('is_active')
-                    ->label('Aktif')
-                    ->helperText('Nonaktifkan kalau titik ini sudah tidak dipakai — kode QR yang lama tidak akan bisa dipakai lagi.')
-                    ->default(true),
+                Section::make('Titik Patroli')
+                    ->description('Tiap titik punya kode QR sendiri yang ditempel di lokasi dan discan security saat patroli.')
+                    ->icon(Heroicon::OutlinedShieldCheck)
+                    ->columnSpanFull()
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Nama Titik Patroli')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                        Toggle::make('is_active')
+                            ->label('Aktif')
+                            ->helperText('Nonaktifkan kalau titik ini sudah tidak dipakai — kode QR yang lama tidak akan bisa dipakai lagi.')
+                            ->default(true)
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 }
