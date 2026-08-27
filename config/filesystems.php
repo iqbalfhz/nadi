@@ -47,6 +47,31 @@ return [
             'report' => false,
         ],
 
+        /*
+         * Operational photos that are evidence, not content: OB cleaning
+         * checklists, security patrol and incident photos, courier
+         * proof-of-delivery. These used to sit on the 'public' disk, which
+         * publishes them at /storage/{media_id}/{file} with no login at all —
+         * and media IDs run sequentially, so the whole archive was walkable by
+         * anyone who found one.
+         *
+         * 'serve' => true makes Laravel hand these out through a signed,
+         * expiring route instead (Illuminate\Filesystem\ServeFile), which also
+         * blocks path traversal and sends no-store + a locked-down CSP. The
+         * URL path is deliberately NOT /storage: that one is taken by the
+         * public symlink, which the web server answers before PHP ever sees
+         * the request.
+         */
+        'internal' => [
+            'driver' => 'local',
+            'root' => storage_path('app/internal'),
+            'url' => rtrim((string) env('APP_URL', 'http://localhost'), '/').'/internal-media',
+            'visibility' => 'private',
+            'serve' => true,
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

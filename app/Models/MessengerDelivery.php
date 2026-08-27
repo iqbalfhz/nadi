@@ -48,7 +48,10 @@ class MessengerDelivery extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('proof')
-            ->useDisk('public')
+            // 'internal', not 'public': these are evidence photos, and the
+            // public disk publishes them at a guessable /storage/{id}/ URL
+            // with no login. See config/filesystems.php.
+            ->useDisk('internal')
             ->singleFile()
             ->acceptsMimeTypes([
                 'image/jpeg',

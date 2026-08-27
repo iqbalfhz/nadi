@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SecurityPatrols\Tables;
 
+use App\Filament\Actions\ViewMediaAction;
 use App\Models\SecurityCheckpoint;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
@@ -80,7 +81,7 @@ class SecurityPatrolsTable
                     ->query(fn (Builder $query): Builder => $query->whereNotNull('incident_report')),
             ])
             ->recordActions([
-                //
+                ViewMediaAction::make('photos', 'Lihat Foto'),
             ]);
     }
 }

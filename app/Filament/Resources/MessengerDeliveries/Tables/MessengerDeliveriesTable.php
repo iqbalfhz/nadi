@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\MessengerDeliveries\Tables;
 
 use App\Enums\MessengerDeliveryStatus;
+use App\Filament\Actions\ViewMediaAction;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
@@ -92,7 +93,7 @@ class MessengerDeliveriesTable
                     ->options(fn () => User::query()->orderBy('name')->pluck('name', 'id')),
             ])
             ->recordActions([
-                //
+                ViewMediaAction::make('proof', 'Lihat Bukti'),
             ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ObChecklists\Tables;
 
+use App\Filament\Actions\ViewMediaAction;
 use App\Models\ObArea;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
@@ -76,7 +77,7 @@ class ObChecklistsTable
                     ->options(fn () => User::query()->orderBy('name')->pluck('name', 'id')),
             ])
             ->recordActions([
-                //
+                ViewMediaAction::make('photos', 'Lihat Foto'),
             ]);
     }
 }
