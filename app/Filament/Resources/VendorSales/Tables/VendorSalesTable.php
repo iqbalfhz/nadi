@@ -8,6 +8,8 @@ use App\Models\Vendor;
 use App\Models\VendorSale;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -66,8 +68,20 @@ class VendorSalesTable
                     ->formatStateUsing(fn (TicketPaymentMethod $state): string => $state->label())
                     ->color(fn (TicketPaymentMethod $state): string => $state->color()),
                 TextColumn::make('price')
-                    ->label('Harga')
-                    ->money('IDR', decimalPlaces: 0),
+                    ->label('Subtotal')
+                    ->money('IDR', decimalPlaces: 0)
+                    ->summarize(Sum::make()->label('Jatah kios')->money('IDR', decimalPlaces: 0)),
+                TextColumn::make('tax_amount')
+                    ->label('PB1')
+                    ->money('IDR', decimalPlaces: 0)
+                    ->placeholder('—')
+                    ->summarize(Sum::make()->label('PB1 terkumpul')->money('IDR', decimalPlaces: 0))
+                    ->toggleable(),
+                TextColumn::make('total')
+                    ->label('Total')
+                    ->state(fn (VendorSale $record): int => $record->total())
+                    ->money('IDR', decimalPlaces: 0)
+                    ->weight(FontWeight::SemiBold),
                 TextColumn::make('soldByUser.name')
                     ->label('Kasir')
                     ->searchable(),

@@ -54,7 +54,11 @@ class VendorSalesOverview extends StatsOverviewWidget
         // transaction_number, so "how many transactions" means distinct
         // transaction_number, not raw row count.
         $total = (clone $scope)->distinct('transaction_number')->count('transaction_number');
-        $revenue = (int) (clone $scope)->sum('price');
+        // price is the pre-tax subtotal, so revenue has to add PB1 back:
+        // this figure is money that came into the till, not the kios's share.
+        $subtotal = (int) (clone $scope)->sum('price');
+        $tax = (int) (clone $scope)->sum('tax_amount');
+        $revenue = $subtotal + $tax;
 
         $paymentCounts = collect(TicketPaymentMethod::cases())
             ->mapWithKeys(fn (TicketPaymentMethod $method): array => [
@@ -66,8 +70,11 @@ class VendorSalesOverview extends StatsOverviewWidget
                 ->description($bazaarName)
                 ->color('gray'),
             Stat::make('Total Pendapatan', 'Rp '.number_format($revenue, 0, ',', '.'))
-                ->description('Untuk bazar di atas')
+                ->description('Uang masuk, termasuk PB1')
                 ->color('success'),
+            Stat::make('PB1 Terkumpul', 'Rp '.number_format($tax, 0, ',', '.'))
+                ->description('Disetor, bukan jatah kios')
+                ->color('warning'),
             Stat::make('Tunai', (string) $paymentCounts[TicketPaymentMethod::Cash->value])
                 ->color(TicketPaymentMethod::Cash->color()),
             Stat::make('QRIS', (string) $paymentCounts[TicketPaymentMethod::Qris->value])

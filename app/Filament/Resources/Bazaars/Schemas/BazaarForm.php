@@ -56,8 +56,16 @@ class BazaarForm
                                 TextInput::make('name')
                                     ->label('Nama Kios')
                                     ->required()
-                                    ->maxLength(255)
-                                    ->columnSpanFull(),
+                                    ->maxLength(255),
+                                TextInput::make('tax_rate')
+                                    ->label('PB1 (%)')
+                                    ->helperText('Ditambahkan di atas harga produk. Isi 0 untuk kios yang tidak dikenakan pajak.')
+                                    ->numeric()
+                                    ->required()
+                                    ->minValue(0)
+                                    ->maxValue(100)
+                                    ->default(10)
+                                    ->suffix('%'),
 
                                 Repeater::make('products')
                                     ->relationship()
@@ -94,7 +102,7 @@ class BazaarForm
                                     ->addActionLabel('Tambah Produk')
                                     ->collapsible(),
                             ])
-                            ->columns(1)
+                            ->columns(2)
                             ->defaultItems(1)
                             ->addActionLabel('Tambah Kios')
                             ->collapsible(),

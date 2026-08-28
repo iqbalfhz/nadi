@@ -19,7 +19,7 @@ use RuntimeException;
  * @property PricingUnit $pricing_unit
  * @property TicketPaymentMethod $payment_method
  */
-#[Fillable(['bazaar_id', 'vendor_id', 'vendor_product_id', 'quantity', 'pricing_unit', 'price', 'payment_method', 'sold_by'])]
+#[Fillable(['bazaar_id', 'vendor_id', 'vendor_product_id', 'quantity', 'pricing_unit', 'price', 'tax_rate', 'tax_amount', 'payment_method', 'sold_by'])]
 class VendorSale extends Model
 {
     /** @use HasFactory<VendorSaleFactory> */
@@ -37,6 +37,18 @@ class VendorSale extends Model
     {
         return 'Penjualan Bazar';
     }
+
+    /**
+     * The column defaults only take effect once a row is written, so a
+     * freshly built instance would read null until refreshed — and total()
+     * would then be quietly adding null. Same reason User pins is_active.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'tax_rate' => 0,
+        'tax_amount' => 0,
+    ];
 
     protected static function booted(): void
     {
@@ -68,7 +80,21 @@ class VendorSale extends Model
             'payment_method' => TicketPaymentMethod::class,
             'quantity' => 'integer',
             'price' => 'integer',
+            'tax_rate' => 'decimal:2',
+            'tax_amount' => 'integer',
         ];
+    }
+
+    /**
+     * What the customer actually paid for this line.
+     *
+     * price stays the pre-tax subtotal — which is also the kios's own share,
+     * so the settlement report keeps summing it directly — and PB1 is added
+     * on top rather than folded in.
+     */
+    public function total(): int
+    {
+        return $this->price + $this->tax_amount;
     }
 
     /**
@@ -162,13 +188,23 @@ class VendorSale extends Model
                     // generate a fresh one per row instead of sharing this
                     // one. Setting it directly bypasses the mass-assignment
                     // guard the same way ShortLink::last_clicked_at does.
+                    $subtotal = $lockedProduct->priceFor($item['quantity']);
+
+                    // Read inside the transaction, and snapshotted onto the
+                    // row like price and pricing_unit already are: changing
+                    // a kios's rate afterwards must never rewrite what a
+                    // customer was actually charged.
+                    $vendor = Vendor::query()->whereKey($lockedProduct->vendor_id)->firstOrFail();
+
                     $sale = new self([
                         'bazaar_id' => $lockedBazaar->id,
                         'vendor_id' => $lockedProduct->vendor_id,
                         'vendor_product_id' => $lockedProduct->id,
                         'quantity' => $item['quantity'],
                         'pricing_unit' => $lockedProduct->pricing_unit,
-                        'price' => $lockedProduct->priceFor($item['quantity']),
+                        'price' => $subtotal,
+                        'tax_rate' => $vendor->tax_rate,
+                        'tax_amount' => $vendor->taxFor($subtotal),
                         'payment_method' => $paymentMethod,
                         'sold_by' => $cashier->id,
                     ]);

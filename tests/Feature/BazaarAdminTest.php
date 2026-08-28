@@ -41,13 +41,17 @@ class BazaarAdminTest extends TestCase
                 'vendors' => [
                     [
                         'name' => 'Kios A',
+                        'tax_rate' => 10,
                         'products' => [
                             ['name' => 'Duren Montong', 'pricing_unit' => PricingUnit::PerHundredGrams->value, 'price' => 45000, 'initial_stock' => 5000],
                             ['name' => 'Es Duren', 'pricing_unit' => PricingUnit::PerPiece->value, 'price' => 10000],
                         ],
                     ],
                     [
+                        // Not every stall is liable — this one sits below
+                        // the threshold, which is why the rate is per kios.
                         'name' => 'Kios B',
+                        'tax_rate' => 0,
                         'products' => [
                             ['name' => 'Air Mineral', 'pricing_unit' => PricingUnit::PerPiece->value, 'price' => 5000],
                         ],
@@ -113,6 +117,7 @@ class BazaarAdminTest extends TestCase
         $vendors = $component->get('data.vendors');
         $vendors[] = [
             'name' => 'Kios Baru',
+            'tax_rate' => 10,
             'products' => [
                 ['name' => 'Produk Baru', 'pricing_unit' => PricingUnit::PerPiece->value, 'price' => 7000],
             ],

@@ -113,7 +113,10 @@ class SellVendorProduct extends Page
      * quantity + unit, computed price) plus its own array index so the
      * "hapus" button can target the right entry.
      *
-     * @return array<int, array{index: int, vendorName: string, productName: string, quantity: int, unitSuffix: string, price: int}>
+     * PB1 is per line, not per cart: the rate belongs to the kios, so a cart
+     * spanning two stalls can carry two different rates at once.
+     *
+     * @return array<int, array{index: int, vendorName: string, productName: string, quantity: int, unitSuffix: string, price: int, taxRate: float, tax: int}>
      */
     #[Computed]
     public function cartItems(): array
@@ -130,13 +133,17 @@ class SellVendorProduct extends Page
                     return null;
                 }
 
+                $price = $product->priceFor($entry['quantity']);
+
                 return [
                     'index' => $index,
                     'vendorName' => $product->vendor->name,
                     'productName' => $product->name,
                     'quantity' => $entry['quantity'],
                     'unitSuffix' => $product->pricing_unit->unitSuffix(),
-                    'price' => $product->priceFor($entry['quantity']),
+                    'price' => $price,
+                    'taxRate' => (float) $product->vendor->tax_rate,
+                    'tax' => $product->vendor->taxFor($price),
                 ];
             })
             ->filter()
@@ -144,10 +151,51 @@ class SellVendorProduct extends Page
             ->all();
     }
 
+    /**
+     * Before PB1 — this is also what the kios itself is owed.
+     */
+    #[Computed]
+    public function cartSubtotal(): int
+    {
+        return collect($this->cartItems())->sum('price');
+    }
+
+    #[Computed]
+    public function cartTax(): int
+    {
+        return collect($this->cartItems())->sum('tax');
+    }
+
+    /**
+     * What the customer hands over.
+     */
     #[Computed]
     public function cartTotal(): int
     {
-        return collect($this->cartItems())->sum('price');
+        return $this->cartSubtotal() + $this->cartTax();
+    }
+
+    /**
+     * Receipt figures, computed here rather than in the Blade view: the
+     * print block is plain HTML by necessity (it goes to a thermal printer),
+     * and keeping arithmetic out of it leaves nothing there to get wrong.
+     */
+    #[Computed]
+    public function receiptSubtotal(): int
+    {
+        return (int) $this->lastSaleItems()->sum('price');
+    }
+
+    #[Computed]
+    public function receiptTax(): int
+    {
+        return (int) $this->lastSaleItems()->sum('tax_amount');
+    }
+
+    #[Computed]
+    public function receiptTotal(): int
+    {
+        return $this->receiptSubtotal() + $this->receiptTax();
     }
 
     /**

@@ -61,7 +61,7 @@ class RevenueChart extends ChartWidget
         if ($user->can('ViewAny:VendorSale')) {
             $datasets[] = [
                 'label' => 'Bazar Kios',
-                'data' => $this->bucketSeries(VendorSale::class, 'SUM(price)'),
+                'data' => $this->bucketSeries(VendorSale::class, 'SUM(price + tax_amount)'),
                 'backgroundColor' => '#10b981',
             ];
         }

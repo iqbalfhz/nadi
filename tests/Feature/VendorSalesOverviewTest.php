@@ -58,7 +58,7 @@ class VendorSalesOverviewTest extends TestCase
         $stats = (new ReflectionMethod(VendorSalesOverview::class, 'getStats'))
             ->invoke(new VendorSalesOverview);
 
-        [$total, $revenue, $cash, $qris, $edc] = $stats;
+        [$total, $revenue, $tax, $cash, $qris, $edc] = $stats;
 
         $this->assertSame('2', $total->getValue());
         $this->assertSame('Rp 40.000', $revenue->getValue());

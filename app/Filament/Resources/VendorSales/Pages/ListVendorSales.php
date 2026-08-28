@@ -48,7 +48,9 @@ class ListVendorSales extends ListRecords
                             ExportColumn::make('payment_method')
                                 ->heading('Metode Bayar')
                                 ->formatStateUsing(fn (TicketPaymentMethod $state): string => $state->label()),
-                            ExportColumn::make('price')->heading('Harga'),
+                            ExportColumn::make('price')->heading('Subtotal'),
+                            ExportColumn::make('tax_rate')->heading('Tarif PB1 (%)'),
+                            ExportColumn::make('tax_amount')->heading('PB1'),
                             ExportColumn::make('soldByUser.name')->heading('Kasir'),
                             ExportColumn::make('created_at')->heading('Waktu'),
                         ]),

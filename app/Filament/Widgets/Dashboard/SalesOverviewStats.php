@@ -56,7 +56,7 @@ class SalesOverviewStats extends StatsOverviewWidget
             : new DashboardMetric(0.0, 0.0);
 
         $bazaarRevenue = $canSeeBazaar
-            ? $this->metric(VendorSale::class, 'SUM(price)')
+            ? $this->metric(VendorSale::class, 'SUM(price + tax_amount)')
             : new DashboardMetric(0.0, 0.0);
 
         $stats = [];

@@ -58,7 +58,12 @@ class VendorSettlementOverview extends TableWidget
                     ->withCount(['sales as sales_count' => fn (Builder $query) => $query
                         ->when($this->scopeToToday, fn (Builder $q) => $q->whereDate('created_at', today()))])
                     ->withSum(['sales as sales_revenue' => fn (Builder $query) => $query
-                        ->when($this->scopeToToday, fn (Builder $q) => $q->whereDate('created_at', today()))], 'price'),
+                        ->when($this->scopeToToday, fn (Builder $q) => $q->whereDate('created_at', today()))], 'price')
+                    // PB1 is collected on the kios's behalf but is owed to
+                    // the government, not to them — kept in its own column so
+                    // nobody settles up by reading the wrong number.
+                    ->withSum(['sales as sales_tax' => fn (Builder $query) => $query
+                        ->when($this->scopeToToday, fn (Builder $q) => $q->whereDate('created_at', today()))], 'tax_amount'),
             )
             ->heading('Rekap Per Kios (Settlement)')
             ->columns([
@@ -72,8 +77,17 @@ class VendorSettlementOverview extends TableWidget
                 TextColumn::make('sales_count')
                     ->label('Jumlah Item Terjual'),
                 TextColumn::make('sales_revenue')
-                    ->label('Total Pendapatan')
+                    ->label('Jatah Kios')
                     ->money('IDR', decimalPlaces: 0),
+                TextColumn::make('sales_tax')
+                    ->label('PB1 Terkumpul')
+                    ->money('IDR', decimalPlaces: 0)
+                    ->placeholder('—'),
+                TextColumn::make('tax_rate')
+                    ->label('Tarif')
+                    ->formatStateUsing(fn ($state): string => ((float) $state > 0 ? rtrim(rtrim(number_format((float) $state, 2, ',', '.'), '0'), ',').'%' : 'Tidak kena'))
+                    ->badge()
+                    ->color(fn ($state): string => (float) $state > 0 ? 'warning' : 'gray'),
             ])
             ->paginated(false);
     }

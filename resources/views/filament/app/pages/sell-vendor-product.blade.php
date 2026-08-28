@@ -10,7 +10,7 @@
                 class="flex flex-col items-center gap-2 py-6 text-center"
             >
                 <span class="text-sm text-gray-500 dark:text-gray-400">Penjualan berhasil dicatat</span>
-                <span class="text-2xl font-bold">{{ $items->count() }} item — Rp {{ number_format($items->sum('price'), 0, ',', '.') }}</span>
+                <span class="text-2xl font-bold">{{ $items->count() }} item — Rp {{ number_format($this->receiptTotal, 0, ',', '.') }}</span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">{{ $first->payment_method->label() }}</span>
 
                 {{-- Print-only receipt — invisible on screen, this is what
@@ -33,7 +33,16 @@
 
                     <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
 
-                    <p style="margin: 0; font-size: 24px; font-weight: bold;">Rp {{ number_format($items->sum('price'), 0, ',', '.') }}</p>
+                    @if ($this->receiptTax > 0)
+                        <p style="margin: 0; font-size: 12px; display: flex; justify-content: space-between;">
+                            <span>Subtotal</span><span>Rp {{ number_format($this->receiptSubtotal, 0, ',', '.') }}</span>
+                        </p>
+                        <p style="margin: 2px 0 6px; font-size: 12px; display: flex; justify-content: space-between;">
+                            <span>PB1</span><span>Rp {{ number_format($this->receiptTax, 0, ',', '.') }}</span>
+                        </p>
+                    @endif
+
+                    <p style="margin: 0; font-size: 24px; font-weight: bold;">Rp {{ number_format($this->receiptTotal, 0, ',', '.') }}</p>
                     <p style="margin: 4px 0 0; font-size: 12px;">{{ $first->payment_method->label() }}</p>
 
                     <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
@@ -220,6 +229,19 @@
                                                 />
                                             </div>
                                         @endforeach
+
+                                        @if ($this->cartTax > 0)
+                                            <div class="flex flex-col gap-1 border-t border-gray-100 pt-2 dark:border-white/10">
+                                                <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                                                    <span>Subtotal</span>
+                                                    <span>Rp {{ number_format($this->cartSubtotal, 0, ',', '.') }}</span>
+                                                </div>
+                                                <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                                                    <span>PB1</span>
+                                                    <span>Rp {{ number_format($this->cartTax, 0, ',', '.') }}</span>
+                                                </div>
+                                            </div>
+                                        @endif
 
                                         <div class="flex items-center justify-between pt-1">
                                             <span class="text-lg font-bold">Total</span>
