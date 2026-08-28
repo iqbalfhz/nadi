@@ -35,30 +35,37 @@ class LogAccessActivity
 
     private const LOG_PERMISSION = 'izin';
 
+    /**
+     * Registered explicitly rather than by discovery, and the methods are
+     * named record* rather than handle* on purpose: Laravel auto-registers
+     * every `handle*` method it finds in app/Listeners, so a handleLogin()
+     * here would be bound twice — once by discovery, once by this method —
+     * and every login would be written to the log twice over.
+     */
     public function subscribe(Dispatcher $events): void
     {
-        $events->listen(Login::class, [self::class, 'handleLogin']);
-        $events->listen(Logout::class, [self::class, 'handleLogout']);
-        $events->listen(Failed::class, [self::class, 'handleFailed']);
-        $events->listen(Lockout::class, [self::class, 'handleLockout']);
-        $events->listen(PasswordReset::class, [self::class, 'handlePasswordReset']);
-        $events->listen(PasswordUpdatedViaController::class, [self::class, 'handlePasswordUpdated']);
-        $events->listen(TwoFactorAuthenticationEnabled::class, [self::class, 'handleTwoFactorEnabled']);
-        $events->listen(TwoFactorAuthenticationConfirmed::class, [self::class, 'handleTwoFactorConfirmed']);
-        $events->listen(TwoFactorAuthenticationDisabled::class, [self::class, 'handleTwoFactorDisabled']);
-        $events->listen(RecoveryCodesGenerated::class, [self::class, 'handleRecoveryCodesGenerated']);
-        $events->listen(RoleAttachedEvent::class, [self::class, 'handleRoleAttached']);
-        $events->listen(RoleDetachedEvent::class, [self::class, 'handleRoleDetached']);
-        $events->listen(PermissionAttachedEvent::class, [self::class, 'handlePermissionAttached']);
-        $events->listen(PermissionDetachedEvent::class, [self::class, 'handlePermissionDetached']);
+        $events->listen(Login::class, [self::class, 'recordLogin']);
+        $events->listen(Logout::class, [self::class, 'recordLogout']);
+        $events->listen(Failed::class, [self::class, 'recordFailed']);
+        $events->listen(Lockout::class, [self::class, 'recordLockout']);
+        $events->listen(PasswordReset::class, [self::class, 'recordPasswordReset']);
+        $events->listen(PasswordUpdatedViaController::class, [self::class, 'recordPasswordUpdated']);
+        $events->listen(TwoFactorAuthenticationEnabled::class, [self::class, 'recordTwoFactorEnabled']);
+        $events->listen(TwoFactorAuthenticationConfirmed::class, [self::class, 'recordTwoFactorConfirmed']);
+        $events->listen(TwoFactorAuthenticationDisabled::class, [self::class, 'recordTwoFactorDisabled']);
+        $events->listen(RecoveryCodesGenerated::class, [self::class, 'recordRecoveryCodesGenerated']);
+        $events->listen(RoleAttachedEvent::class, [self::class, 'recordRoleAttached']);
+        $events->listen(RoleDetachedEvent::class, [self::class, 'recordRoleDetached']);
+        $events->listen(PermissionAttachedEvent::class, [self::class, 'recordPermissionAttached']);
+        $events->listen(PermissionDetachedEvent::class, [self::class, 'recordPermissionDetached']);
     }
 
-    public function handleLogin(Login $event): void
+    public function recordLogin(Login $event): void
     {
         $this->access($event->user, 'Login berhasil');
     }
 
-    public function handleLogout(Logout $event): void
+    public function recordLogout(Logout $event): void
     {
         if ($event->user !== null) {
             $this->access($event->user, 'Logout');
@@ -70,66 +77,66 @@ class LogAccessActivity
      * login is very often a typo in the email, and the whole point of this
      * entry is being able to see *which* account is being hammered.
      */
-    public function handleFailed(Failed $event): void
+    public function recordFailed(Failed $event): void
     {
         activity(self::LOG_ACCESS)
             ->withProperty('email', $event->credentials['email'] ?? null)
             ->log('Login gagal');
     }
 
-    public function handleLockout(Lockout $event): void
+    public function recordLockout(Lockout $event): void
     {
         activity(self::LOG_ACCESS)
             ->withProperty('email', $event->request->input('email'))
             ->log('Login diblokir sementara (terlalu banyak percobaan)');
     }
 
-    public function handlePasswordReset(PasswordReset $event): void
+    public function recordPasswordReset(PasswordReset $event): void
     {
         $this->access($event->user, 'Password direset lewat email');
     }
 
-    public function handlePasswordUpdated(PasswordUpdatedViaController $event): void
+    public function recordPasswordUpdated(PasswordUpdatedViaController $event): void
     {
         $this->access($event->user, 'Password diubah');
     }
 
-    public function handleTwoFactorEnabled(TwoFactorAuthenticationEnabled $event): void
+    public function recordTwoFactorEnabled(TwoFactorAuthenticationEnabled $event): void
     {
         $this->access($event->user, '2FA diaktifkan');
     }
 
-    public function handleTwoFactorConfirmed(TwoFactorAuthenticationConfirmed $event): void
+    public function recordTwoFactorConfirmed(TwoFactorAuthenticationConfirmed $event): void
     {
         $this->access($event->user, '2FA dikonfirmasi');
     }
 
-    public function handleTwoFactorDisabled(TwoFactorAuthenticationDisabled $event): void
+    public function recordTwoFactorDisabled(TwoFactorAuthenticationDisabled $event): void
     {
         $this->access($event->user, '2FA dimatikan');
     }
 
-    public function handleRecoveryCodesGenerated(RecoveryCodesGenerated $event): void
+    public function recordRecoveryCodesGenerated(RecoveryCodesGenerated $event): void
     {
         $this->access($event->user, 'Kode cadangan 2FA dibuat ulang');
     }
 
-    public function handleRoleAttached(RoleAttachedEvent $event): void
+    public function recordRoleAttached(RoleAttachedEvent $event): void
     {
         $this->permissionChange($event->model, 'Role diberikan', $event->rolesOrIds, 'role');
     }
 
-    public function handleRoleDetached(RoleDetachedEvent $event): void
+    public function recordRoleDetached(RoleDetachedEvent $event): void
     {
         $this->permissionChange($event->model, 'Role dicabut', $event->rolesOrIds, 'role');
     }
 
-    public function handlePermissionAttached(PermissionAttachedEvent $event): void
+    public function recordPermissionAttached(PermissionAttachedEvent $event): void
     {
         $this->permissionChange($event->model, 'Izin diberikan', $event->permissionsOrIds, 'permission');
     }
 
-    public function handlePermissionDetached(PermissionDetachedEvent $event): void
+    public function recordPermissionDetached(PermissionDetachedEvent $event): void
     {
         $this->permissionChange($event->model, 'Izin dicabut', $event->permissionsOrIds, 'permission');
     }

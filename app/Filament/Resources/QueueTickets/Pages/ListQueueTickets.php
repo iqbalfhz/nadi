@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\QueueTickets\Pages;
 
+use App\Concerns\LogsDataAccess;
 use App\Enums\QueueTicketStatus;
 use App\Filament\Resources\QueueTickets\QueueTicketResource;
 use App\Filament\Widgets\QueueTicketsOverview;
@@ -12,6 +13,8 @@ use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class ListQueueTickets extends ListRecords
 {
+    use LogsDataAccess;
+
     protected static string $resource = QueueTicketResource::class;
 
     protected function getHeaderWidgets(): array
@@ -28,6 +31,7 @@ class ListQueueTickets extends ListRecords
             // currently set to — exports the filtered list, not everything.
             ExportAction::make()
                 ->label('Export Excel')
+                ->after(fn () => $this->logDataAccess('Export Excel', 'Riwayat Tiket Antrian'))
                 ->exports([
                     ExcelExport::make('tiket')
                         ->withFilename(fn (): string => 'riwayat-tiket-antrian-'.now()->format('Y-m-d'))

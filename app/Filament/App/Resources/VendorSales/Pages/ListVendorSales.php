@@ -2,6 +2,7 @@
 
 namespace App\Filament\App\Resources\VendorSales\Pages;
 
+use App\Concerns\LogsDataAccess;
 use App\Enums\PricingUnit;
 use App\Enums\TicketPaymentMethod;
 use App\Filament\App\Resources\VendorSales\VendorSaleResource;
@@ -14,6 +15,8 @@ use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class ListVendorSales extends ListRecords
 {
+    use LogsDataAccess;
+
     protected static string $resource = VendorSaleResource::class;
 
     protected function getHeaderWidgets(): array
@@ -29,6 +32,7 @@ class ListVendorSales extends ListRecords
         return [
             ExportAction::make()
                 ->label('Export Excel')
+                ->after(fn () => $this->logDataAccess('Export Excel', 'Laporan Penjualan Bazar (/app)'))
                 ->exports([
                     ExcelExport::make('penjualan-bazar')
                         ->withFilename(fn (): string => 'penjualan-bazar-'.now()->format('Y-m-d'))

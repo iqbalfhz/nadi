@@ -4,19 +4,25 @@ namespace Tests\Feature;
 
 use App\Filament\Pages\ManageQueueKioskSettings;
 use App\Filament\Resources\ActivityLogs\ActivityLogResource;
+use App\Filament\Resources\ObChecklists\Pages\ListObChecklists;
+use App\Filament\Resources\Tickets\Pages\ListTickets;
 use App\Models\ActivityLog;
 use App\Models\Area;
 use App\Models\Event;
+use App\Models\ObChecklist;
 use App\Models\QueueCategory;
 use App\Models\QueueTicket;
 use App\Models\User;
 use App\Policies\ActivityLogPolicy;
 use App\Settings\QueueKioskSettings;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
@@ -215,5 +221,88 @@ class ActivityLogTest extends TestCase
             ->firstOrFail();
 
         $this->assertSame('Event — Nobar Kemerdekaan', $activity->subjectLabel());
+    }
+
+    /**
+     * Laravel auto-registers every `handle*` method it finds in app/Listeners.
+     * LogAccessActivity also registers itself explicitly, so methods named
+     * handleLogin() would be bound twice and every sign-in would appear in the
+     * log twice over — which is exactly what shipped the first time.
+     */
+    public function test_one_login_writes_exactly_one_line(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $before = Activity::count();
+        event(new Login('web', $user, false));
+
+        $this->assertSame($before + 1, Activity::count());
+    }
+
+    /**
+     * Deletions are the entries that matter most and the only ones whose
+     * subject can no longer name itself — it's gone. The name has to come
+     * from what the log captured, or "Hapus Pengguna" reads as an id nobody
+     * can look up any more.
+     */
+    public function test_a_deleted_record_is_still_named_in_the_list(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $victim = User::factory()->create(['name' => 'Budi Santoso']);
+        $victim->delete();
+
+        $entry = ActivityLog::query()
+            ->where('subject_type', User::class)
+            ->where('event', 'deleted')
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertSame('Pengguna — Budi Santoso', $entry->subjectLabel());
+    }
+
+    /**
+     * Reading data leaves no trace of its own — nothing is written, so no
+     * model event fires. Without this, taking a copy of the sales figures
+     * would be the one thing the audit trail couldn't see.
+     */
+    public function test_exporting_a_report_is_recorded(): void
+    {
+        $user = $this->actingAsSuperAdmin();
+
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
+
+        Livewire::actingAs($user)
+            ->test(ListTickets::class)
+            ->callAction('export');
+
+        $logged = Activity::query()->where('log_name', 'akses-data')->latest('id')->firstOrFail();
+
+        $this->assertSame('Export Excel', $logged->description);
+        $this->assertSame('Laporan Tiket Event', $logged->getProperty('data'));
+        $this->assertSame($user->id, $logged->causer_id);
+    }
+
+    public function test_opening_evidence_photos_is_recorded(): void
+    {
+        $user = $this->actingAsSuperAdmin();
+
+        $checklist = ObChecklist::factory()->create();
+        $checklist->addMedia(UploadedFile::fake()->image('bukti.jpg'))->toMediaCollection('photos');
+
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
+
+        Livewire::actingAs($user)
+            ->test(ListObChecklists::class)
+            ->mountAction(TestAction::make('viewMedia')->table($checklist));
+
+        $logged = Activity::query()->where('log_name', 'akses-data')->latest('id')->firstOrFail();
+
+        $this->assertSame('Lihat foto', $logged->description);
+        $this->assertSame($checklist->id, $logged->subject_id);
+        $this->assertSame($user->id, $logged->causer_id);
+
+        Storage::disk('internal')->deleteDirectory((string) $checklist->getFirstMedia('photos')->id);
     }
 }

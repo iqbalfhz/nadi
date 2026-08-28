@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Tickets\Pages;
 
+use App\Concerns\LogsDataAccess;
 use App\Enums\TicketPaymentMethod;
 use App\Filament\Resources\Tickets\TicketResource;
 use App\Filament\Widgets\TicketsOverview;
@@ -12,6 +13,8 @@ use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class ListTickets extends ListRecords
 {
+    use LogsDataAccess;
+
     protected static string $resource = TicketResource::class;
 
     protected function getHeaderWidgets(): array
@@ -26,6 +29,7 @@ class ListTickets extends ListRecords
         return [
             ExportAction::make()
                 ->label('Export Excel')
+                ->after(fn () => $this->logDataAccess('Export Excel', 'Laporan Tiket Event'))
                 ->exports([
                     ExcelExport::make('tiket')
                         ->withFilename(fn (): string => 'penjualan-tiket-event-'.now()->format('Y-m-d'))
