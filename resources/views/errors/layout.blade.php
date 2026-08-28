@@ -186,13 +186,22 @@
     </div>
 
     <div class="actions">
-        <a class="btn btn-primary" href="{{ $destination['url'] }}">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                 stroke-linejoin="round" style="width:1rem;height:1rem">
-                <path d="M12.5 15L7.5 10L12.5 5"/>
-            </svg>
-            {{ $destination['label'] }}
-        </a>
+        {{-- Signing out is the only useful action left for an account that
+             can reach neither panel, and Fortify only accepts it as a POST. --}}
+        @if ($destination['method'] === 'post')
+            <form method="POST" action="{{ $destination['url'] }}">
+                @csrf
+                <button type="submit" class="btn btn-primary">{{ $destination['label'] }}</button>
+            </form>
+        @else
+            <a class="btn btn-primary" href="{{ $destination['url'] }}">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                     stroke-linejoin="round" style="width:1rem;height:1rem">
+                    <path d="M12.5 15L7.5 10L12.5 5"/>
+                </svg>
+                {{ $destination['label'] }}
+            </a>
+        @endif
 
         @isset($retry)
             <button class="btn btn-secondary" type="button" onclick="window.location.reload()">Muat Ulang</button>

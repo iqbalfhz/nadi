@@ -64,7 +64,9 @@ class ErrorPageTest extends TestCase
 
     public function test_the_back_button_sends_an_employee_back_into_the_app_panel(): void
     {
-        $this->actingAs(User::factory()->create());
+        // Holding a real /app permission, not a bare account: the button now
+        // only offers a panel the person can actually get into.
+        $this->actingAsEmployeeWithPermissions('ViewAny:RoomBooking');
 
         $this->get('/app/tidak-ada-halaman-ini')
             ->assertSee('Kembali ke Dashboard')
@@ -129,5 +131,53 @@ class ErrorPageTest extends TestCase
                 ->assertSee('https://github.com/iqbalfhz?tab=repositories', escape: false)
                 ->assertSee('Dibuat oleh Iqbal Fahrozi');
         }
+    }
+
+    /**
+     * The bug this replaces: a 403 at /admin offered "Kembali ke Dashboard
+     * Admin", which sent the employee straight back to the page that had
+     * just refused them — an endless loop with no way out of it.
+     */
+    public function test_an_employee_refused_at_admin_is_sent_to_their_own_panel(): void
+    {
+        $this->actingAsEmployeeWithPermissions(['ViewAny:RoomBooking', 'Create:RoomBooking']);
+
+        $this->get('/admin')
+            ->assertForbidden()
+            ->assertSee('Kembali ke Dashboard')
+            ->assertDontSee('Kembali ke Dashboard Admin')
+            ->assertSee(url('/app'), escape: false);
+    }
+
+    public function test_an_admin_refused_inside_admin_is_still_sent_back_there(): void
+    {
+        // They can enter the panel, just not that one resource — so the
+        // panel really is where they should go back to.
+        $this->actingAsEmployeeWithPermissions('ViewAny:Document');
+
+        $this->get('/admin/users')
+            ->assertForbidden()
+            ->assertSee('Kembali ke Dashboard Admin')
+            ->assertSee(url('/admin'), escape: false);
+    }
+
+    /**
+     * An account whose role holds nothing at all can reach neither panel, so
+     * there is no page to offer — only signing out, which Fortify accepts
+     * as a POST.
+     */
+    public function test_an_account_with_no_access_at_all_is_offered_a_way_out(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $response = $this->get('/admin');
+
+        $response->assertForbidden()
+            ->assertSee('Keluar')
+            ->assertSee(route('logout'), escape: false)
+            ->assertSee('method="POST"', escape: false);
+
+        // ...and it must never point at a page that would refuse them again.
+        $response->assertDontSee('Kembali ke Dashboard');
     }
 }
