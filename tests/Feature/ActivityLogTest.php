@@ -305,4 +305,64 @@ class ActivityLogTest extends TestCase
 
         Storage::disk('internal')->deleteDirectory((string) $checklist->getFirstMedia('photos')->id);
     }
+
+    /**
+     * The one audit category that only appears when somebody is somewhere
+     * they shouldn't be. Hooked on the response status rather than on Gate
+     * checks: Filament calls the gate constantly just to decide which menu
+     * items to draw, and almost all of those legitimately come back false.
+     */
+    public function test_a_refused_request_is_recorded(): void
+    {
+        $employee = $this->actingAsEmployeeWithPermissions('ViewAny:RoomBooking');
+
+        $before = Activity::count();
+        $this->get('/admin')->assertForbidden();
+
+        $denied = Activity::query()->where('log_name', 'ditolak')->latest('id')->firstOrFail();
+
+        $this->assertSame($before + 1, Activity::count());
+        $this->assertSame('Akses ditolak', $denied->description);
+        $this->assertSame($employee->id, $denied->causer_id);
+        $this->assertSame('admin', $denied->getProperty('halaman'));
+    }
+
+    /**
+     * A guest hitting a panel is redirected to the login page, not refused —
+     * logging those would fill the table with people who simply weren't
+     * signed in yet.
+     */
+    public function test_a_guest_being_sent_to_login_is_not_recorded_as_a_refusal(): void
+    {
+        $before = Activity::count();
+
+        $this->get('/app');
+
+        $this->assertSame($before, Activity::count());
+    }
+
+    public function test_a_permitted_request_records_no_refusal(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $before = Activity::query()->where('log_name', 'ditolak')->count();
+        $this->get('/admin')->assertOk();
+
+        $this->assertSame($before, Activity::query()->where('log_name', 'ditolak')->count());
+    }
+
+    /**
+     * Colour carries meaning here: red has to mean "look at this" every
+     * time, or an admin scanning a long list learns to ignore it.
+     */
+    public function test_every_log_type_has_a_colour_and_a_label(): void
+    {
+        foreach (array_keys(ActivityLog::LOG_NAMES) as $logName) {
+            $this->assertArrayHasKey($logName, ActivityLog::LOG_COLORS, "[{$logName}] has a label but no colour.");
+        }
+
+        $this->assertSame(ActivityLog::LOG_COLORS['izin'], ActivityLog::LOG_COLORS['ditolak']);
+        $this->assertSame('danger', ActivityLog::LOG_COLORS['ditolak']);
+        $this->assertSame('gray', ActivityLog::LOG_COLORS['data'], 'The bulk of the log must stay visually quiet.');
+    }
 }

@@ -16,14 +16,35 @@ class ActivityLog extends Activity
 {
     /**
      * The log_name each source writes under, so the table can offer a filter
-     * an admin recognises instead of raw strings.
+     * an admin recognises instead of raw strings. Ordered by how much
+     * attention an entry deserves, which is also the colour order below.
      */
     public const LOG_NAMES = [
         'data' => 'Perubahan Data',
         'akses' => 'Akses & Login',
-        'izin' => 'Role & Izin',
         'akses-data' => 'Lihat & Export Data',
         'sistem' => 'Sistem',
+        'izin' => 'Role & Izin',
+        'ditolak' => 'Akses Ditolak',
+    ];
+
+    /**
+     * Colour by how much attention the entry deserves, not by giving each
+     * type a different one for the sake of it — an admin scanning a long
+     * list needs red to mean "look here", every time.
+     *
+     * grey    routine, the bulk of the log
+     * blue    normal comings and goings
+     * amber   somebody took a copy, or changed how the system runs
+     * red     security: who can do what, and who was told no
+     */
+    public const LOG_COLORS = [
+        'data' => 'gray',
+        'akses' => 'info',
+        'akses-data' => 'warning',
+        'sistem' => 'warning',
+        'izin' => 'danger',
+        'ditolak' => 'danger',
     ];
 
     /**

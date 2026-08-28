@@ -44,12 +44,7 @@ class ActivityLogsTable
                     ->label('Jenis')
                     ->badge()
                     ->formatStateUsing(fn (?string $state): string => ActivityLog::LOG_NAMES[$state] ?? ($state ?? '—'))
-                    ->color(fn (?string $state): string => match ($state) {
-                        'akses' => 'info',
-                        'izin' => 'danger',
-                        'sistem' => 'warning',
-                        default => 'gray',
-                    }),
+                    ->color(fn (?string $state): string => ActivityLog::LOG_COLORS[$state] ?? 'gray'),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([

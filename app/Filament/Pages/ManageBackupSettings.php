@@ -143,6 +143,11 @@ class ManageBackupSettings extends SettingsPage
                         return;
                     }
 
+                    // Running a backup by hand copies the whole numbering
+                    // module off to an external account — worth a line in
+                    // the audit trail on its own.
+                    activity('sistem')->log('Menjalankan backup manual ke Google Drive');
+
                     Notification::make()
                         ->success()
                         ->title('Backup berhasil dikirim ke Google Drive')

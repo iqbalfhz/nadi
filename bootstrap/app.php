@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AddSecurityHeaders;
 use App\Http\Middleware\EnsureKioskIsUnlocked;
+use App\Http\Middleware\LogDeniedAccess;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Applied to every response, panels and public screens alike.
         $middleware->append(AddSecurityHeaders::class);
+        $middleware->append(LogDeniedAccess::class);
 
         // Cloudflare Tunnel + Coolify terminate TLS at the edge and proxy
         // plain HTTP to this container over a host-only port (not directly
