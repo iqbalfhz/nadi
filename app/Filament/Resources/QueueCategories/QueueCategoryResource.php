@@ -19,6 +19,8 @@ class QueueCategoryResource extends Resource
 {
     protected static ?string $model = QueueCategory::class;
 
+    protected static ?string $pluralModelLabel = 'Loket';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQueueList;
 
     protected static string|UnitEnum|null $navigationGroup = 'Antrian';

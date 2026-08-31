@@ -19,6 +19,8 @@ class SecurityPatrolResource extends Resource
 {
     protected static ?string $model = SecurityPatrol::class;
 
+    protected static ?string $pluralModelLabel = 'Riwayat Patroli';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
     protected static string|UnitEnum|null $navigationGroup = 'Security';

@@ -19,6 +19,8 @@ class MessengerDeliveryResource extends Resource
 {
     protected static ?string $model = MessengerDelivery::class;
 
+    protected static ?string $pluralModelLabel = 'Riwayat Pengiriman';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
 
     protected static string|UnitEnum|null $navigationGroup = 'Messenger';

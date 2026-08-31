@@ -19,6 +19,10 @@ class RoomResource extends Resource
 {
     protected static ?string $model = Room::class;
 
+    protected static ?string $modelLabel = 'Ruangan';
+
+    protected static ?string $pluralModelLabel = 'Ruangan';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;
 
     protected static string|UnitEnum|null $navigationGroup = 'Booking Room';

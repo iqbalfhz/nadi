@@ -19,6 +19,10 @@ class AreaResource extends Resource
 {
     protected static ?string $model = Area::class;
 
+    protected static ?string $modelLabel = 'Lokasi';
+
+    protected static ?string $pluralModelLabel = 'Lokasi';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static string|UnitEnum|null $navigationGroup = 'Booking Room';

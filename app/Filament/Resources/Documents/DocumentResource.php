@@ -18,6 +18,8 @@ class DocumentResource extends Resource
 {
     protected static ?string $model = Document::class;
 
+    protected static ?string $pluralModelLabel = 'Dokumen';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;
 
     protected static string|UnitEnum|null $navigationGroup = 'Penomoran Dokumen';

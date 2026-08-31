@@ -24,7 +24,7 @@ class RoomBookingResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Booking Room';
 
-    protected static ?string $modelLabel = 'Booking Saya';
+    protected static ?string $modelLabel = 'Booking Ruangan';
 
     protected static ?string $navigationLabel = 'Booking Saya';
 

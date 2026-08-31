@@ -24,6 +24,10 @@ class VendorSaleResource extends Resource
 {
     protected static ?string $model = VendorSale::class;
 
+    protected static ?string $modelLabel = 'Penjualan Bazar';
+
+    protected static ?string $pluralModelLabel = 'Laporan Penjualan Bazar';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptPercent;
 
     protected static string|UnitEnum|null $navigationGroup = 'Bazar';

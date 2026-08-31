@@ -38,10 +38,10 @@ class SecurityTest extends TestCase
 
         $response->assertOk();
 
-        $response->assertSee('Passkeys');
-        $response->assertSee('No passkeys yet');
-        $response->assertSee('Two-factor authentication');
-        $response->assertSee('Enable 2FA');
+        $response->assertSee('Passkey');
+        $response->assertSee('Belum ada passkey');
+        $response->assertSee('Autentikasi dua langkah');
+        $response->assertSee('Aktifkan 2FA');
     }
 
     public function test_security_settings_page_requires_password_confirmation_when_enabled(): void
@@ -64,10 +64,10 @@ class SecurityTest extends TestCase
             ->withSession(['auth.password_confirmed_at' => time()])
             ->get(route('security.edit'))
             ->assertOk()
-            ->assertSee('Update password')
-            ->assertDontSee('Manage your passkeys for passwordless sign-in')
-            ->assertDontSee('Add a passkey to sign in without a password')
-            ->assertDontSee('Two-factor authentication');
+            ->assertSee('Perbarui Password')
+            ->assertDontSee('Kelola passkey untuk masuk tanpa password')
+            ->assertDontSee('Tambahkan passkey untuk masuk tanpa password')
+            ->assertDontSee('Autentikasi dua langkah');
     }
 
     public function test_two_factor_authentication_disabled_when_confirmation_abandoned_between_requests(): void

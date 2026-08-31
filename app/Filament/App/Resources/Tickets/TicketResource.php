@@ -24,6 +24,10 @@ class TicketResource extends Resource
 {
     protected static ?string $model = Ticket::class;
 
+    protected static ?string $modelLabel = 'Tiket Event';
+
+    protected static ?string $pluralModelLabel = 'Laporan Penjualan Tiket';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptPercent;
 
     protected static string|UnitEnum|null $navigationGroup = 'Tiket Event';

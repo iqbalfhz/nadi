@@ -19,6 +19,8 @@ class DocumentTypeResource extends Resource
 {
     protected static ?string $model = DocumentType::class;
 
+    protected static ?string $pluralModelLabel = 'Jenis Dokumen';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
     protected static string|UnitEnum|null $navigationGroup = 'Penomoran Dokumen';

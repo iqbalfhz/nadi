@@ -20,6 +20,8 @@ class BarcodeResource extends Resource
 {
     protected static ?string $model = Barcode::class;
 
+    protected static ?string $pluralModelLabel = 'Riwayat Barcode Saya';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQrCode;
 
     protected static string|UnitEnum|null $navigationGroup = 'Tools';

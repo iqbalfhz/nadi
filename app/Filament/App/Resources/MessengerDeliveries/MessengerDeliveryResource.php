@@ -29,7 +29,7 @@ class MessengerDeliveryResource extends Resource
 
     protected static ?string $navigationLabel = 'Pengiriman Saya';
 
-    protected static ?string $modelLabel = 'Pengiriman Saya';
+    protected static ?string $modelLabel = 'Pengiriman';
 
     protected static ?string $pluralModelLabel = 'Pengiriman Saya';
 

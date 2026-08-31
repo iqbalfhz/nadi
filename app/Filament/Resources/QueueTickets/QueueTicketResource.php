@@ -18,6 +18,8 @@ class QueueTicketResource extends Resource
 {
     protected static ?string $model = QueueTicket::class;
 
+    protected static ?string $pluralModelLabel = 'Riwayat Tiket Antrian';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;
 
     protected static string|UnitEnum|null $navigationGroup = 'Antrian';

@@ -19,6 +19,8 @@ class SecurityCheckpointResource extends Resource
 {
     protected static ?string $model = SecurityCheckpoint::class;
 
+    protected static ?string $pluralModelLabel = 'Titik Patroli';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQrCode;
 
     protected static string|UnitEnum|null $navigationGroup = 'Security';

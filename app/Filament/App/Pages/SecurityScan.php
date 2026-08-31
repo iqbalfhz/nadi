@@ -89,7 +89,7 @@ class SecurityScan extends Page
                 ->footer([
                     Actions::make([
                         Action::make('submit')
-                            ->label('Submit Laporan')
+                            ->label('Kirim Laporan')
                             ->submit('form'),
                     ]),
                 ]),

@@ -29,7 +29,7 @@ class ObChecklistResource extends Resource
 
     protected static ?string $navigationLabel = 'Checklist Saya';
 
-    protected static ?string $modelLabel = 'Checklist Saya';
+    protected static ?string $modelLabel = 'Checklist OB';
 
     protected static ?string $pluralModelLabel = 'Checklist Saya';
 

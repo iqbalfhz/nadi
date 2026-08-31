@@ -19,6 +19,8 @@ class AdvertisementResource extends Resource
 {
     protected static ?string $model = Advertisement::class;
 
+    protected static ?string $pluralModelLabel = 'Iklan Layar';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFilm;
 
     protected static string|UnitEnum|null $navigationGroup = 'Antrian';

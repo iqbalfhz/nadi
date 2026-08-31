@@ -19,13 +19,15 @@ class ObAreaResource extends Resource
 {
     protected static ?string $model = ObArea::class;
 
+    protected static ?string $pluralModelLabel = 'Area/Titik OB';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMapPin;
 
     protected static string|UnitEnum|null $navigationGroup = 'OB';
 
     protected static ?string $navigationLabel = 'Area/Titik';
 
-    protected static ?string $modelLabel = 'Area/Titik';
+    protected static ?string $modelLabel = 'Area/Titik OB';
 
     public static function form(Schema $schema): Schema
     {

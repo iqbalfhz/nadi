@@ -22,13 +22,15 @@ class TicketResource extends Resource
 {
     protected static ?string $model = Ticket::class;
 
+    protected static ?string $pluralModelLabel = 'Riwayat Penjualan Tiket';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptPercent;
 
     protected static string|UnitEnum|null $navigationGroup = 'Tiket Event';
 
     protected static ?string $navigationLabel = 'Riwayat Penjualan';
 
-    protected static ?string $modelLabel = 'Tiket';
+    protected static ?string $modelLabel = 'Tiket Event';
 
     /**
      * @return Builder<Ticket>

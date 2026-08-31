@@ -48,12 +48,12 @@ class RoomBookingsTable
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make()->label('Cancel'),
+                DeleteAction::make()->label('Batalkan'),
                 RestoreAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->label('Cancel'),
+                    DeleteBulkAction::make()->label('Batalkan'),
                     RestoreBulkAction::make(),
                 ]),
             ]);

@@ -22,13 +22,15 @@ class VendorSaleResource extends Resource
 {
     protected static ?string $model = VendorSale::class;
 
+    protected static ?string $pluralModelLabel = 'Riwayat Penjualan Bazar';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptPercent;
 
     protected static string|UnitEnum|null $navigationGroup = 'Bazar';
 
     protected static ?string $navigationLabel = 'Riwayat Penjualan Bazar';
 
-    protected static ?string $modelLabel = 'Penjualan';
+    protected static ?string $modelLabel = 'Penjualan Bazar';
 
     /**
      * @return Builder<VendorSale>

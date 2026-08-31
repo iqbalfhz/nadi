@@ -19,6 +19,8 @@ class ObChecklistResource extends Resource
 {
     protected static ?string $model = ObChecklist::class;
 
+    protected static ?string $pluralModelLabel = 'Riwayat Checklist OB';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
 
     protected static string|UnitEnum|null $navigationGroup = 'OB';

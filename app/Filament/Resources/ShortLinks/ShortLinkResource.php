@@ -19,6 +19,8 @@ class ShortLinkResource extends Resource
 {
     protected static ?string $model = ShortLink::class;
 
+    protected static ?string $pluralModelLabel = 'Short Link';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
 
     protected static string|UnitEnum|null $navigationGroup = 'Tools';

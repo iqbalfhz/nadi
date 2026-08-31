@@ -23,6 +23,8 @@ class BazaarResource extends Resource
 {
     protected static ?string $model = Bazaar::class;
 
+    protected static ?string $pluralModelLabel = 'Bazar';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
 
     protected static string|UnitEnum|null $navigationGroup = 'Bazar';
