@@ -22,7 +22,7 @@ services:
     env_file:
       - .env
     depends_on:
-      - redis
+      - nadi-redis
     volumes:
       - storage_app:/app/storage/app
 
@@ -34,7 +34,7 @@ services:
       - "8086:8080"
     depends_on:
       - app
-      - redis
+      - nadi-redis
     env_file:
       - .env
     volumes:
@@ -46,7 +46,7 @@ services:
     command: php artisan schedule:work
     depends_on:
       - app
-      - redis
+      - nadi-redis
     env_file:
       - .env
     volumes:
@@ -66,7 +66,7 @@ services:
     command: php artisan queue:work --tries=3 --max-time=3600
     depends_on:
       - app
-      - redis
+      - nadi-redis
     env_file:
       - .env
     volumes:
@@ -75,9 +75,23 @@ services:
   # Session and cache store, replacing the MySQL-backed drivers that added a
   # couple of queries to every single request. Runs as a service of this
   # resource rather than a separate Coolify resource so it lands on the same
-  # compose network as app/reverb/scheduler automatically, reachable simply
-  # as the hostname "redis".
-  redis:
+  # compose network as app/reverb/scheduler automatically.
+  #
+  # Named "nadi-redis", not "redis": this VPS runs several Coolify projects on
+  # a shared network, more than one of which has a service called "redis". The
+  # name resolved to two containers at once —
+  #
+  #   $ getent hosts redis
+  #   fd5a:9590:d076::5   redis
+  #   fd5a:9590:d076::10  redis
+  #
+  # — so Docker handed out connections to whichever it felt like, and roughly
+  # half of them hit another project's Redis and were refused with WRONGPASS.
+  # That surfaced as a queue worker in a crash loop, and (more quietly) as
+  # sessions and cache reads failing at random in the web app.
+  #
+  # REDIS_HOST must match this name.
+  nadi-redis:
     image: redis:7-alpine
     restart: unless-stopped
     # No persistence on purpose: everything in here is a session or a cache
