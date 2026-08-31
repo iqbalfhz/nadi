@@ -52,6 +52,26 @@ services:
     volumes:
       - storage_app:/app/storage/app
 
+  # Runs queued jobs — currently the Telegram delivery for Checklist HK.
+  # Without this the jobs are written to the database and simply sit there:
+  # nothing fails visibly, the reports just never reach the group.
+  #
+  # Mounts storage_app because the job reads the inspection photos from the
+  # private 'internal' disk to upload them.
+  queue:
+    image: nadi-app:latest
+    restart: unless-stopped
+    # --max-time recycles the worker hourly so a long-lived process can't
+    # accumulate leaked memory or hold stale code after a deploy.
+    command: php artisan queue:work --tries=3 --max-time=3600
+    depends_on:
+      - app
+      - redis
+    env_file:
+      - .env
+    volumes:
+      - storage_app:/app/storage/app
+
   # Session and cache store, replacing the MySQL-backed drivers that added a
   # couple of queries to every single request. Runs as a service of this
   # resource rather than a separate Coolify resource so it lands on the same
