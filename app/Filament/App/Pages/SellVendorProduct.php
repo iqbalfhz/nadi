@@ -14,6 +14,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use RuntimeException;
@@ -343,6 +344,14 @@ class SellVendorProduct extends Page
                 cashier: $cashier,
                 paymentMethod: TicketPaymentMethod::from($this->paymentMethod),
             );
+        } catch (ModelNotFoundException) {
+            // Caught before RuntimeException on purpose: firstOrFail()
+            // throws a subclass of it, and its own message is the
+            // English "No query results for model [App\Models...]" —
+            // meaningless to a cashier mid-transaction.
+            Notification::make()->warning()->title('Salah satu data di keranjang sudah tidak ada. Muat ulang halaman lalu coba lagi.')->send();
+
+            return;
         } catch (RuntimeException $exception) {
             Notification::make()->warning()->title($exception->getMessage())->send();
 

@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 use UnitEnum;
 
@@ -124,20 +125,32 @@ class ManageBackupSettings extends SettingsPage
 
                         $exitCode = Artisan::call('backup:run', ['--only-to-disk' => 'google']);
                     } catch (Throwable $exception) {
+                        // Google's own errors ("invalid_grant", "Client error:
+                        // 401") say nothing an admin can act on. Name the two
+                        // things that actually go wrong here, and keep the raw
+                        // text in the log where it belongs.
+                        report($exception);
+
                         Notification::make()
                             ->danger()
-                            ->title('Backup gagal')
-                            ->body($exception->getMessage())
+                            ->title('Backup gagal terkirim')
+                            ->body('Google Drive menolak koneksinya. Cek Client ID, Client Secret, dan Refresh Token di atas — Refresh Token bisa kedaluwarsa kalau lama tidak dipakai. Rincian teknisnya tercatat di log.')
+                            ->persistent()
                             ->send();
 
                         return;
                     }
 
                     if ($exitCode !== 0) {
+                        // backup:run's own output is a wall of English command
+                        // log — useful to a developer, alarming to everyone else.
+                        Log::error('Backup manual gagal.', ['output' => Artisan::output()]);
+
                         Notification::make()
                             ->danger()
-                            ->title('Backup gagal')
-                            ->body(Artisan::output())
+                            ->title('Backup gagal diselesaikan')
+                            ->body('Prosesnya berhenti di tengah jalan. Coba ulangi sekali lagi; kalau tetap gagal, rincian teknisnya sudah tercatat di log untuk diperiksa.')
+                            ->persistent()
                             ->send();
 
                         return;

@@ -13,6 +13,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use RuntimeException;
@@ -89,6 +90,14 @@ class MessengerTasks extends Page
 
         try {
             MessengerDelivery::claim($deliveryId, $messenger);
+        } catch (ModelNotFoundException) {
+            // Caught before RuntimeException on purpose: firstOrFail()
+            // throws a subclass of it, and its own message is the
+            // English "No query results for model [App\Models...]" —
+            // meaningless to a cashier mid-transaction.
+            Notification::make()->warning()->title('Tugas ini sudah tidak ada. Muat ulang halaman lalu coba lagi.')->send();
+
+            return;
         } catch (RuntimeException $exception) {
             Notification::make()
                 ->warning()
@@ -113,6 +122,14 @@ class MessengerTasks extends Page
 
         try {
             $delivery->markInTransit($messenger);
+        } catch (ModelNotFoundException) {
+            // Caught before RuntimeException on purpose: firstOrFail()
+            // throws a subclass of it, and its own message is the
+            // English "No query results for model [App\Models...]" —
+            // meaningless to a cashier mid-transaction.
+            Notification::make()->warning()->title('Tugas ini sudah tidak ada. Muat ulang halaman lalu coba lagi.')->send();
+
+            return;
         } catch (RuntimeException $exception) {
             Notification::make()
                 ->warning()

@@ -86,7 +86,17 @@ class GenerateBarcode extends Page
         try {
             $barcode->renderPng();
         } catch (Throwable $exception) {
-            Notification::make()->danger()->title('Gagal generate: '.$exception->getMessage())->send();
+            // The barcode library's own message is English and technical
+            // ("Barcode requires a positive length"), which reads as a crash
+            // rather than "your content doesn't fit this format". Say what to
+            // do instead, and leave the raw text to the log.
+            report($exception);
+
+            Notification::make()
+                ->danger()
+                ->title('Konten tidak cocok untuk jenis ini')
+                ->body('Cek lagi isinya — EAN-13 hanya menerima 12-13 digit angka, sedangkan Code 128 dan Code 39 bisa teks bebas.')
+                ->send();
 
             return;
         }
