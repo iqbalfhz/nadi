@@ -78,6 +78,8 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
         'View:GenerateBarcode',
         'ViewAny:VendorSale',
         'View:SellVendorProduct',
+        'ViewAny:HkInspection',
+        'Create:HkInspection',
     ];
 
     /**

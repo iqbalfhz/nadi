@@ -69,6 +69,13 @@ class NadiRoleSeeder extends Seeder
         'security' => [
             'View:SecurityScan',
         ],
+        // The supervisor who inspects housekeeping work, not the HK staff
+        // themselves — HK staff are not NADI account holders at all, their
+        // names are typed into the report by the supervisor.
+        'pengawas-hk' => [
+            'ViewAny:HkInspection',
+            'Create:HkInspection',
+        ],
         'kurir' => [
             'View:MessengerTasks',
         ],
@@ -102,6 +109,7 @@ class NadiRoleSeeder extends Seeder
         'admin-antrian' => ['QueueTicket', 'QueueCategory', 'Advertisement'],
         'admin-ob' => ['ObChecklist', 'ObArea'],
         'admin-security' => ['SecurityPatrol', 'SecurityCheckpoint'],
+        'admin-hk' => ['HkInspection', 'HkCategory', 'HkArea'],
         'admin-messenger' => ['MessengerDelivery'],
         'admin-event' => ['Ticket', 'Event'],
         'admin-bazar' => ['VendorSale', 'Bazaar'],
