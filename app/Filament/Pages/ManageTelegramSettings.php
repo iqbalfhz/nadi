@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Concerns\LogsSettingsChanges;
 use App\Settings\TelegramSettings;
+use App\Support\QueueHealth;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
@@ -12,9 +13,11 @@ use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -41,8 +44,23 @@ class ManageTelegramSettings extends SettingsPage
 
     public function form(Schema $schema): Schema
     {
+        $queue = QueueHealth::read();
+
         return $schema
             ->components([
+                // Placed above the credentials because when someone opens this
+                // page it is usually to find out why a report never arrived —
+                // and a stalled worker, not a wrong token, is the likelier
+                // cause once the settings have been working.
+                Section::make('Status Antrean')
+                    ->description('Laporan Checklist HK dikirim lewat antrean, bukan langsung — jadi pengawas tidak perlu menunggu Telegram saat menyimpan.')
+                    ->icon(Heroicon::OutlinedQueueList)
+                    ->columnSpanFull()
+                    ->schema([
+                        Text::make($queue->summary())
+                            ->color($queue->color())
+                            ->columnSpanFull(),
+                    ]),
                 Section::make('Notifikasi Grup Telegram')
                     ->description('Setiap laporan Checklist HK yang masuk dikirim otomatis ke grup Telegram.')
                     ->icon(Heroicon::OutlinedPaperAirplane)
@@ -79,7 +97,72 @@ class ManageTelegramSettings extends SettingsPage
                 // Reads the saved settings, not the form state: the point is
                 // to prove what the job will actually use.
                 ->action(fn () => $this->sendTestMessage()),
+            // An escape hatch for exactly the situation that prompted this
+            // page's queue panel: the worker is down, reports are piling up,
+            // and the only fix used to be a terminal on the server. Shown only
+            // when something is actually waiting.
+            Action::make('drain')
+                ->label('Proses Sekarang')
+                ->icon(Heroicon::OutlinedPlay)
+                ->color('warning')
+                ->visible(fn (): bool => QueueHealth::read()->pending > 0)
+                ->action(fn () => $this->drainQueue()),
+            Action::make('retry')
+                ->label('Coba Lagi yang Gagal')
+                ->icon(Heroicon::OutlinedArrowPath)
+                ->color('danger')
+                ->visible(fn (): bool => QueueHealth::read()->failed > 0)
+                ->action(fn () => $this->retryFailedJobs()),
         ];
+    }
+
+    /**
+     * Works the queue inside this request, capped hard so a web worker can
+     * never hang on it. Anything left over stays queued for the real worker.
+     */
+    private function drainQueue(): void
+    {
+        try {
+            Artisan::call('queue:work', [
+                '--stop-when-empty' => true,
+                '--max-time' => 15,
+                '--tries' => 3,
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+        }
+
+        $queue = QueueHealth::read();
+
+        if ($queue->pending === 0 && $queue->failed === 0) {
+            Notification::make()
+                ->success()
+                ->title('Antrean selesai diproses')
+                ->body('Semua yang tertunda sudah terkirim. Cek grup Telegram Anda.')
+                ->send();
+
+            return;
+        }
+
+        Notification::make()
+            ->warning()
+            ->title('Belum semuanya selesai')
+            ->body($queue->summary().' Kalau ini terus terjadi, pekerja antrean di server perlu diperiksa.')
+            ->persistent()
+            ->send();
+    }
+
+    private function retryFailedJobs(): void
+    {
+        // Pushes them back onto the queue; they still need a worker — or the
+        // "Proses Sekarang" button — to actually run.
+        Artisan::call('queue:retry', ['id' => ['all']]);
+
+        Notification::make()
+            ->success()
+            ->title('Dimasukkan kembali ke antrean')
+            ->body('Pekerjaan yang gagal sudah diantrekan ulang. Klik "Proses Sekarang" kalau ingin langsung dijalankan.')
+            ->send();
     }
 
     /**
