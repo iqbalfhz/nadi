@@ -71,6 +71,21 @@ return [
             ]) : [],
             'dump' => [
                 'include_tables' => $backupTables,
+                // mysqldump in the production image comes from mariadb-client,
+                // which verifies the server certificate — and Coolify's MySQL
+                // presents a self-signed one, so the dump died with
+                // "TLS/SSL error: self-signed certificate in certificate chain"
+                // while PHP's own connection (which does not verify) was fine.
+                //
+                // Both flags are needed together: skip_ssl turns the option on,
+                // set_ssl_flag picks 'skip-ssl' over the library's default
+                // 'ssl-mode=DISABLED', which is a MySQL-client option that the
+                // MariaDB client rejects as an unknown variable.
+                //
+                // Dropping TLS is acceptable here only because the app and the
+                // database talk over a private Docker network on one host.
+                'skip_ssl' => true,
+                'set_ssl_flag' => 'skip-ssl',
             ],
         ],
 
