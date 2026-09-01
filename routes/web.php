@@ -21,6 +21,7 @@ Route::get('dashboard', function () {
     return redirect($user->hasAnyAdminPermission() ? '/admin' : '/app');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+require __DIR__.'/legal.php';
 require __DIR__.'/settings.php';
 require __DIR__.'/queue.php';
 require __DIR__.'/security.php';

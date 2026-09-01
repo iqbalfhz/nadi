@@ -10,6 +10,13 @@ final class SocialLinks
 {
     public const AUTHOR = 'Iqbal Fahrozi';
 
+    /**
+     * Shown on the public privacy and terms pages, and registered as the
+     * support contact on the Google OAuth consent screen \u2014 the two have to
+     * match for the app to stay publishable.
+     */
+    public const EMAIL = 'iqbalfahrozi284@gmail.com';
+
     public const INSTAGRAM = 'https://www.instagram.com/iqbalfhrzi_/';
 
     public const GITHUB = 'https://github.com/iqbalfhz?tab=repositories';
