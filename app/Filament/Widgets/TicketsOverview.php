@@ -37,8 +37,10 @@ class TicketsOverview extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $event = Event::query()->where('is_open', true)->latest()->first()
-            ?? Event::query()->latest()->first();
+        // latest('id'), not latest(): two rows created in the same second
+        // would otherwise be ordered by whatever the database returns first.
+        $event = Event::query()->where('is_open', true)->latest('id')->first()
+            ?? Event::query()->latest('id')->first();
 
         $eventName = 'Belum ada event';
         $eventId = null;

@@ -95,7 +95,10 @@ class VendorSalesTable
                 SelectFilter::make('bazaar_id')
                     ->label('Bazar')
                     ->options(fn () => Bazaar::query()->orderBy('name')->pluck('name', 'id'))
-                    ->default(fn () => $defaultToLatestBazaar ? Bazaar::query()->latest()->value('id') : null),
+                    // latest('id'), not latest(): several rows can share a
+                    // created_at to the second, and the tie-break is then
+                    // whatever the database feels like returning.
+                    ->default(fn () => $defaultToLatestBazaar ? Bazaar::query()->latest('id')->value('id') : null),
                 SelectFilter::make('vendor_id')
                     ->label('Kios')
                     // Vendors aren't reusable master data (typed fresh per

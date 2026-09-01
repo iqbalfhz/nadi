@@ -81,7 +81,10 @@ class TicketsTable
                 SelectFilter::make('event_id')
                     ->label('Event')
                     ->options(fn () => Event::query()->orderBy('name')->pluck('name', 'id'))
-                    ->default(fn () => $defaultToLatestEvent ? Event::query()->latest()->value('id') : null),
+                    // latest('id'), not latest(): several rows can share a
+                    // created_at to the second, and the tie-break is then
+                    // whatever the database feels like returning.
+                    ->default(fn () => $defaultToLatestEvent ? Event::query()->latest('id')->value('id') : null),
                 SelectFilter::make('payment_method')
                     ->label('Metode Bayar')
                     ->options(fn () => collect(TicketPaymentMethod::cases())

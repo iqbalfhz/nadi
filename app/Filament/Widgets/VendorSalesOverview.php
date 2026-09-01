@@ -35,8 +35,10 @@ class VendorSalesOverview extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $bazaar = Bazaar::query()->where('is_open', true)->latest()->first()
-            ?? Bazaar::query()->latest()->first();
+        // latest('id'), not latest(): two rows created in the same second
+        // would otherwise be ordered by whatever the database returns first.
+        $bazaar = Bazaar::query()->where('is_open', true)->latest('id')->first()
+            ?? Bazaar::query()->latest('id')->first();
 
         $bazaarName = 'Belum ada bazar';
         $bazaarId = null;

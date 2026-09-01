@@ -44,8 +44,10 @@ class VendorSettlementOverview extends TableWidget
 
     public function table(Table $table): Table
     {
-        $bazaar = Bazaar::query()->where('is_open', true)->latest()->first()
-            ?? Bazaar::query()->latest()->first();
+        // latest('id'), not latest(): two rows created in the same second
+        // would otherwise be ordered by whatever the database returns first.
+        $bazaar = Bazaar::query()->where('is_open', true)->latest('id')->first()
+            ?? Bazaar::query()->latest('id')->first();
 
         return $table
             ->query(
