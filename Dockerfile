@@ -61,6 +61,14 @@ RUN npm run build
 # 8.4.20) — composer.json's own "^8.3" constraint no longer reflects reality.
 FROM dunglas/frankenphp:1-php8.4
 
+# spatie/laravel-backup does not dump the database itself — it shells out to
+# mysqldump. The PHP extensions below let the app *talk* to MySQL, but they
+# do not provide that binary, so backup:run failed in production while
+# working fine on a developer machine that happened to have it installed.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends mariadb-client \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN install-php-extensions \
     pdo_mysql \
     gd \
