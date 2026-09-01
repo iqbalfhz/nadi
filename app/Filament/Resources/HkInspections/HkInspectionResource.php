@@ -27,7 +27,7 @@ class HkInspectionResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'HK';
 
-    protected static ?string $navigationLabel = 'Laporan';
+    protected static ?string $navigationLabel = 'Riwayat Laporan';
 
     protected static ?int $navigationSort = 3;
 

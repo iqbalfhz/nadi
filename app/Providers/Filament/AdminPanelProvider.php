@@ -86,6 +86,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('Antrian')->icon(Heroicon::OutlinedQueueList),
                 NavigationGroup::make('OB')->icon(Heroicon::OutlinedClipboardDocumentCheck),
                 NavigationGroup::make('Security')->icon(Heroicon::OutlinedShieldCheck),
+                NavigationGroup::make('HK')->icon(Heroicon::OutlinedSparkles),
                 NavigationGroup::make('Messenger')->icon(Heroicon::OutlinedTruck),
                 NavigationGroup::make('Tiket Event')->icon(Heroicon::OutlinedTicket),
                 NavigationGroup::make('Bazar')->icon(Heroicon::OutlinedBuildingStorefront),

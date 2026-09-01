@@ -61,6 +61,7 @@ class AppPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make('Booking Room')->icon(Heroicon::OutlinedCalendarDays),
                 NavigationGroup::make('OB')->icon(Heroicon::OutlinedClipboardDocumentCheck),
+                NavigationGroup::make('HK')->icon(Heroicon::OutlinedSparkles),
                 NavigationGroup::make('Messenger')->icon(Heroicon::OutlinedTruck),
                 NavigationGroup::make('Tiket Event')->icon(Heroicon::OutlinedTicket),
                 NavigationGroup::make('Bazar')->icon(Heroicon::OutlinedBuildingStorefront),
