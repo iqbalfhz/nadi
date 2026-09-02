@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard;
+use App\Filament\Pages\Security;
 use App\Filament\Widgets\Dashboard\DocumentsByTypeChart;
 use App\Filament\Widgets\Dashboard\MessengerStatusChart;
 use App\Filament\Widgets\Dashboard\ModuleActivityChart;
@@ -140,15 +141,14 @@ class AdminPanelProvider extends PanelProvider
                     ->visible(fn (): bool => Auth::user()?->can('View:QueueOperator') ?? false),
             ])
             // Filament's own name/email/password page, rendered inside the panel
-            // shell (not the simple centered layout) so it feels native. 2FA and
-            // passkeys still live on the shared Fortify security page, linked
-            // below, since those aren't covered by this page.
+            // shell (not the simple centered layout) so it feels native. Two-factor
+            // settings sit beside it on App\Filament\Pages\Security, linked below.
             ->profile(isSimple: false)
             ->userMenuItems([
                 Action::make('security')
                     ->label('Keamanan')
                     ->icon(Heroicon::ShieldCheck)
-                    ->url(fn (): string => route('security.edit')),
+                    ->url(fn (): string => Security::getUrl()),
             ])
             ->authMiddleware([
                 Authenticate::class,

@@ -56,8 +56,8 @@ class FortifyServiceProvider extends ServiceProvider
     /**
      * Reject deactivated accounts at the password login form itself, with a
      * clear message — the App\Listeners\PreventInactiveUserLogin listener
-     * backs this up for other auth paths (passkeys) that don't go through
-     * this callback.
+     * backs this up for auth paths that don't go through this callback, such
+     * as the remember-me cookie.
      */
     private function configureAuthentication(): void
     {
@@ -106,12 +106,5 @@ class FortifyServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($throttleKey);
         });
 
-        RateLimiter::for('passkeys', function (Request $request) {
-            $credentialId = $request->input('credential.id');
-
-            return Limit::perMinute(10)->by(
-                ($credentialId ?: $request->session()->getId()).'|'.$request->ip(),
-            );
-        });
     }
 }

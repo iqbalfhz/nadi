@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\App\Pages\Security;
 use App\Filament\App\Widgets\DashboardStatsWidget;
 use App\Filament\App\Widgets\QuickLinksWidget;
 use App\Providers\Filament\Concerns\HasNadiSidebarCustomizations;
@@ -69,15 +70,14 @@ class AppPanelProvider extends PanelProvider
                 NavigationGroup::make('Filament Shield'),
             ])
             // Filament's own name/email/password page, rendered inside the panel
-            // shell (not the simple centered layout) so it feels native. 2FA and
-            // passkeys still live on the shared Fortify security page, linked
-            // below, since those aren't covered by this page.
+            // shell (not the simple centered layout) so it feels native. Two-factor
+            // settings sit beside it on App\Filament\App\Pages\Security, linked below.
             ->profile(isSimple: false)
             ->userMenuItems([
                 Action::make('security')
                     ->label('Keamanan')
                     ->icon(Heroicon::ShieldCheck)
-                    ->url(fn (): string => route('security.edit')),
+                    ->url(fn (): string => Security::getUrl()),
             ])
             ->middleware([
                 EncryptCookies::class,

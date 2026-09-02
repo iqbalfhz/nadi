@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Filament\App\Pages\Security as AppSecurity;
+use App\Filament\Pages\Security as AdminSecurity;
 use App\Filament\Resources\Areas\AreaResource;
 use App\Filament\Resources\Areas\Pages\CreateArea;
 use App\Filament\Resources\Areas\Pages\EditArea;
@@ -45,7 +47,7 @@ class AdminPanelTest extends TestCase
             ->assertRedirect(AreaResource::getUrl('index'));
     }
 
-    public function test_the_admin_panel_user_menu_has_a_native_profile_page_and_links_security_to_settings(): void
+    public function test_the_admin_panel_user_menu_links_profile_and_security_to_filament_pages(): void
     {
         $panel = Filament::getPanel('admin');
         $items = $panel->getUserMenuItems();
@@ -55,10 +57,10 @@ class AdminPanelTest extends TestCase
         $this->assertSame($panel->getProfileUrl(), $items['profile']->getUrl());
 
         $this->assertArrayHasKey('security', $items);
-        $this->assertSame(route('security.edit'), $items['security']->getUrl());
+        $this->assertSame(AdminSecurity::getUrl(), $items['security']->getUrl());
     }
 
-    public function test_the_app_panel_user_menu_has_a_native_profile_page_and_links_security_to_settings(): void
+    public function test_the_app_panel_user_menu_links_profile_and_security_to_filament_pages(): void
     {
         Filament::setCurrentPanel(Filament::getPanel('app'));
 
@@ -70,7 +72,7 @@ class AdminPanelTest extends TestCase
         $this->assertSame($panel->getProfileUrl(), $items['profile']->getUrl());
 
         $this->assertArrayHasKey('security', $items);
-        $this->assertSame(route('security.edit'), $items['security']->getUrl());
+        $this->assertSame(AppSecurity::getUrl(), $items['security']->getUrl());
     }
 
     public function test_the_admin_native_profile_page_renders(): void

@@ -11,11 +11,10 @@ use Laravel\Fortify\Fortify;
 class PreventInactiveUserLogin
 {
     /**
-     * Every authentication method (password, passkey, 2FA) ends by calling
-     * Auth::login(), which fires this event — hooking here catches all of
-     * them from a single place, rather than gating each login path
-     * separately (Fortify::authenticateUsing() only covers the password
-     * grant, not passkeys).
+     * Every authentication method (password, 2FA, the remember-me cookie)
+     * ends by calling Auth::login(), which fires this event — hooking here
+     * catches all of them from one place, rather than gating each login path
+     * separately (Fortify::authenticateUsing() only covers the password grant).
      */
     public function handle(Login $event): void
     {

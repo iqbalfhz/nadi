@@ -22,7 +22,6 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 require __DIR__.'/legal.php';
-require __DIR__.'/settings.php';
 require __DIR__.'/queue.php';
 require __DIR__.'/security.php';
 require __DIR__.'/short-links.php';

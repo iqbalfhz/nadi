@@ -112,21 +112,15 @@ class InterfaceLanguageTest extends TestCase
      * @var array<int, string>
      */
     private const PASSES_THROUGH_UNTRANSLATED = [
-        'Atau konfirmasi dengan password',
-        'Dashboard',
         'Email',
         'Ingat saya',
         'Ini area aman — konfirmasi password Anda dulu untuk melanjutkan.',
         'Konfirmasi',
         'Konfirmasi Password',
-        'Konfirmasi dengan passkey',
         'Lupa password?',
         'Masuk',
         'Masuk dengan akun NADI Anda untuk melanjutkan.',
-        'Mengonfirmasi...',
         'Password',
-        'Platform',
-        'Repository',
         'Selamat datang kembali',
     ];
 
@@ -165,7 +159,9 @@ class InterfaceLanguageTest extends TestCase
             }
         }
 
-        $this->assertGreaterThan(50, $checked, 'Expected to inspect every __() string in resources/views.');
+        // A floor, not a target: it only has to be high enough that a broken
+        // discovery loop cannot pass by inspecting nothing.
+        $this->assertGreaterThan(20, $checked, 'Expected to inspect every __() string in resources/views.');
 
         $this->assertSame(
             [],
@@ -204,10 +200,7 @@ class InterfaceLanguageTest extends TestCase
     {
         foreach ([
             'Log in' => 'Masuk',
-            'Log out' => 'Keluar',
-            'Settings' => 'Pengaturan',
             'Forgot password' => 'Lupa Password',
-            'Two-factor authentication' => 'Autentikasi dua langkah',
             'Please enter your new password below' => 'Masukkan password baru Anda di bawah ini',
         ] as $source => $expected) {
             $this->assertSame($expected, __($source), "[{$source}] is missing from lang/id.json.");
