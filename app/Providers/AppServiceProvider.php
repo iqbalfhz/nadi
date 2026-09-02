@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Listeners\LogAccessActivity;
+use App\Listeners\RecordBackupOutcome;
 use App\Settings\BackupSettings;
 use Carbon\CarbonImmutable;
 use Google\Client as GoogleClient;
@@ -37,6 +38,11 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureGoogleDriveDisk();
         $this->configureActivityLog();
+
+        // The nightly backup only reports failures by email, and this
+        // installation sends mail to the log file. This keeps the outcome
+        // somewhere the settings page can show it.
+        Event::subscribe(RecordBackupOutcome::class);
     }
 
     /**

@@ -7,12 +7,14 @@ use App\Settings\BackupSettings;
 use App\Support\BackupDrive;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -44,6 +46,20 @@ class ManageBackupSettings extends SettingsPage
     {
         return $schema
             ->components([
+                // First thing on the page, because "did last night's backup
+                // work?" is the question people actually come here with — and
+                // for weeks the honest answer was invisible, since failures are
+                // only reported by email and this installation sends mail to
+                // the log file.
+                Section::make('Backup Terakhir')
+                    ->description('Dicatat setiap kali backup selesai, jadi tidak perlu membuka Google Drive untuk tahu hasilnya.')
+                    ->icon(Heroicon::OutlinedClock)
+                    ->columnSpanFull()
+                    ->schema([
+                        Text::make(fn (): string => self::lastRunSummary())
+                            ->color(fn (): string => self::lastRunColor())
+                            ->columnSpanFull(),
+                    ]),
                 Section::make('Backup Otomatis')
                     ->description('Berjalan tiap hari lewat scheduler. Hanya modul Penomoran Dokumen yang dicadangkan — bukan seluruh data NADI.')
                     ->icon(Heroicon::OutlinedCircleStack)
@@ -108,6 +124,34 @@ class ManageBackupSettings extends SettingsPage
         }
 
         return $data;
+    }
+
+    private static function lastRunSummary(): string
+    {
+        $settings = app(BackupSettings::class);
+
+        if ($settings->last_run_at === '') {
+            return 'Belum pernah ada backup yang tercatat. Kalau backup otomatis baru saja dinyalakan, tunggu jadwal berikutnya (01:00) atau klik "Jalankan Backup Sekarang".';
+        }
+
+        $when = CarbonImmutable::parse($settings->last_run_at)->translatedFormat('d M Y H:i');
+
+        if ($settings->last_run_succeeded) {
+            return "Berhasil pada {$when}.";
+        }
+
+        return "Gagal pada {$when} — {$settings->last_run_message} Rincian lengkapnya ada di log.";
+    }
+
+    private static function lastRunColor(): string
+    {
+        $settings = app(BackupSettings::class);
+
+        return match (true) {
+            $settings->last_run_at === '' => 'gray',
+            $settings->last_run_succeeded => 'success',
+            default => 'danger',
+        };
     }
 
     protected function getHeaderActions(): array
