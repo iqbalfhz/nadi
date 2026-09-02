@@ -22,6 +22,7 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 require __DIR__.'/impersonation.php';
+require __DIR__.'/language.php';
 require __DIR__.'/legal.php';
 require __DIR__.'/queue.php';
 require __DIR__.'/security.php';

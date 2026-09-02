@@ -5,7 +5,9 @@ namespace App\Providers\Filament;
 use App\Filament\App\Pages\Security;
 use App\Filament\App\Widgets\DashboardStatsWidget;
 use App\Filament\App\Widgets\QuickLinksWidget;
+use App\Http\Middleware\SetInterfaceLanguage;
 use App\Providers\Filament\Concerns\HasImpersonationBanner;
+use App\Providers\Filament\Concerns\HasLanguageSwitcher;
 use App\Providers\Filament\Concerns\HasNadiSidebarCustomizations;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Actions\Action;
@@ -28,7 +30,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AppPanelProvider extends PanelProvider
 {
-    use HasImpersonationBanner, HasNadiSidebarCustomizations;
+    use HasImpersonationBanner, HasLanguageSwitcher, HasNadiSidebarCustomizations;
 
     public function panel(Panel $panel): Panel
     {
@@ -93,8 +95,15 @@ class AppPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                // After Authenticate: the choice lives on the account, so
+                // there is nobody to ask before this point.
+                SetInterfaceLanguage::class,
             ]);
 
-        return $this->withImpersonationBanner($this->withNadiSidebarCustomizations($panel));
+        return $this->withLanguageSwitcher(
+            $this->withImpersonationBanner(
+                $this->withNadiSidebarCustomizations($panel),
+            ),
+        );
     }
 }

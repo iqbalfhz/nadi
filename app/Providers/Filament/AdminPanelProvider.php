@@ -11,7 +11,9 @@ use App\Filament\Widgets\Dashboard\OperationalOverviewStats;
 use App\Filament\Widgets\Dashboard\QueueByCategoryChart;
 use App\Filament\Widgets\Dashboard\RevenueChart;
 use App\Filament\Widgets\Dashboard\SalesOverviewStats;
+use App\Http\Middleware\SetInterfaceLanguage;
 use App\Providers\Filament\Concerns\HasImpersonationBanner;
+use App\Providers\Filament\Concerns\HasLanguageSwitcher;
 use App\Providers\Filament\Concerns\HasNadiSidebarCustomizations;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Actions\Action;
@@ -35,7 +37,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
-    use HasImpersonationBanner, HasNadiSidebarCustomizations;
+    use HasImpersonationBanner, HasLanguageSwitcher, HasNadiSidebarCustomizations;
 
     public function panel(Panel $panel): Panel
     {
@@ -153,8 +155,15 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                // After Authenticate: the choice lives on the account, so
+                // there is nobody to ask before this point.
+                SetInterfaceLanguage::class,
             ]);
 
-        return $this->withImpersonationBanner($this->withNadiSidebarCustomizations($panel));
+        return $this->withLanguageSwitcher(
+            $this->withImpersonationBanner(
+                $this->withNadiSidebarCustomizations($panel),
+            ),
+        );
     }
 }
