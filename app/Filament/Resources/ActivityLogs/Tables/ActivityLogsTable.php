@@ -31,6 +31,17 @@ class ActivityLogsTable
                     ->placeholder('Sistem / tidak login')
                     ->searchable()
                     ->sortable(),
+                // Entries made while an admin was using "Masuk sebagai" belong
+                // to the employee's account but were not typed by them. Shown
+                // as its own column so it is visible while scanning, not buried
+                // in the detail view.
+                TextColumn::make('impersonated_by')
+                    ->label('Diwakili')
+                    ->badge()
+                    ->color('warning')
+                    ->icon(Heroicon::OutlinedUserCircle)
+                    ->placeholder('—')
+                    ->state(fn (ActivityLog $record): ?string => $record->impersonatorName()),
                 TextColumn::make('description')
                     ->label('Aktivitas')
                     ->searchable()

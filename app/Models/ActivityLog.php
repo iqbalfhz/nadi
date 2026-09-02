@@ -56,6 +56,28 @@ class ActivityLog extends Activity
     }
 
     /**
+     * The admin who was actually at the keyboard, when this entry was made
+     * while impersonating an employee.
+     *
+     * The entry still belongs to the employee — that is whose account acted —
+     * but without this, "Budi mengubah data" would be indistinguishable from
+     * an admin doing it through Budi's account. Stamped in
+     * AppServiceProvider::configureActivityLog().
+     */
+    public function impersonatorName(): ?string
+    {
+        $impersonator = $this->properties?->get('impersonated_by');
+
+        if (! is_array($impersonator)) {
+            return null;
+        }
+
+        $name = $impersonator['name'] ?? null;
+
+        return is_string($name) ? $name : null;
+    }
+
+    /**
      * What the entry is *about*, in words an admin recognises — the model's
      * own Indonesian label plus a readable title, falling back to the raw
      * class name for anything logged before a label existed.

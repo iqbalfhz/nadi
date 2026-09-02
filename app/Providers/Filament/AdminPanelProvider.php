@@ -11,6 +11,7 @@ use App\Filament\Widgets\Dashboard\OperationalOverviewStats;
 use App\Filament\Widgets\Dashboard\QueueByCategoryChart;
 use App\Filament\Widgets\Dashboard\RevenueChart;
 use App\Filament\Widgets\Dashboard\SalesOverviewStats;
+use App\Providers\Filament\Concerns\HasImpersonationBanner;
 use App\Providers\Filament\Concerns\HasNadiSidebarCustomizations;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Actions\Action;
@@ -34,7 +35,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
-    use HasNadiSidebarCustomizations;
+    use HasImpersonationBanner, HasNadiSidebarCustomizations;
 
     public function panel(Panel $panel): Panel
     {
@@ -154,6 +155,6 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ]);
 
-        return $this->withNadiSidebarCustomizations($panel);
+        return $this->withImpersonationBanner($this->withNadiSidebarCustomizations($panel));
     }
 }

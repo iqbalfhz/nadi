@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Listeners\LogAccessActivity;
 use App\Listeners\RecordBackupOutcome;
 use App\Settings\BackupSettings;
+use App\Support\Impersonation;
 use Carbon\CarbonImmutable;
 use Google\Client as GoogleClient;
 use Google\Service\Drive as GoogleDrive;
@@ -87,16 +88,35 @@ class AppServiceProvider extends ServiceProvider
         Event::subscribe(LogAccessActivity::class);
 
         Activity::creating(function (Activity $activity): void {
+            $properties = $activity->properties ?? collect();
+
+            // Two stamps with two different preconditions, so two different
+            // guards. Lumping them behind one check would silently drop the
+            // impersonation mark anywhere the IP happens to be unavailable.
+
             // Console runs (scheduler, seeders, artisan) have no request and
             // so no meaningful IP — leave it off rather than record a
             // misleading one.
-            if (app()->runningInConsole()) {
-                return;
+            if (! app()->runningInConsole()) {
+                $properties = $properties->put('ip', request()->ip());
             }
 
-            $properties = $activity->properties ?? collect();
+            // Impersonation is a property of the session, not the request.
+            // Without this, anything an admin changes while impersonating is
+            // recorded as the employee having done it — an audit trail that
+            // quietly lies is worse than none at all. The entry still belongs
+            // to the employee, because that is whose account acted; this names
+            // the hand that was actually on the keyboard.
+            $impersonator = Impersonation::isActive() ? Impersonation::impersonator() : null;
 
-            $activity->properties = $properties->put('ip', request()->ip());
+            if ($impersonator !== null) {
+                $properties = $properties->put('impersonated_by', [
+                    'id' => $impersonator->getKey(),
+                    'name' => $impersonator->name,
+                ]);
+            }
+
+            $activity->properties = $properties;
         });
     }
 

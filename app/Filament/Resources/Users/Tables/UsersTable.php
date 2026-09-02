@@ -3,10 +3,14 @@
 namespace App\Filament\Resources\Users\Tables;
 
 use App\Models\User;
+use App\Support\Impersonation;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -45,6 +49,27 @@ class UsersTable
             ])
             ->recordActions([
                 EditAction::make(),
+                // Answers "why can't I see the Bazar menu?" by showing the
+                // employee's own view instead of reasoning backwards from
+                // three stacked layers of roles.
+                Action::make('impersonate')
+                    ->label('Masuk sebagai')
+                    ->icon(Heroicon::OutlinedUserCircle)
+                    ->color('warning')
+                    // Same rule that guards the action itself: a button that
+                    // appears and then refuses is worse than no button.
+                    ->visible(fn (User $record): bool => Impersonation::isImpersonatable(self::currentUser(), $record))
+                    ->requiresConfirmation()
+                    ->modalHeading(fn (User $record): string => "Masuk sebagai {$record->name}?")
+                    ->modalDescription('Anda akan melihat NADI persis seperti yang dilihat karyawan ini. Perubahan apa pun tercatat atas namanya, disertai penanda bahwa Anda yang mengerjakannya.')
+                    ->modalSubmitActionLabel('Masuk sebagai dia')
+                    ->action(function (User $record) {
+                        Impersonation::start(self::currentUser(), $record);
+
+                        return redirect(Filament::getPanel(
+                            Impersonation::landingPanelFor($record) ?? 'app',
+                        )->getUrl());
+                    }),
                 DeleteAction::make()
                     ->visible(fn (User $record): bool => $record->id !== Auth::id()),
             ])
@@ -53,5 +78,18 @@ class UsersTable
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    /**
+     * This table only renders behind Filament's auth middleware, so there is
+     * always a user — the cast keeps that fact in one place instead of a null
+     * check at every call site.
+     */
+    private static function currentUser(): User
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        return $user;
     }
 }

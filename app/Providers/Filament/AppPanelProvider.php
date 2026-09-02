@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\App\Pages\Security;
 use App\Filament\App\Widgets\DashboardStatsWidget;
 use App\Filament\App\Widgets\QuickLinksWidget;
+use App\Providers\Filament\Concerns\HasImpersonationBanner;
 use App\Providers\Filament\Concerns\HasNadiSidebarCustomizations;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Actions\Action;
@@ -27,7 +28,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AppPanelProvider extends PanelProvider
 {
-    use HasNadiSidebarCustomizations;
+    use HasImpersonationBanner, HasNadiSidebarCustomizations;
 
     public function panel(Panel $panel): Panel
     {
@@ -94,6 +95,6 @@ class AppPanelProvider extends PanelProvider
                 Authenticate::class,
             ]);
 
-        return $this->withNadiSidebarCustomizations($panel);
+        return $this->withImpersonationBanner($this->withNadiSidebarCustomizations($panel));
     }
 }
