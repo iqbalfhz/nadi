@@ -19,15 +19,27 @@ class DepartmentResource extends Resource
 {
     protected static ?string $model = Department::class;
 
-    protected static ?string $pluralModelLabel = 'Departemen';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Departemen');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Penomoran Dokumen';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Penomoran Dokumen');
+    }
 
-    protected static ?string $navigationLabel = 'Departemen';
+    public static function getNavigationLabel(): string
+    {
+        return __('Departemen');
+    }
 
-    protected static ?string $modelLabel = 'Departemen';
+    public static function getModelLabel(): string
+    {
+        return __('Departemen');
+    }
 
     public static function form(Schema $schema): Schema
     {

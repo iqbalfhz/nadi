@@ -19,15 +19,27 @@ class AdvertisementResource extends Resource
 {
     protected static ?string $model = Advertisement::class;
 
-    protected static ?string $pluralModelLabel = 'Iklan Layar';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Iklan Layar');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFilm;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Antrian';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Antrian');
+    }
 
-    protected static ?string $navigationLabel = 'Iklan Layar';
+    public static function getNavigationLabel(): string
+    {
+        return __('Iklan Layar');
+    }
 
-    protected static ?string $modelLabel = 'Iklan Layar';
+    public static function getModelLabel(): string
+    {
+        return __('Iklan Layar');
+    }
 
     public static function form(Schema $schema): Schema
     {

@@ -19,15 +19,27 @@ class CompanyResource extends Resource
 {
     protected static ?string $model = Company::class;
 
-    protected static ?string $pluralModelLabel = 'PT';
+    public static function getPluralModelLabel(): string
+    {
+        return __('PT');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Penomoran Dokumen';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Penomoran Dokumen');
+    }
 
-    protected static ?string $navigationLabel = 'PT';
+    public static function getNavigationLabel(): string
+    {
+        return __('PT');
+    }
 
-    protected static ?string $modelLabel = 'PT';
+    public static function getModelLabel(): string
+    {
+        return __('PT');
+    }
 
     public static function form(Schema $schema): Schema
     {

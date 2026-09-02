@@ -20,15 +20,27 @@ class HkCategoryResource extends Resource
 {
     protected static ?string $model = HkCategory::class;
 
-    protected static ?string $modelLabel = 'Kategori HK';
+    public static function getModelLabel(): string
+    {
+        return __('Kategori HK');
+    }
 
-    protected static ?string $pluralModelLabel = 'Kategori HK';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Kategori HK');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
 
-    protected static string|UnitEnum|null $navigationGroup = 'HK';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('HK');
+    }
 
-    protected static ?string $navigationLabel = 'Kategori';
+    public static function getNavigationLabel(): string
+    {
+        return __('Kategori');
+    }
 
     protected static ?int $navigationSort = 1;
 

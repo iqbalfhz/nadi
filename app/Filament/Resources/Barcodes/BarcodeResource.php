@@ -19,15 +19,27 @@ class BarcodeResource extends Resource
 {
     protected static ?string $model = Barcode::class;
 
-    protected static ?string $pluralModelLabel = 'Riwayat Barcode';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Riwayat Barcode');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQrCode;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tools';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Tools');
+    }
 
-    protected static ?string $navigationLabel = 'Riwayat Barcode';
+    public static function getNavigationLabel(): string
+    {
+        return __('Riwayat Barcode');
+    }
 
-    protected static ?string $modelLabel = 'Barcode';
+    public static function getModelLabel(): string
+    {
+        return __('Barcode');
+    }
 
     /**
      * @return Builder<Barcode>

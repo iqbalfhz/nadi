@@ -23,15 +23,27 @@ class EventResource extends Resource
 {
     protected static ?string $model = Event::class;
 
-    protected static ?string $pluralModelLabel = 'Event';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Event');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tiket Event';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Tiket Event');
+    }
 
-    protected static ?string $navigationLabel = 'Event';
+    public static function getNavigationLabel(): string
+    {
+        return __('Event');
+    }
 
-    protected static ?string $modelLabel = 'Event';
+    public static function getModelLabel(): string
+    {
+        return __('Event');
+    }
 
     /**
      * @return Builder<Event>

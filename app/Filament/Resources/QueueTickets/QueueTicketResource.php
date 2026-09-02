@@ -18,15 +18,27 @@ class QueueTicketResource extends Resource
 {
     protected static ?string $model = QueueTicket::class;
 
-    protected static ?string $pluralModelLabel = 'Riwayat Tiket Antrian';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Riwayat Tiket Antrian');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Antrian';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Antrian');
+    }
 
-    protected static ?string $navigationLabel = 'Riwayat Tiket';
+    public static function getNavigationLabel(): string
+    {
+        return __('Riwayat Tiket');
+    }
 
-    protected static ?string $modelLabel = 'Tiket Antrian';
+    public static function getModelLabel(): string
+    {
+        return __('Tiket Antrian');
+    }
 
     // Tickets are only ever created via the public kiosk and progressed by
     // operators — this resource exists purely so admins can browse history.

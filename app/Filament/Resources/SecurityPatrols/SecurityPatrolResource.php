@@ -19,15 +19,27 @@ class SecurityPatrolResource extends Resource
 {
     protected static ?string $model = SecurityPatrol::class;
 
-    protected static ?string $pluralModelLabel = 'Riwayat Patroli';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Riwayat Patroli');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Security';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Security');
+    }
 
-    protected static ?string $navigationLabel = 'Riwayat Patroli';
+    public static function getNavigationLabel(): string
+    {
+        return __('Riwayat Patroli');
+    }
 
-    protected static ?string $modelLabel = 'Patroli Security';
+    public static function getModelLabel(): string
+    {
+        return __('Patroli Security');
+    }
 
     /**
      * @return Builder<SecurityPatrol>

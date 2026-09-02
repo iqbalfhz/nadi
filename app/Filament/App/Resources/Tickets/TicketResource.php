@@ -24,15 +24,27 @@ class TicketResource extends Resource
 {
     protected static ?string $model = Ticket::class;
 
-    protected static ?string $modelLabel = 'Tiket Event';
+    public static function getModelLabel(): string
+    {
+        return __('Tiket Event');
+    }
 
-    protected static ?string $pluralModelLabel = 'Laporan Penjualan Tiket';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Laporan Penjualan Tiket');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptPercent;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tiket Event';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Tiket Event');
+    }
 
-    protected static ?string $navigationLabel = 'Laporan Penjualan Tiket';
+    public static function getNavigationLabel(): string
+    {
+        return __('Laporan Penjualan Tiket');
+    }
 
     /**
      * @return Builder<Ticket>

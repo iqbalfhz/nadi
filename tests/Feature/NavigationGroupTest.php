@@ -7,7 +7,6 @@ use Filament\Navigation\NavigationGroup;
 use Filament\Resources\Resource;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ReflectionClass;
 use Tests\TestCase;
 
 /**
@@ -31,6 +30,16 @@ class NavigationGroupTest extends TestCase
         return [['admin'], ['app']];
     }
 
+    /**
+     * Deliberately checked in one language only.
+     *
+     * A version of this that re-ran under `en` was written and then removed: a
+     * missing translation makes __() return the source string on *both* sides,
+     * so the two still match and the test can never fail independently. What
+     * actually protects English is
+     * InterfaceLanguageTest::test_every_translatable_string_in_the_code_has_an_english_counterpart,
+     * which fails when an entry is missing from lang/en.json.
+     */
     #[DataProvider('panels')]
     public function test_every_group_a_resource_uses_is_registered_on_its_panel(string $panelId): void
     {
@@ -74,10 +83,13 @@ class NavigationGroupTest extends TestCase
     /**
      * @param  class-string<resource>  $resource
      */
+    /**
+     * Read through the method, not the static property it replaced: the group
+     * name is translated now, and a property initialiser cannot call __().
+     */
     private static function groupOf(string $resource): ?string
     {
-        $property = (new ReflectionClass($resource))->getProperty('navigationGroup');
-        $value = $property->getValue();
+        $value = $resource::getNavigationGroup();
 
         return is_string($value) ? $value : null;
     }

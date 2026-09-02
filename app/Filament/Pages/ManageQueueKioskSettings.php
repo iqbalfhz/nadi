@@ -12,6 +12,7 @@ use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use UnitEnum;
 
 class ManageQueueKioskSettings extends SettingsPage
@@ -25,11 +26,20 @@ class ManageQueueKioskSettings extends SettingsPage
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Antrian';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Antrian');
+    }
 
-    protected static ?string $navigationLabel = 'Kiosk Antrian';
+    public static function getNavigationLabel(): string
+    {
+        return __('Kiosk Antrian');
+    }
 
-    protected static ?string $title = 'Pengaturan Kiosk Antrian';
+    public function getTitle(): string|Htmlable
+    {
+        return __('Pengaturan Kiosk Antrian');
+    }
 
     protected static string $settings = QueueKioskSettings::class;
 

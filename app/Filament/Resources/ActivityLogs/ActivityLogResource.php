@@ -23,13 +23,25 @@ class ActivityLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Sistem';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Sistem');
+    }
 
-    protected static ?string $navigationLabel = 'Riwayat Aktivitas';
+    public static function getNavigationLabel(): string
+    {
+        return __('Riwayat Aktivitas');
+    }
 
-    protected static ?string $modelLabel = 'Riwayat Aktivitas';
+    public static function getModelLabel(): string
+    {
+        return __('Riwayat Aktivitas');
+    }
 
-    protected static ?string $pluralModelLabel = 'Riwayat Aktivitas';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Riwayat Aktivitas');
+    }
 
     public static function getEloquentQuery(): Builder
     {

@@ -19,13 +19,22 @@ class AreaResource extends Resource
 {
     protected static ?string $model = Area::class;
 
-    protected static ?string $modelLabel = 'Lokasi';
+    public static function getModelLabel(): string
+    {
+        return __('Lokasi');
+    }
 
-    protected static ?string $pluralModelLabel = 'Lokasi';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Lokasi');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Booking Room';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Booking Room');
+    }
 
     public static function form(Schema $schema): Schema
     {

@@ -19,15 +19,27 @@ class ObChecklistResource extends Resource
 {
     protected static ?string $model = ObChecklist::class;
 
-    protected static ?string $pluralModelLabel = 'Riwayat Checklist OB';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Riwayat Checklist OB');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
 
-    protected static string|UnitEnum|null $navigationGroup = 'OB';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('OB');
+    }
 
-    protected static ?string $navigationLabel = 'Riwayat Checklist';
+    public static function getNavigationLabel(): string
+    {
+        return __('Riwayat Checklist');
+    }
 
-    protected static ?string $modelLabel = 'Checklist OB';
+    public static function getModelLabel(): string
+    {
+        return __('Checklist OB');
+    }
 
     /**
      * @return Builder<ObChecklist>

@@ -11,6 +11,7 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
@@ -26,11 +27,20 @@ class SellTicket extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tiket Event';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Tiket Event');
+    }
 
-    protected static ?string $navigationLabel = 'Jual Tiket';
+    public static function getNavigationLabel(): string
+    {
+        return __('Jual Tiket');
+    }
 
-    protected static ?string $title = 'Jual Tiket';
+    public function getTitle(): string|Htmlable
+    {
+        return __('Jual Tiket');
+    }
 
     public ?int $eventId = null;
 

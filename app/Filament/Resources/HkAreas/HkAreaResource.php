@@ -20,15 +20,27 @@ class HkAreaResource extends Resource
 {
     protected static ?string $model = HkArea::class;
 
-    protected static ?string $modelLabel = 'Titik HK';
+    public static function getModelLabel(): string
+    {
+        return __('Titik HK');
+    }
 
-    protected static ?string $pluralModelLabel = 'Titik HK';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Titik HK');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMapPin;
 
-    protected static string|UnitEnum|null $navigationGroup = 'HK';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('HK');
+    }
 
-    protected static ?string $navigationLabel = 'Titik';
+    public static function getNavigationLabel(): string
+    {
+        return __('Titik');
+    }
 
     protected static ?int $navigationSort = 2;
 

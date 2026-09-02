@@ -25,13 +25,25 @@ class ObChecklistResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
 
-    protected static string|UnitEnum|null $navigationGroup = 'OB';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('OB');
+    }
 
-    protected static ?string $navigationLabel = 'Checklist Saya';
+    public static function getNavigationLabel(): string
+    {
+        return __('Checklist Saya');
+    }
 
-    protected static ?string $modelLabel = 'Checklist OB';
+    public static function getModelLabel(): string
+    {
+        return __('Checklist OB');
+    }
 
-    protected static ?string $pluralModelLabel = 'Checklist Saya';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Checklist Saya');
+    }
 
     public static function form(Schema $schema): Schema
     {

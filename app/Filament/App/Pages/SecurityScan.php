@@ -15,6 +15,7 @@ use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -29,7 +30,10 @@ class SecurityScan extends Page
     // Reached only via QR scan, never from the sidebar.
     protected static bool $shouldRegisterNavigation = false;
 
-    protected static ?string $title = 'Lapor Patroli';
+    public function getTitle(): string|Htmlable
+    {
+        return __('Lapor Patroli');
+    }
 
     public ?SecurityCheckpoint $checkpoint = null;
 

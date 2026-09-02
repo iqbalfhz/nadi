@@ -63,13 +63,18 @@ class AppPanelProvider extends PanelProvider
             // Security have no grouped /app pages, so they aren't listed —
             // they render as flat top-level items instead.
             ->navigationGroups([
-                NavigationGroup::make('Booking Room')->icon(Heroicon::OutlinedCalendarDays),
-                NavigationGroup::make('OB')->icon(Heroicon::OutlinedClipboardDocumentCheck),
-                NavigationGroup::make('HK')->icon(Heroicon::OutlinedSparkles),
-                NavigationGroup::make('Messenger')->icon(Heroicon::OutlinedTruck),
-                NavigationGroup::make('Tiket Event')->icon(Heroicon::OutlinedTicket),
-                NavigationGroup::make('Bazar')->icon(Heroicon::OutlinedBuildingStorefront),
-                NavigationGroup::make('Tools')->icon(Heroicon::OutlinedWrenchScrewdriver),
+                // Closures, not bare __(): this provider runs at boot, before
+                // the middleware that applies the user's language. A closure
+                // defers the lookup to render time — and these labels must
+                // match what the resources return, or the group silently loses
+                // its icon and its place in the order.
+                NavigationGroup::make(fn (): string => __('Booking Room'))->icon(Heroicon::OutlinedCalendarDays),
+                NavigationGroup::make(fn (): string => __('OB'))->icon(Heroicon::OutlinedClipboardDocumentCheck),
+                NavigationGroup::make(fn (): string => __('HK'))->icon(Heroicon::OutlinedSparkles),
+                NavigationGroup::make(fn (): string => __('Messenger'))->icon(Heroicon::OutlinedTruck),
+                NavigationGroup::make(fn (): string => __('Tiket Event'))->icon(Heroicon::OutlinedTicket),
+                NavigationGroup::make(fn (): string => __('Bazar'))->icon(Heroicon::OutlinedBuildingStorefront),
+                NavigationGroup::make(fn (): string => __('Tools'))->icon(Heroicon::OutlinedWrenchScrewdriver),
                 NavigationGroup::make('Filament Shield'),
             ])
             // Filament's own name/email/password page, rendered inside the panel

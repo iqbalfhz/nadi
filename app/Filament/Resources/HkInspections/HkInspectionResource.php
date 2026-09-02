@@ -19,15 +19,27 @@ class HkInspectionResource extends Resource
 {
     protected static ?string $model = HkInspection::class;
 
-    protected static ?string $modelLabel = 'Checklist HK';
+    public static function getModelLabel(): string
+    {
+        return __('Checklist HK');
+    }
 
-    protected static ?string $pluralModelLabel = 'Laporan HK';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Laporan HK');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
-    protected static string|UnitEnum|null $navigationGroup = 'HK';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('HK');
+    }
 
-    protected static ?string $navigationLabel = 'Riwayat Laporan';
+    public static function getNavigationLabel(): string
+    {
+        return __('Riwayat Laporan');
+    }
 
     protected static ?int $navigationSort = 3;
 

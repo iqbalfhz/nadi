@@ -85,23 +85,28 @@ class AdminPanelProvider extends PanelProvider
             // resource-discovery order, which is arbitrary and was the whole
             // reason this sidebar felt disorganized.
             ->navigationGroups([
-                NavigationGroup::make('Penomoran Dokumen')->icon(Heroicon::OutlinedDocumentDuplicate),
-                NavigationGroup::make('Booking Room')->icon(Heroicon::OutlinedCalendarDays),
-                NavigationGroup::make('Antrian')->icon(Heroicon::OutlinedQueueList),
-                NavigationGroup::make('OB')->icon(Heroicon::OutlinedClipboardDocumentCheck),
-                NavigationGroup::make('Security')->icon(Heroicon::OutlinedShieldCheck),
-                NavigationGroup::make('HK')->icon(Heroicon::OutlinedSparkles),
-                NavigationGroup::make('Messenger')->icon(Heroicon::OutlinedTruck),
-                NavigationGroup::make('Tiket Event')->icon(Heroicon::OutlinedTicket),
-                NavigationGroup::make('Bazar')->icon(Heroicon::OutlinedBuildingStorefront),
-                NavigationGroup::make('Tools')->icon(Heroicon::OutlinedWrenchScrewdriver),
-                NavigationGroup::make('Pengguna')->icon(Heroicon::OutlinedUsers),
+                // Closures, not bare __(): this provider runs at boot, before
+                // the middleware that applies the user's language. A closure
+                // defers the lookup to render time — and these labels must
+                // match what the resources return, or the group silently loses
+                // its icon and its place in the order.
+                NavigationGroup::make(fn (): string => __('Penomoran Dokumen'))->icon(Heroicon::OutlinedDocumentDuplicate),
+                NavigationGroup::make(fn (): string => __('Booking Room'))->icon(Heroicon::OutlinedCalendarDays),
+                NavigationGroup::make(fn (): string => __('Antrian'))->icon(Heroicon::OutlinedQueueList),
+                NavigationGroup::make(fn (): string => __('OB'))->icon(Heroicon::OutlinedClipboardDocumentCheck),
+                NavigationGroup::make(fn (): string => __('Security'))->icon(Heroicon::OutlinedShieldCheck),
+                NavigationGroup::make(fn (): string => __('HK'))->icon(Heroicon::OutlinedSparkles),
+                NavigationGroup::make(fn (): string => __('Messenger'))->icon(Heroicon::OutlinedTruck),
+                NavigationGroup::make(fn (): string => __('Tiket Event'))->icon(Heroicon::OutlinedTicket),
+                NavigationGroup::make(fn (): string => __('Bazar'))->icon(Heroicon::OutlinedBuildingStorefront),
+                NavigationGroup::make(fn (): string => __('Tools'))->icon(Heroicon::OutlinedWrenchScrewdriver),
+                NavigationGroup::make(fn (): string => __('Pengguna'))->icon(Heroicon::OutlinedUsers),
                 // No ->icon() override — this only controls where the
                 // Shield plugin's own group lands in the order, not its
                 // appearance. Mixing bare strings into this array (rather
                 // than NavigationGroup instances) throws at render time.
                 NavigationGroup::make('Filament Shield'),
-                NavigationGroup::make('Sistem')->icon(Heroicon::OutlinedCog6Tooth),
+                NavigationGroup::make(fn (): string => __('Sistem'))->icon(Heroicon::OutlinedCog6Tooth),
             ])
             ->middleware([
                 EncryptCookies::class,

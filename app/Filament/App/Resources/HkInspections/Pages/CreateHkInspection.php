@@ -7,13 +7,17 @@ use App\Filament\App\Resources\HkInspections\HkInspectionResource;
 use App\Jobs\SendHkInspectionToTelegram;
 use App\Models\HkArea;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 
 class CreateHkInspection extends CreateRecord
 {
     protected static string $resource = HkInspectionResource::class;
 
-    protected static ?string $title = 'Isi Laporan HK';
+    public function getTitle(): string|Htmlable
+    {
+        return __('Isi Laporan HK');
+    }
 
     /**
      * @param  array<string, mixed>  $data

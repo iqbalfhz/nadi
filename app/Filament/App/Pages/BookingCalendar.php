@@ -7,6 +7,7 @@ use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use UnitEnum;
 
 class BookingCalendar extends Page
@@ -17,11 +18,20 @@ class BookingCalendar extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Booking Room';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Booking Room');
+    }
 
-    protected static ?string $navigationLabel = 'Kalender Ruangan';
+    public static function getNavigationLabel(): string
+    {
+        return __('Kalender Ruangan');
+    }
 
-    protected static ?string $title = 'Kalender Ruangan';
+    public function getTitle(): string|Htmlable
+    {
+        return __('Kalender Ruangan');
+    }
 
     protected function getHeaderWidgets(): array
     {

@@ -18,6 +18,7 @@ use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -34,11 +35,20 @@ class ManageBackupSettings extends SettingsPage
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCircleStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Sistem';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Sistem');
+    }
 
-    protected static ?string $navigationLabel = 'Backup Penomoran Dokumen';
+    public static function getNavigationLabel(): string
+    {
+        return __('Backup Penomoran Dokumen');
+    }
 
-    protected static ?string $title = 'Pengaturan Backup Penomoran Dokumen';
+    public function getTitle(): string|Htmlable
+    {
+        return __('Pengaturan Backup Penomoran Dokumen');
+    }
 
     protected static string $settings = BackupSettings::class;
 

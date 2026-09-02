@@ -23,15 +23,27 @@ class BazaarResource extends Resource
 {
     protected static ?string $model = Bazaar::class;
 
-    protected static ?string $pluralModelLabel = 'Bazar';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Bazar');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Bazar';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Bazar');
+    }
 
-    protected static ?string $navigationLabel = 'Bazar';
+    public static function getNavigationLabel(): string
+    {
+        return __('Bazar');
+    }
 
-    protected static ?string $modelLabel = 'Bazar';
+    public static function getModelLabel(): string
+    {
+        return __('Bazar');
+    }
 
     /**
      * @return Builder<Bazaar>

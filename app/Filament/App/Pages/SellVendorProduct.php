@@ -13,6 +13,7 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
@@ -28,11 +29,20 @@ class SellVendorProduct extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Bazar';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Bazar');
+    }
 
-    protected static ?string $navigationLabel = 'Jual Produk Bazar';
+    public static function getNavigationLabel(): string
+    {
+        return __('Jual Produk Bazar');
+    }
 
-    protected static ?string $title = 'Jual Produk Bazar';
+    public function getTitle(): string|Htmlable
+    {
+        return __('Jual Produk Bazar');
+    }
 
     public ?int $bazaarId = null;
 

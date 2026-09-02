@@ -18,15 +18,27 @@ class DocumentResource extends Resource
 {
     protected static ?string $model = Document::class;
 
-    protected static ?string $pluralModelLabel = 'Dokumen';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Dokumen');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Penomoran Dokumen';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Penomoran Dokumen');
+    }
 
-    protected static ?string $navigationLabel = 'Dokumen';
+    public static function getNavigationLabel(): string
+    {
+        return __('Dokumen');
+    }
 
-    protected static ?string $modelLabel = 'Dokumen';
+    public static function getModelLabel(): string
+    {
+        return __('Dokumen');
+    }
 
     public static function form(Schema $schema): Schema
     {

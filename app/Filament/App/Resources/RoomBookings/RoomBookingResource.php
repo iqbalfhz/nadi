@@ -22,13 +22,25 @@ class RoomBookingResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Booking Room';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Booking Room');
+    }
 
-    protected static ?string $modelLabel = 'Booking Ruangan';
+    public static function getModelLabel(): string
+    {
+        return __('Booking Ruangan');
+    }
 
-    protected static ?string $navigationLabel = 'Booking Saya';
+    public static function getNavigationLabel(): string
+    {
+        return __('Booking Saya');
+    }
 
-    protected static ?string $pluralModelLabel = 'Booking Saya';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Booking Saya');
+    }
 
     public static function table(Table $table): Table
     {

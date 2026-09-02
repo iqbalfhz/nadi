@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Filament\Concerns\ManagesTwoFactor;
 use Filament\Pages\Page;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * Two-factor management for /admin.
@@ -38,7 +39,10 @@ class Security extends Page
      */
     protected static bool $shouldRegisterNavigation = false;
 
-    protected static ?string $title = 'Keamanan Akun';
+    public function getTitle(): string|Htmlable
+    {
+        return __('Keamanan Akun');
+    }
 
     protected string $view = 'filament.pages.security';
 

@@ -19,15 +19,27 @@ class ShortLinkResource extends Resource
 {
     protected static ?string $model = ShortLink::class;
 
-    protected static ?string $pluralModelLabel = 'Short Link';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Short Link');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tools';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Tools');
+    }
 
-    protected static ?string $navigationLabel = 'Short Link';
+    public static function getNavigationLabel(): string
+    {
+        return __('Short Link');
+    }
 
-    protected static ?string $modelLabel = 'Short Link';
+    public static function getModelLabel(): string
+    {
+        return __('Short Link');
+    }
 
     /**
      * @return Builder<ShortLink>

@@ -6,7 +6,7 @@ use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ReflectionClass;
+use ReflectionMethod;
 use Tests\TestCase;
 
 /**
@@ -48,18 +48,18 @@ class InterfaceLanguageTest extends TestCase
                     continue;
                 }
 
-                foreach (['modelLabel', 'pluralModelLabel'] as $property) {
-                    $declaration = (new ReflectionClass($resource))->getProperty($property);
+                foreach (['getModelLabel', 'getPluralModelLabel'] as $method) {
+                    $declaration = new ReflectionMethod($resource, $method);
 
                     $this->assertSame(
                         $resource,
                         $declaration->getDeclaringClass()->getName(),
-                        "[{$resource}] does not declare \${$property}, so Filament will invent one by pluralising the class name with English rules.",
+                        "[{$resource}] does not override {$method}(), so Filament will invent a name by pluralising the class with English rules.",
                     );
 
                     $this->assertNotEmpty(
-                        $declaration->getValue(),
-                        "[{$resource}] declares \${$property} but leaves it empty.",
+                        $resource::$method(),
+                        "[{$resource}] overrides {$method}() but returns nothing.",
                     );
                 }
 
@@ -188,6 +188,70 @@ class InterfaceLanguageTest extends TestCase
         }
 
         return $files;
+    }
+
+    /**
+     * Indonesian is the source language for NADI's own code, so every string
+     * wrapped in __() there needs an English counterpart — otherwise switching
+     * to English leaves that word in Indonesian, and the interface ends up
+     * half-translated in a way nobody notices until a user complains.
+     *
+     * The reverse direction (lang/id.json) is covered by the view test above.
+     */
+    public function test_every_translatable_string_in_the_code_has_an_english_counterpart(): void
+    {
+        $dictionary = json_decode((string) file_get_contents(lang_path('en.json')), true);
+
+        $this->assertIsArray($dictionary);
+
+        $missing = [];
+        $checked = 0;
+
+        foreach ($this->translatableStringsInCode() as $string => $file) {
+            $checked++;
+
+            if (! array_key_exists($string, $dictionary)) {
+                $missing[$string] = $file;
+            }
+        }
+
+        $this->assertGreaterThan(50, $checked, 'Expected to inspect every __() string under app/.');
+
+        $this->assertSame(
+            [],
+            $missing,
+            'These stay Indonesian when the interface is switched to English. Add each to lang/en.json.',
+        );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function translatableStringsInCode(): array
+    {
+        $strings = [];
+
+        $directory = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(app_path()),
+        );
+
+        foreach ($directory as $file) {
+            if ($file->getExtension() !== 'php') {
+                continue;
+            }
+
+            $source = (string) file_get_contents($file->getPathname());
+
+            if (! preg_match_all("/__\('((?:[^'\\\\]|\\\\.)*)'\)/", $source, $matches)) {
+                continue;
+            }
+
+            foreach ($matches[1] as $string) {
+                $strings[stripslashes($string)] = basename($file->getPathname());
+            }
+        }
+
+        return $strings;
     }
 
     /**

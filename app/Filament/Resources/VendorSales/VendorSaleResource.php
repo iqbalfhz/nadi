@@ -22,15 +22,27 @@ class VendorSaleResource extends Resource
 {
     protected static ?string $model = VendorSale::class;
 
-    protected static ?string $pluralModelLabel = 'Riwayat Penjualan Bazar';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Riwayat Penjualan Bazar');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptPercent;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Bazar';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Bazar');
+    }
 
-    protected static ?string $navigationLabel = 'Riwayat Penjualan Bazar';
+    public static function getNavigationLabel(): string
+    {
+        return __('Riwayat Penjualan Bazar');
+    }
 
-    protected static ?string $modelLabel = 'Penjualan Bazar';
+    public static function getModelLabel(): string
+    {
+        return __('Penjualan Bazar');
+    }
 
     /**
      * @return Builder<VendorSale>

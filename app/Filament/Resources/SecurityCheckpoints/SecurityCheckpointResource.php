@@ -19,15 +19,27 @@ class SecurityCheckpointResource extends Resource
 {
     protected static ?string $model = SecurityCheckpoint::class;
 
-    protected static ?string $pluralModelLabel = 'Titik Patroli';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Titik Patroli');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQrCode;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Security';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Security');
+    }
 
-    protected static ?string $navigationLabel = 'Titik Patroli';
+    public static function getNavigationLabel(): string
+    {
+        return __('Titik Patroli');
+    }
 
-    protected static ?string $modelLabel = 'Titik Patroli';
+    public static function getModelLabel(): string
+    {
+        return __('Titik Patroli');
+    }
 
     public static function form(Schema $schema): Schema
     {

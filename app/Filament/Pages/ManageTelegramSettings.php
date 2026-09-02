@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -34,11 +35,20 @@ class ManageTelegramSettings extends SettingsPage
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPaperAirplane;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Sistem';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Sistem');
+    }
 
-    protected static ?string $navigationLabel = 'Telegram';
+    public static function getNavigationLabel(): string
+    {
+        return __('Telegram');
+    }
 
-    protected static ?string $title = 'Pengaturan Telegram';
+    public function getTitle(): string|Htmlable
+    {
+        return __('Pengaturan Telegram');
+    }
 
     protected static string $settings = TelegramSettings::class;
 

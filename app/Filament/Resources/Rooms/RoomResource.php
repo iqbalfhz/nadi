@@ -19,13 +19,22 @@ class RoomResource extends Resource
 {
     protected static ?string $model = Room::class;
 
-    protected static ?string $modelLabel = 'Ruangan';
+    public static function getModelLabel(): string
+    {
+        return __('Ruangan');
+    }
 
-    protected static ?string $pluralModelLabel = 'Ruangan';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Ruangan');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Booking Room';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Booking Room');
+    }
 
     public static function form(Schema $schema): Schema
     {

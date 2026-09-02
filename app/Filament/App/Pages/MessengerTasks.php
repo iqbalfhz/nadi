@@ -12,6 +12,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
@@ -31,11 +32,20 @@ class MessengerTasks extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Messenger';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Messenger');
+    }
 
-    protected static ?string $navigationLabel = 'Tugas Messenger';
+    public static function getNavigationLabel(): string
+    {
+        return __('Tugas Messenger');
+    }
 
-    protected static ?string $title = 'Tugas Messenger';
+    public function getTitle(): string|Htmlable
+    {
+        return __('Tugas Messenger');
+    }
 
     public ?int $completingDeliveryId = null;
 

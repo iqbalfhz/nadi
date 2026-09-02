@@ -19,15 +19,27 @@ class QueueCategoryResource extends Resource
 {
     protected static ?string $model = QueueCategory::class;
 
-    protected static ?string $pluralModelLabel = 'Loket';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Loket');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQueueList;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Antrian';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Antrian');
+    }
 
-    protected static ?string $navigationLabel = 'Loket';
+    public static function getNavigationLabel(): string
+    {
+        return __('Loket');
+    }
 
-    protected static ?string $modelLabel = 'Loket';
+    public static function getModelLabel(): string
+    {
+        return __('Loket');
+    }
 
     public static function form(Schema $schema): Schema
     {

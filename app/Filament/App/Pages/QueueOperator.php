@@ -12,6 +12,7 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -25,9 +26,15 @@ class QueueOperator extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSpeakerWave;
 
-    protected static ?string $navigationLabel = 'Operator Antrian';
+    public static function getNavigationLabel(): string
+    {
+        return __('Operator Antrian');
+    }
 
-    protected static ?string $title = 'Operator Antrian';
+    public function getTitle(): string|Htmlable
+    {
+        return __('Operator Antrian');
+    }
 
     public ?int $categoryId = null;
 

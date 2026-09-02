@@ -19,15 +19,27 @@ class ObAreaResource extends Resource
 {
     protected static ?string $model = ObArea::class;
 
-    protected static ?string $pluralModelLabel = 'Area/Titik OB';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Area/Titik OB');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMapPin;
 
-    protected static string|UnitEnum|null $navigationGroup = 'OB';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('OB');
+    }
 
-    protected static ?string $navigationLabel = 'Area/Titik';
+    public static function getNavigationLabel(): string
+    {
+        return __('Area/Titik');
+    }
 
-    protected static ?string $modelLabel = 'Area/Titik OB';
+    public static function getModelLabel(): string
+    {
+        return __('Area/Titik OB');
+    }
 
     public static function form(Schema $schema): Schema
     {

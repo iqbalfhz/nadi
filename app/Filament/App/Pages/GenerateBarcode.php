@@ -10,6 +10,7 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Throwable;
@@ -23,11 +24,20 @@ class GenerateBarcode extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQrCode;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tools';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Tools');
+    }
 
-    protected static ?string $navigationLabel = 'Generator Barcode/QR';
+    public static function getNavigationLabel(): string
+    {
+        return __('Generator Barcode/QR');
+    }
 
-    protected static ?string $title = 'Generator Barcode/QR';
+    public function getTitle(): string|Htmlable
+    {
+        return __('Generator Barcode/QR');
+    }
 
     public string $format = '';
 

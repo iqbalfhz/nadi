@@ -25,13 +25,25 @@ class MessengerDeliveryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Messenger';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Messenger');
+    }
 
-    protected static ?string $navigationLabel = 'Pengiriman Saya';
+    public static function getNavigationLabel(): string
+    {
+        return __('Pengiriman Saya');
+    }
 
-    protected static ?string $modelLabel = 'Pengiriman';
+    public static function getModelLabel(): string
+    {
+        return __('Pengiriman');
+    }
 
-    protected static ?string $pluralModelLabel = 'Pengiriman Saya';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Pengiriman Saya');
+    }
 
     public static function form(Schema $schema): Schema
     {

@@ -19,15 +19,27 @@ class MessengerDeliveryResource extends Resource
 {
     protected static ?string $model = MessengerDelivery::class;
 
-    protected static ?string $pluralModelLabel = 'Riwayat Pengiriman';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Riwayat Pengiriman');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Messenger';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Messenger');
+    }
 
-    protected static ?string $navigationLabel = 'Riwayat Pengiriman';
+    public static function getNavigationLabel(): string
+    {
+        return __('Riwayat Pengiriman');
+    }
 
-    protected static ?string $modelLabel = 'Pengiriman';
+    public static function getModelLabel(): string
+    {
+        return __('Pengiriman');
+    }
 
     /**
      * @return Builder<MessengerDelivery>

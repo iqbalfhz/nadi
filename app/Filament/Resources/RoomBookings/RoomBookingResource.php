@@ -21,13 +21,22 @@ class RoomBookingResource extends Resource
 {
     protected static ?string $model = RoomBooking::class;
 
-    protected static ?string $modelLabel = 'Booking Ruangan';
+    public static function getModelLabel(): string
+    {
+        return __('Booking Ruangan');
+    }
 
-    protected static ?string $pluralModelLabel = 'Booking Ruangan';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Booking Ruangan');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Booking Room';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Booking Room');
+    }
 
     public static function form(Schema $schema): Schema
     {

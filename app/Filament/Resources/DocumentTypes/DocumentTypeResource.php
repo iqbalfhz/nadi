@@ -19,15 +19,27 @@ class DocumentTypeResource extends Resource
 {
     protected static ?string $model = DocumentType::class;
 
-    protected static ?string $pluralModelLabel = 'Jenis Dokumen';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Jenis Dokumen');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Penomoran Dokumen';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Penomoran Dokumen');
+    }
 
-    protected static ?string $navigationLabel = 'Jenis Dokumen';
+    public static function getNavigationLabel(): string
+    {
+        return __('Jenis Dokumen');
+    }
 
-    protected static ?string $modelLabel = 'Jenis Dokumen';
+    public static function getModelLabel(): string
+    {
+        return __('Jenis Dokumen');
+    }
 
     public static function form(Schema $schema): Schema
     {

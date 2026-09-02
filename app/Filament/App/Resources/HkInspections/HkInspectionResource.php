@@ -23,15 +23,27 @@ class HkInspectionResource extends Resource
 {
     protected static ?string $model = HkInspection::class;
 
-    protected static ?string $modelLabel = 'Checklist HK';
+    public static function getModelLabel(): string
+    {
+        return __('Checklist HK');
+    }
 
-    protected static ?string $pluralModelLabel = 'Laporan Saya';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Laporan Saya');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
-    protected static string|UnitEnum|null $navigationGroup = 'HK';
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('HK');
+    }
 
-    protected static ?string $navigationLabel = 'Laporan Saya';
+    public static function getNavigationLabel(): string
+    {
+        return __('Laporan Saya');
+    }
 
     public static function form(Schema $schema): Schema
     {
