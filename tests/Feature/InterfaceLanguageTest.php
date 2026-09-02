@@ -102,6 +102,99 @@ class InterfaceLanguageTest extends TestCase
     }
 
     /**
+     * Strings that legitimately reach the screen untranslated: either already
+     * written in Indonesian inside the view, or a word spelled the same in both
+     * languages.
+     *
+     * Anything else must have an entry in lang/id.json. Adding to this list is
+     * a deliberate act — that is the point.
+     *
+     * @var array<int, string>
+     */
+    private const PASSES_THROUGH_UNTRANSLATED = [
+        'Atau konfirmasi dengan password',
+        'Dashboard',
+        'Email',
+        'Ingat saya',
+        'Ini area aman — konfirmasi password Anda dulu untuk melanjutkan.',
+        'Konfirmasi',
+        'Konfirmasi Password',
+        'Konfirmasi dengan passkey',
+        'Lupa password?',
+        'Masuk',
+        'Masuk dengan akun NADI Anda untuk melanjutkan.',
+        'Mengonfirmasi...',
+        'Password',
+        'Platform',
+        'Repository',
+        'Selamat datang kembali',
+    ];
+
+    /**
+     * Every translatable string in every view, with no length limit.
+     *
+     * The audit script this replaces capped strings at 90 characters, so seven
+     * English paragraphs on the two-factor screen were never even looked at —
+     * including the one an employee reads while deciding whether to turn 2FA
+     * on. A cap is exactly the kind of quiet blind spot a test should not have.
+     */
+    public function test_no_view_shows_an_untranslated_string(): void
+    {
+        $dictionary = json_decode((string) file_get_contents(lang_path('id.json')), true);
+
+        $this->assertIsArray($dictionary);
+
+        $untranslated = [];
+        $checked = 0;
+
+        foreach ($this->viewFiles() as $file) {
+            $source = (string) file_get_contents($file);
+
+            if (! preg_match_all("/__\('([^']{2,400})'\)/", $source, $matches)) {
+                continue;
+            }
+
+            foreach ($matches[1] as $string) {
+                $checked++;
+
+                if (isset($dictionary[$string]) || in_array($string, self::PASSES_THROUGH_UNTRANSLATED, true)) {
+                    continue;
+                }
+
+                $untranslated[$string] = basename($file);
+            }
+        }
+
+        $this->assertGreaterThan(50, $checked, 'Expected to inspect every __() string in resources/views.');
+
+        $this->assertSame(
+            [],
+            $untranslated,
+            'These reach the screen in English. Add each to lang/id.json, or to PASSES_THROUGH_UNTRANSLATED if it is the same word in Indonesian.',
+        );
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function viewFiles(): array
+    {
+        $files = [];
+
+        $directory = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(resource_path('views')),
+        );
+
+        foreach ($directory as $file) {
+            if ($file->getExtension() === 'php') {
+                $files[] = $file->getPathname();
+            }
+        }
+
+        return $files;
+    }
+
+    /**
      * The login, password-reset and account-settings screens come from the
      * Livewire starter kit and are written against English source strings, so
      * lang/id.json is the only thing standing between an employee and a
