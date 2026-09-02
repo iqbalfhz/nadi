@@ -94,12 +94,13 @@ final class Impersonation
             ->performedOn($target)
             ->log("Mulai masuk sebagai {$target->name}");
 
-        // Regenerating on the way in *and* out: swapping identity while keeping
-        // the same session id is the textbook session-fixation shape.
-        Session::regenerate();
+        // Auth::login() migrates the session id itself, so identity never
+        // changes hands on the old id.
+        Auth::login($target);
+
         Session::put(self::SESSION_KEY, $actorId);
 
-        Auth::login($target);
+        self::syncSessionPasswordHash($target);
     }
 
     /**
@@ -120,9 +121,10 @@ final class Impersonation
         $target = Auth::user();
 
         Session::forget(self::SESSION_KEY);
-        Session::regenerate();
 
         Auth::login($impersonator);
+
+        self::syncSessionPasswordHash($impersonator);
 
         activity('akses')
             ->causedBy($impersonator)
@@ -135,6 +137,24 @@ final class Impersonation
     public static function isActive(): bool
     {
         return Session::has(self::SESSION_KEY);
+    }
+
+    /**
+     * Teach AuthenticateSession that this identity swap was intentional.
+     *
+     * Both panels run Illuminate\Session\Middleware\AuthenticateSession, which
+     * compares the password hash stored in the session against the signed-in
+     * user's and logs out on a mismatch — that is how it detects a stolen
+     * session. Auth::login() does not update that stored hash, so the very
+     * next request saw the admin's hash against the employee's account and
+     * threw the admin straight out to the login page.
+     */
+    private static function syncSessionPasswordHash(User $user): void
+    {
+        Session::put(
+            'password_hash_'.Auth::getDefaultDriver(),
+            $user->getAuthPassword(),
+        );
     }
 
     /**

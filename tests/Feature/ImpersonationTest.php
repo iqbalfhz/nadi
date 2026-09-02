@@ -12,6 +12,7 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -60,6 +61,70 @@ class ImpersonationTest extends TestCase
         $this->assertTrue(Auth::user()?->is($employee));
         $this->assertTrue(Impersonation::isActive());
         $this->assertTrue(Impersonation::impersonator()?->is($admin));
+    }
+
+    /**
+     * The bug this feature shipped with: impersonating threw the admin
+     * straight out to the login page on the very next request.
+     *
+     * Both panels run AuthenticateSession, which logs out whenever the
+     * password hash kept in the session stops matching the signed-in user's —
+     * its way of spotting a stolen session. Auth::login() leaves that stored
+     * hash alone, so an intentional swap looked exactly like a theft.
+     *
+     * Asserted on the session directly rather than through a request: the
+     * suite runs on SESSION_DRIVER=array, which starts every request with an
+     * empty session, so the middleware never finds a stale hash to disagree
+     * with. An earlier version of this test drove two real requests and passed
+     * against the broken code — proving nothing.
+     */
+    public function test_the_session_password_hash_follows_the_impersonated_user(): void
+    {
+        $admin = $this->superAdmin();
+        $employee = $this->employee();
+
+        $this->actingAs($admin);
+
+        Impersonation::start($admin, $employee);
+
+        $this->assertSame(
+            $employee->getAuthPassword(),
+            Session::get('password_hash_'.Auth::getDefaultDriver()),
+            'AuthenticateSession compares this against the signed-in user and logs out on a mismatch.',
+        );
+    }
+
+    public function test_the_session_password_hash_is_restored_on_the_way_back(): void
+    {
+        $admin = $this->superAdmin();
+        $employee = $this->employee();
+
+        $this->actingAs($admin);
+
+        Impersonation::start($admin, $employee);
+        Impersonation::stop();
+
+        $this->assertSame(
+            $admin->getAuthPassword(),
+            Session::get('password_hash_'.Auth::getDefaultDriver()),
+        );
+    }
+
+    /**
+     * A smoke test, not the guard above: it confirms an impersonated session
+     * can actually load a panel page end to end.
+     */
+    public function test_an_impersonated_session_can_open_the_targets_panel(): void
+    {
+        $admin = $this->superAdmin();
+        $employee = $this->employee(['ViewAny:ObChecklist', 'Create:ObChecklist']);
+
+        $this->actingAs($admin);
+        Impersonation::start($admin, $employee);
+
+        $this->get(Filament::getPanel('app')->getUrl())->assertSuccessful();
+
+        $this->assertAuthenticatedAs($employee);
     }
 
     public function test_stopping_restores_the_original_account(): void
