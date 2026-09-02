@@ -25,6 +25,7 @@ services:
       - nadi-redis
     volumes:
       - storage_app:/app/storage/app
+      - storage_logs:/app/storage/logs
 
   reverb:
     image: nadi-app:latest
@@ -39,6 +40,7 @@ services:
       - .env
     volumes:
       - storage_app:/app/storage/app
+      - storage_logs:/app/storage/logs
 
   scheduler:
     image: nadi-app:latest
@@ -51,19 +53,25 @@ services:
       - .env
     volumes:
       - storage_app:/app/storage/app
+      - storage_logs:/app/storage/logs
 
   # Runs queued jobs — currently the Telegram delivery for Checklist HK.
   # Without this the jobs are written to the database and simply sit there:
   # nothing fails visibly, the reports just never reach the group.
   #
   # Mounts storage_app because the job reads the inspection photos from the
-  # private 'internal' disk to upload them.
+  # private 'internal' disk in order to upload them to Telegram.
   queue:
     image: nadi-app:latest
     restart: unless-stopped
-    # --max-time recycles the worker hourly so a long-lived process can't
-    # accumulate leaked memory or hold stale code after a deploy.
-    command: php artisan queue:work --tries=3 --max-time=3600
+    # Deliberately no --max-time. It used to recycle the worker hourly, which
+    # bought nothing (a deploy already replaces the container, and this queue
+    # handles a handful of jobs a day) while making Coolify's restart counter
+    # climb by one every hour. That counter is the signal that caught the
+    # Redis crash loop at 18 restarts; it is worth keeping meaningful.
+    # The restart policy above already brings the worker back if it
+    # genuinely dies.
+    command: php artisan queue:work --tries=3
     depends_on:
       - app
       - nadi-redis
@@ -71,6 +79,7 @@ services:
       - .env
     volumes:
       - storage_app:/app/storage/app
+      - storage_logs:/app/storage/logs
 
   # Session and cache store, replacing the MySQL-backed drivers that added a
   # couple of queries to every single request. Runs as a service of this
@@ -121,3 +130,7 @@ services:
 
 volumes:
   storage_app:
+  # Logs live outside storage/app, so without this they sit in the container's
+  # writable layer and vanish on every redeploy — which is exactly the moment
+  # you reach for them, since fixing something usually means deploying.
+  storage_logs:
