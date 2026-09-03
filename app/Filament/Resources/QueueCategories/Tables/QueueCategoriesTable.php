@@ -16,17 +16,17 @@ class QueueCategoriesTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nama')
+                    ->label(__('Nama'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('code')
-                    ->label('Kode')
+                    ->label(__('Kode'))
                     ->badge(),
                 IconColumn::make('is_active')
-                    ->label('Aktif')
+                    ->label(__('Aktif'))
                     ->boolean(),
                 TextColumn::make('tickets_count')
-                    ->label('Total Tiket')
+                    ->label(__('Total Tiket'))
                     ->counts('tickets')
                     ->sortable(),
             ])

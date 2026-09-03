@@ -13,29 +13,29 @@ class QueueTicketInfolist
         return $schema
             ->components([
                 TextEntry::make('formatted_number')
-                    ->label('Nomor'),
+                    ->label(__('Nomor')),
                 TextEntry::make('category.name')
-                    ->label('Loket'),
+                    ->label(__('Loket')),
                 TextEntry::make('status')
-                    ->label('Status')
+                    ->label(__('Status'))
                     ->badge()
                     ->formatStateUsing(fn (QueueTicketStatus $state): string => $state->label()),
                 TextEntry::make('counter_label')
-                    ->label('Loket/Counter')
-                    ->placeholder('—'),
+                    ->label(__('Loket/Counter'))
+                    ->placeholder(__('—')),
                 TextEntry::make('calledByUser.name')
-                    ->label('Dipanggil Oleh')
-                    ->placeholder('—'),
+                    ->label(__('Dipanggil Oleh'))
+                    ->placeholder(__('—')),
                 TextEntry::make('called_at')
-                    ->label('Waktu Dipanggil')
+                    ->label(__('Waktu Dipanggil'))
                     ->dateTime()
-                    ->placeholder('—'),
+                    ->placeholder(__('—')),
                 TextEntry::make('done_at')
-                    ->label('Waktu Selesai/Dilewati')
+                    ->label(__('Waktu Selesai/Dilewati'))
                     ->dateTime()
-                    ->placeholder('—'),
+                    ->placeholder(__('—')),
                 TextEntry::make('created_at')
-                    ->label('Waktu Ambil Nomor')
+                    ->label(__('Waktu Ambil Nomor'))
                     ->dateTime(),
             ]);
     }

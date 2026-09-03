@@ -14,19 +14,19 @@ class QueueCategoryForm
     {
         return $schema
             ->components([
-                Section::make('Loket / Layanan')
-                    ->description('Tiap loket punya deret nomor antriannya sendiri, direset tiap hari.')
+                Section::make(__('Loket / Layanan'))
+                    ->description(__('Tiap loket punya deret nomor antriannya sendiri, direset tiap hari.'))
                     ->icon(Heroicon::OutlinedQueueList)
                     ->columnSpanFull()
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
-                            ->label('Nama Loket / Layanan')
+                            ->label(__('Nama Loket / Layanan'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('code')
-                            ->label('Kode Prefix')
-                            ->helperText('Contoh: A — dipakai sebagai awalan nomor antrian (A001, A002, ...).')
+                            ->label(__('Kode Prefix'))
+                            ->helperText(__('Contoh: A — dipakai sebagai awalan nomor antrian (A001, A002, ...).'))
                             ->required()
                             ->maxLength(4)
                             ->unique(ignoreRecord: true)
@@ -34,8 +34,8 @@ class QueueCategoryForm
                             ->formatStateUsing(fn (?string $state): ?string => $state ? strtoupper($state) : $state)
                             ->dehydrateStateUsing(fn (?string $state): ?string => $state ? strtoupper($state) : $state),
                         Toggle::make('is_active')
-                            ->label('Aktif')
-                            ->helperText('Hanya loket aktif yang muncul di kiosk & bisa dioperasikan.')
+                            ->label(__('Aktif'))
+                            ->helperText(__('Hanya loket aktif yang muncul di kiosk & bisa dioperasikan.'))
                             ->default(true)
                             ->columnSpanFull(),
                     ]),

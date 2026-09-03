@@ -30,22 +30,22 @@ class ListQueueTickets extends ListRecords
             // Respects whatever the "Tanggal"/"Status" table filters are
             // currently set to — exports the filtered list, not everything.
             ExportAction::make()
-                ->label('Export Excel')
+                ->label(__('Export Excel'))
                 ->after(fn () => $this->logDataAccess('Export Excel', 'Riwayat Tiket Antrian'))
                 ->exports([
                     ExcelExport::make('tiket')
                         ->withFilename(fn (): string => 'riwayat-tiket-antrian-'.now()->format('Y-m-d'))
                         ->withColumns([
-                            ExportColumn::make('formatted_number')->heading('Nomor'),
-                            ExportColumn::make('category.name')->heading('Loket'),
+                            ExportColumn::make('formatted_number')->heading(__('Nomor')),
+                            ExportColumn::make('category.name')->heading(__('Loket')),
                             ExportColumn::make('status')
-                                ->heading('Status')
+                                ->heading(__('Status'))
                                 ->formatStateUsing(fn (QueueTicketStatus $state): string => $state->label()),
-                            ExportColumn::make('counter_label')->heading('Loket/Counter'),
-                            ExportColumn::make('calledByUser.name')->heading('Dipanggil Oleh'),
-                            ExportColumn::make('called_at')->heading('Waktu Dipanggil'),
-                            ExportColumn::make('done_at')->heading('Waktu Selesai/Dilewati'),
-                            ExportColumn::make('created_at')->heading('Waktu Ambil Nomor'),
+                            ExportColumn::make('counter_label')->heading(__('Loket/Counter')),
+                            ExportColumn::make('calledByUser.name')->heading(__('Dipanggil Oleh')),
+                            ExportColumn::make('called_at')->heading(__('Waktu Dipanggil')),
+                            ExportColumn::make('done_at')->heading(__('Waktu Selesai/Dilewati')),
+                            ExportColumn::make('created_at')->heading(__('Waktu Ambil Nomor')),
                         ]),
                 ]),
         ];

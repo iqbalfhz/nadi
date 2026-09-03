@@ -17,29 +17,29 @@ class DocumentForm
     {
         return $schema
             ->components([
-                Section::make('Data Dokumen')
-                    ->description('Nomor urut dibuat otomatis dari jenis dokumen + PT, dan direset tiap bulan.')
+                Section::make(__('Data Dokumen'))
+                    ->description(__('Nomor urut dibuat otomatis dari jenis dokumen + PT, dan direset tiap bulan.'))
                     ->icon(Heroicon::OutlinedDocumentDuplicate)
                     ->columnSpanFull()
                     ->columns(3)
                     ->schema([
                         Select::make('document_type_id')
-                            ->label('Jenis Dokumen')
+                            ->label(__('Jenis Dokumen'))
                             ->options(fn () => DocumentType::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id'))
                             ->required()
                             ->searchable(),
                         Select::make('company_id')
-                            ->label('PT')
+                            ->label(__('PT'))
                             ->options(fn () => Company::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id'))
                             ->required()
                             ->searchable(),
                         Select::make('department_id')
-                            ->label('Departemen')
+                            ->label(__('Departemen'))
                             ->options(fn () => Department::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id'))
                             ->required()
                             ->searchable(),
                         Textarea::make('subject')
-                            ->label('Perihal')
+                            ->label(__('Perihal'))
                             ->required()
                             ->maxLength(255)
                             ->rows(3)

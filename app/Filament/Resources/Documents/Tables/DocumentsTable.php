@@ -20,26 +20,26 @@ class DocumentsTable
         return $table
             ->columns([
                 TextColumn::make('formatted_number')
-                    ->label('Nomor')
+                    ->label(__('Nomor'))
                     ->weight('bold')
                     ->searchable(query: fn (Builder $query, string $search): Builder => $query->where('number', 'like', "%{$search}%")),
                 TextColumn::make('subject')
-                    ->label('Perihal')
+                    ->label(__('Perihal'))
                     ->limit(50)
                     ->searchable(),
                 TextColumn::make('documentType.name')
-                    ->label('Jenis Dokumen')
+                    ->label(__('Jenis Dokumen'))
                     ->sortable(),
                 TextColumn::make('company.name')
-                    ->label('PT')
+                    ->label(__('PT'))
                     ->sortable(),
                 TextColumn::make('department.name')
-                    ->label('Departemen')
+                    ->label(__('Departemen'))
                     ->sortable(),
                 TextColumn::make('creator.name')
-                    ->label('Dibuat Oleh'),
+                    ->label(__('Dibuat Oleh')),
                 TextColumn::make('created_at')
-                    ->label('Tanggal')
+                    ->label(__('Tanggal'))
                     ->dateTime()
                     ->sortable(),
             ])
@@ -48,13 +48,13 @@ class DocumentsTable
                 // Defaults to the current month so this doesn't grow into an
                 // ever-longer unfiltered list — clear the dates for full history.
                 Filter::make('created_at')
-                    ->label('Tanggal')
+                    ->label(__('Tanggal'))
                     ->schema([
                         DatePicker::make('from')
-                            ->label('Dari Tanggal')
+                            ->label(__('Dari Tanggal'))
                             ->default(now()->startOfMonth()->toDateString()),
                         DatePicker::make('until')
-                            ->label('Sampai Tanggal')
+                            ->label(__('Sampai Tanggal'))
                             ->default(now()->toDateString()),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
@@ -84,13 +84,13 @@ class DocumentsTable
                         return $indicators;
                     }),
                 SelectFilter::make('document_type_id')
-                    ->label('Jenis Dokumen')
+                    ->label(__('Jenis Dokumen'))
                     ->options(fn () => DocumentType::query()->orderBy('name')->pluck('name', 'id')),
                 SelectFilter::make('company_id')
-                    ->label('PT')
+                    ->label(__('PT'))
                     ->options(fn () => Company::query()->orderBy('name')->pluck('name', 'id')),
                 SelectFilter::make('department_id')
-                    ->label('Departemen')
+                    ->label(__('Departemen'))
                     ->options(fn () => Department::query()->orderBy('name')->pluck('name', 'id')),
             ])
             ->recordActions([

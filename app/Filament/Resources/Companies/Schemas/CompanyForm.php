@@ -14,19 +14,19 @@ class CompanyForm
     {
         return $schema
             ->components([
-                Section::make('PT')
-                    ->description('Kode PT dipakai sebagai bagian dari nomor dokumen yang dihasilkan.')
+                Section::make(__('PT'))
+                    ->description(__('Kode PT dipakai sebagai bagian dari nomor dokumen yang dihasilkan.'))
                     ->icon(Heroicon::OutlinedBuildingOffice2)
                     ->columnSpanFull()
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
-                            ->label('Nama PT')
+                            ->label(__('Nama PT'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('code')
-                            ->label('Kode')
-                            ->helperText('Satu huruf, contoh: E untuk EFM, S untuk SSK.')
+                            ->label(__('Kode'))
+                            ->helperText(__('Satu huruf, contoh: E untuk EFM, S untuk SSK.'))
                             ->required()
                             ->maxLength(4)
                             ->unique(ignoreRecord: true)
@@ -34,8 +34,8 @@ class CompanyForm
                             ->formatStateUsing(fn (?string $state): ?string => $state ? strtoupper($state) : $state)
                             ->dehydrateStateUsing(fn (?string $state): ?string => $state ? strtoupper($state) : $state),
                         Toggle::make('is_active')
-                            ->label('Aktif')
-                            ->helperText('Hanya PT aktif yang bisa dipilih saat membuat dokumen baru.')
+                            ->label(__('Aktif'))
+                            ->helperText(__('Hanya PT aktif yang bisa dipilih saat membuat dokumen baru.'))
                             ->default(true)
                             ->columnSpanFull(),
                     ]),

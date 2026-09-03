@@ -17,7 +17,7 @@ class AreasTable
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('rooms_count')
-                    ->label('Jumlah Ruangan')
+                    ->label(__('Jumlah Ruangan'))
                     ->counts('rooms'),
             ])
             ->filters([

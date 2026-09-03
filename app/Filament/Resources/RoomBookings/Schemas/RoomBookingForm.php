@@ -20,13 +20,13 @@ class RoomBookingForm
     {
         return $schema
             ->components([
-                Section::make('Detail Booking')
+                Section::make(__('Detail Booking'))
                     ->icon(Heroicon::OutlinedCalendarDays)
                     ->columnSpanFull()
                     ->columns(2)
                     ->schema([
                         Select::make('room_id')
-                            ->label('Ruangan')
+                            ->label(__('Ruangan'))
                             ->options(fn () => Room::query()
                                 ->with('area')
                                 ->orderBy('name')
@@ -37,7 +37,7 @@ class RoomBookingForm
                             ->searchable()
                             ->live(),
                         Select::make('user_id')
-                            ->label('Dipesan Oleh')
+                            ->label(__('Dipesan Oleh'))
                             ->relationship('user', 'name')
                             ->searchable()
                             ->preload()
@@ -45,16 +45,16 @@ class RoomBookingForm
                         // Full width so the two date pickers below line up as
                         // one balanced row instead of leaving a gap beside it.
                         TextInput::make('title')
-                            ->label('Keperluan')
+                            ->label(__('Keperluan'))
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),
                         DateTimePicker::make('starts_at')
-                            ->label('Mulai')
+                            ->label(__('Mulai'))
                             ->required()
                             ->live(),
                         DateTimePicker::make('ends_at')
-                            ->label('Selesai')
+                            ->label(__('Selesai'))
                             ->required()
                             ->after('starts_at')
                             ->rule(fn (Get $get, ?RoomBooking $record) => function (string $attribute, $value, \Closure $fail) use ($get, $record) {

@@ -15,7 +15,7 @@ class RoomsTable
         return $table
             ->columns([
                 TextColumn::make('area.name')
-                    ->label('Area')
+                    ->label(__('Area'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('name')

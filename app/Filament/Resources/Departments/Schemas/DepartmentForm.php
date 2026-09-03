@@ -14,19 +14,19 @@ class DepartmentForm
     {
         return $schema
             ->components([
-                Section::make('Departemen')
-                    ->description('Kode departemen dipakai sebagai bagian dari nomor dokumen yang dihasilkan.')
+                Section::make(__('Departemen'))
+                    ->description(__('Kode departemen dipakai sebagai bagian dari nomor dokumen yang dihasilkan.'))
                     ->icon(Heroicon::OutlinedSquares2x2)
                     ->columnSpanFull()
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
-                            ->label('Nama Departemen')
+                            ->label(__('Nama Departemen'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('code')
-                            ->label('Kode')
-                            ->helperText('Contoh: TERE untuk Tenant Relation, EVEN untuk Promo & Event.')
+                            ->label(__('Kode'))
+                            ->helperText(__('Contoh: TERE untuk Tenant Relation, EVEN untuk Promo & Event.'))
                             ->required()
                             ->maxLength(10)
                             ->unique(ignoreRecord: true)
@@ -34,8 +34,8 @@ class DepartmentForm
                             ->formatStateUsing(fn (?string $state): ?string => $state ? strtoupper($state) : $state)
                             ->dehydrateStateUsing(fn (?string $state): ?string => $state ? strtoupper($state) : $state),
                         Toggle::make('is_active')
-                            ->label('Aktif')
-                            ->helperText('Hanya departemen aktif yang bisa dipilih saat membuat dokumen baru.')
+                            ->label(__('Aktif'))
+                            ->helperText(__('Hanya departemen aktif yang bisa dipilih saat membuat dokumen baru.'))
                             ->default(true)
                             ->columnSpanFull(),
                     ]),

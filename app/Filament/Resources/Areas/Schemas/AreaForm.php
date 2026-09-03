@@ -13,8 +13,8 @@ class AreaForm
     {
         return $schema
             ->components([
-                Section::make('Lokasi')
-                    ->description('Pengelompokan ruangan, misalnya lantai atau gedung — dipakai sebagai filter di kalender booking.')
+                Section::make(__('Lokasi'))
+                    ->description(__('Pengelompokan ruangan, misalnya lantai atau gedung — dipakai sebagai filter di kalender booking.'))
                     ->icon(Heroicon::OutlinedMapPin)
                     ->columnSpanFull()
                     ->schema([
@@ -22,7 +22,7 @@ class AreaForm
                         // it sits in the left half of the 2-column grid with an
                         // empty right half beside it.
                         TextInput::make('name')
-                            ->label('Nama Lokasi')
+                            ->label(__('Nama Lokasi'))
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),

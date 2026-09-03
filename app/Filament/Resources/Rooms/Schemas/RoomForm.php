@@ -14,7 +14,7 @@ class RoomForm
     {
         return $schema
             ->components([
-                Section::make('Ruangan')
+                Section::make(__('Ruangan'))
                     ->icon(Heroicon::OutlinedBuildingOffice)
                     ->columnSpanFull()
                     // Three columns so all three fields fill one tidy row,
@@ -22,17 +22,17 @@ class RoomForm
                     ->columns(3)
                     ->schema([
                         TextInput::make('name')
-                            ->label('Nama Ruangan')
+                            ->label(__('Nama Ruangan'))
                             ->required()
                             ->maxLength(255),
                         Select::make('area_id')
-                            ->label('Lokasi')
+                            ->label(__('Lokasi'))
                             ->relationship('area', 'name')
                             ->required()
                             ->searchable()
                             ->preload(),
                         TextInput::make('capacity')
-                            ->label('Kapasitas (orang)')
+                            ->label(__('Kapasitas (orang)'))
                             ->numeric()
                             ->minValue(1),
                     ]),

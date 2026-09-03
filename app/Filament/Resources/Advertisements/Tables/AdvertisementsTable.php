@@ -17,22 +17,22 @@ class AdvertisementsTable
         return $table
             ->columns([
                 TextColumn::make('title')
-                    ->label('Judul')
+                    ->label(__('Judul'))
                     ->searchable(),
                 TextColumn::make('type')
-                    ->label('Tipe')
+                    ->label(__('Tipe'))
                     ->state(fn (Advertisement $record): string => $record->isVideo() ? 'Video' : 'Gambar')
                     ->badge()
                     ->color(fn (Advertisement $record): string => $record->isVideo() ? 'info' : 'gray'),
                 TextColumn::make('duration_seconds')
-                    ->label('Durasi')
+                    ->label(__('Durasi'))
                     ->suffix(' detik')
-                    ->placeholder('Default (8 detik)'),
+                    ->placeholder(__('Default (8 detik)')),
                 TextColumn::make('sort_order')
-                    ->label('Urutan')
+                    ->label(__('Urutan'))
                     ->sortable(),
                 IconColumn::make('is_active')
-                    ->label('Aktif')
+                    ->label(__('Aktif'))
                     ->boolean(),
             ])
             ->defaultSort('sort_order')

@@ -15,21 +15,21 @@ class AdvertisementForm
     {
         return $schema
             ->components([
-                Section::make('Materi Iklan')
+                Section::make(__('Materi Iklan'))
                     ->icon(Heroicon::OutlinedFilm)
                     ->columnSpanFull()
                     ->schema([
                         TextInput::make('title')
-                            ->label('Judul')
-                            ->helperText('Untuk referensi Anda sendiri — tidak ditampilkan di layar.')
+                            ->label(__('Judul'))
+                            ->helperText(__('Untuk referensi Anda sendiri — tidak ditampilkan di layar.'))
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),
                         // A 45MB video/image dropzone needs the full row for its
                         // preview; half a column crops it to a sliver.
                         SpatieMediaLibraryFileUpload::make('file')
-                            ->label('Video atau Gambar')
-                            ->helperText('Maks. 45MB.')
+                            ->label(__('Video atau Gambar'))
+                            ->helperText(__('Maks. 45MB.'))
                             ->collection('file')
                             // Filament file uploads default to private (signed) URLs, but
                             // the queue display screen is public with no login — it can't
@@ -41,26 +41,26 @@ class AdvertisementForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Pemutaran di Layar Antrian')
+                Section::make(__('Pemutaran di Layar Antrian'))
                     ->icon(Heroicon::OutlinedClock)
                     ->columnSpanFull()
                     ->columns(2)
                     ->schema([
                         TextInput::make('duration_seconds')
-                            ->label('Durasi Tampil (detik)')
-                            ->helperText('Khusus untuk gambar — video otomatis diputar sampai selesai. Kosongkan untuk pakai default (8 detik).')
+                            ->label(__('Durasi Tampil (detik)'))
+                            ->helperText(__('Khusus untuk gambar — video otomatis diputar sampai selesai. Kosongkan untuk pakai default (8 detik).'))
                             ->numeric()
                             ->minValue(1)
                             ->maxValue(120),
                         TextInput::make('sort_order')
-                            ->label('Urutan')
-                            ->helperText('Angka lebih kecil tampil lebih dulu.')
+                            ->label(__('Urutan'))
+                            ->helperText(__('Angka lebih kecil tampil lebih dulu.'))
                             ->numeric()
                             ->default(0)
                             ->required(),
                         Toggle::make('is_active')
-                            ->label('Aktif')
-                            ->helperText('Hanya iklan aktif yang ikut diputar di layar antrian.')
+                            ->label(__('Aktif'))
+                            ->helperText(__('Hanya iklan aktif yang ikut diputar di layar antrian.'))
                             ->default(true)
                             ->columnSpanFull(),
                     ]),

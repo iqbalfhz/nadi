@@ -22,14 +22,14 @@ class QueueTicketsTable
         return $table
             ->columns([
                 TextColumn::make('formatted_number')
-                    ->label('Nomor')
+                    ->label(__('Nomor'))
                     ->weight('bold'),
                 TextColumn::make('category.name')
-                    ->label('Loket')
+                    ->label(__('Loket'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('status')
-                    ->label('Status')
+                    ->label(__('Status'))
                     ->badge()
                     ->formatStateUsing(fn (QueueTicketStatus $state): string => $state->label())
                     ->color(fn (QueueTicketStatus $state): string => match ($state) {
@@ -39,13 +39,13 @@ class QueueTicketsTable
                         QueueTicketStatus::Skipped => 'danger',
                     }),
                 TextColumn::make('counter_label')
-                    ->label('Loket/Counter')
-                    ->placeholder('—'),
+                    ->label(__('Loket/Counter'))
+                    ->placeholder(__('—')),
                 TextColumn::make('calledByUser.name')
-                    ->label('Dipanggil Oleh')
-                    ->placeholder('—'),
+                    ->label(__('Dipanggil Oleh'))
+                    ->placeholder(__('—')),
                 TextColumn::make('created_at')
-                    ->label('Diambil')
+                    ->label(__('Diambil'))
                     ->dateTime()
                     ->sortable(),
             ])
@@ -54,13 +54,13 @@ class QueueTicketsTable
                 // Defaults to today so this doesn't grow into an ever-longer,
                 // unfiltered list — clear the dates to see the full history.
                 Filter::make('created_at')
-                    ->label('Tanggal')
+                    ->label(__('Tanggal'))
                     ->schema([
                         DatePicker::make('from')
-                            ->label('Dari Tanggal')
+                            ->label(__('Dari Tanggal'))
                             ->default(now()->toDateString()),
                         DatePicker::make('until')
-                            ->label('Sampai Tanggal')
+                            ->label(__('Sampai Tanggal'))
                             ->default(now()->toDateString()),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
@@ -80,7 +80,7 @@ class QueueTicketsTable
                         return $indicators;
                     }),
                 SelectFilter::make('status')
-                    ->label('Status')
+                    ->label(__('Status'))
                     ->options(fn (): array => collect(QueueTicketStatus::cases())
                         ->mapWithKeys(fn (QueueTicketStatus $status) => [$status->value => $status->label()])
                         ->all()),
@@ -91,24 +91,24 @@ class QueueTicketsTable
                 // who called it never came back to resolve it. Otherwise these
                 // could only be fixed by editing the database directly.
                 Action::make('markDone')
-                    ->label('Tandai Selesai')
+                    ->label(__('Tandai Selesai'))
                     ->icon('heroicon-o-check')
                     ->color('success')
                     ->visible(fn (QueueTicket $record): bool => $record->status === QueueTicketStatus::Called)
                     ->authorize('update')
                     ->action(function (QueueTicket $record): void {
                         $record->update(['status' => QueueTicketStatus::Done, 'done_at' => Carbon::now()]);
-                        Notification::make()->title('Tiket ditandai selesai.')->success()->send();
+                        Notification::make()->title(__('Tiket ditandai selesai.'))->success()->send();
                     }),
                 Action::make('markSkipped')
-                    ->label('Tandai Dilewati')
+                    ->label(__('Tandai Dilewati'))
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
                     ->visible(fn (QueueTicket $record): bool => $record->status === QueueTicketStatus::Called)
                     ->authorize('update')
                     ->action(function (QueueTicket $record): void {
                         $record->update(['status' => QueueTicketStatus::Skipped, 'done_at' => Carbon::now()]);
-                        Notification::make()->title('Tiket ditandai dilewati.')->success()->send();
+                        Notification::make()->title(__('Tiket ditandai dilewati.'))->success()->send();
                     }),
             ]);
     }

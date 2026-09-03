@@ -16,14 +16,14 @@ class CompaniesTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nama PT')
+                    ->label(__('Nama PT'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('code')
-                    ->label('Kode')
+                    ->label(__('Kode'))
                     ->badge(),
                 IconColumn::make('is_active')
-                    ->label('Aktif')
+                    ->label(__('Aktif'))
                     ->boolean(),
             ])
             ->filters([

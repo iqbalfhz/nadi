@@ -16,14 +16,14 @@ class DepartmentsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nama Departemen')
+                    ->label(__('Nama Departemen'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('code')
-                    ->label('Kode')
+                    ->label(__('Kode'))
                     ->badge(),
                 IconColumn::make('is_active')
-                    ->label('Aktif')
+                    ->label(__('Aktif'))
                     ->boolean(),
             ])
             ->filters([
