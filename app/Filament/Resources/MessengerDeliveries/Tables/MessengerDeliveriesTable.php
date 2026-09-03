@@ -20,49 +20,49 @@ class MessengerDeliveriesTable
         return $table
             ->columns([
                 TextColumn::make('tracking_number')
-                    ->label('No. Tracking')
+                    ->label(__('No. Tracking'))
                     ->searchable()
                     ->weight('bold'),
                 TextColumn::make('sender.name')
-                    ->label('Pengirim')
+                    ->label(__('Pengirim'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('destination')
-                    ->label('Tujuan')
+                    ->label(__('Tujuan'))
                     ->searchable(),
                 TextColumn::make('document_description')
-                    ->label('Deskripsi Dokumen')
+                    ->label(__('Deskripsi Dokumen'))
                     ->limit(40),
                 TextColumn::make('status')
-                    ->label('Status')
+                    ->label(__('Status'))
                     ->badge()
                     ->formatStateUsing(fn (MessengerDeliveryStatus $state): string => $state->label())
                     ->color(fn (MessengerDeliveryStatus $state): string => $state->color()),
                 TextColumn::make('messenger.name')
-                    ->label('Messenger')
-                    ->placeholder('—')
+                    ->label(__('Messenger'))
+                    ->placeholder(__('—'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->label('Dibuat')
+                    ->label(__('Dibuat'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('delivered_at')
-                    ->label('Terkirim')
+                    ->label(__('Terkirim'))
                     ->dateTime()
-                    ->placeholder('—')
+                    ->placeholder(__('—'))
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 Filter::make('created_at')
-                    ->label('Tanggal')
+                    ->label(__('Tanggal'))
                     ->schema([
                         DatePicker::make('from')
-                            ->label('Dari Tanggal')
+                            ->label(__('Dari Tanggal'))
                             ->default(now()->startOfMonth()->toDateString()),
                         DatePicker::make('until')
-                            ->label('Sampai Tanggal')
+                            ->label(__('Sampai Tanggal'))
                             ->default(now()->toDateString()),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
@@ -82,14 +82,14 @@ class MessengerDeliveriesTable
                         return $indicators;
                     }),
                 SelectFilter::make('status')
-                    ->label('Status')
+                    ->label(__('Status'))
                     ->options(fn () => collect(MessengerDeliveryStatus::cases())
                         ->mapWithKeys(fn (MessengerDeliveryStatus $status) => [$status->value => $status->label()])),
                 SelectFilter::make('sender_id')
-                    ->label('Pengirim')
+                    ->label(__('Pengirim'))
                     ->options(fn () => User::query()->orderBy('name')->pluck('name', 'id')),
                 SelectFilter::make('messenger_id')
-                    ->label('Messenger')
+                    ->label(__('Messenger'))
                     ->options(fn () => User::query()->orderBy('name')->pluck('name', 'id')),
             ])
             ->recordActions([

@@ -21,37 +21,37 @@ class HkAreasTable
             // roughly nine points per category, "all the toilets together" is
             // how an admin actually looks for one.
             ->defaultSort('category.name')
-            ->emptyStateHeading('Belum ada titik')
-            ->emptyStateDescription('Buat kategori dulu di menu Kategori, lalu tambahkan titik-titiknya di sini.')
+            ->emptyStateHeading(__('Belum ada titik'))
+            ->emptyStateDescription(__('Buat kategori dulu di menu Kategori, lalu tambahkan titik-titiknya di sini.'))
             ->columns([
                 TextColumn::make('category.name')
-                    ->label('Kategori')
+                    ->label(__('Kategori'))
                     ->badge()
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('name')
-                    ->label('Nama Titik')
+                    ->label(__('Nama Titik'))
                     ->searchable()
                     ->sortable(),
                 IconColumn::make('is_active')
-                    ->label('Aktif')
+                    ->label(__('Aktif'))
                     ->boolean(),
                 TextColumn::make('inspections_count')
-                    ->label('Laporan Masuk')
+                    ->label(__('Laporan Masuk'))
                     ->badge()
                     ->color('gray'),
             ])
             ->filters([
                 SelectFilter::make('hk_category_id')
-                    ->label('Kategori')
+                    ->label(__('Kategori'))
                     ->relationship('category', 'name')
                     ->searchable()
                     ->preload(),
                 TernaryFilter::make('is_active')
-                    ->label('Status')
-                    ->placeholder('Semua')
-                    ->trueLabel('Hanya yang aktif')
-                    ->falseLabel('Hanya yang nonaktif'),
+                    ->label(__('Status'))
+                    ->placeholder(__('Semua'))
+                    ->trueLabel(__('Hanya yang aktif'))
+                    ->falseLabel(__('Hanya yang nonaktif')),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -66,7 +66,7 @@ class HkAreasTable
 
                         Notification::make()
                             ->warning()
-                            ->title('Titik tidak bisa dihapus')
+                            ->title(__('Titik tidak bisa dihapus'))
                             ->body("Titik \"{$record->name}\" sudah punya laporan masuk, jadi riwayatnya harus tetap utuh. Kalau titik ini sudah tidak diperiksa lagi, matikan tombol Aktif supaya tidak muncul saat pengawas mengisi laporan.")
                             ->send();
 

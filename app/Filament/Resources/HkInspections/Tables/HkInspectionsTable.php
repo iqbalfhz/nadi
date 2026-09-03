@@ -23,52 +23,52 @@ class HkInspectionsTable
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('created_at')
-                    ->label('Waktu')
+                    ->label(__('Waktu'))
                     ->dateTime('d M Y H:i')
                     ->sortable(),
                 TextColumn::make('category.name')
-                    ->label('Kategori')
+                    ->label(__('Kategori'))
                     ->badge()
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('area.name')
-                    ->label('Titik')
+                    ->label(__('Titik'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('condition')
-                    ->label('Kondisi')
+                    ->label(__('Kondisi'))
                     ->badge()
                     ->formatStateUsing(fn (HkCondition $state): string => $state->label())
                     ->color(fn (HkCondition $state): string => $state->color())
                     ->sortable(),
                 TextColumn::make('shift')
-                    ->label('Shift')
+                    ->label(__('Shift'))
                     ->badge()
                     ->formatStateUsing(fn (HkShift $state): string => $state->label())
                     ->color(fn (HkShift $state): string => $state->color()),
                 TextColumn::make('staff_name')
-                    ->label('Petugas')
+                    ->label(__('Petugas'))
                     ->searchable(),
                 TextColumn::make('user.name')
-                    ->label('Pengawas')
+                    ->label(__('Pengawas'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('floor')
-                    ->label('Lantai')
-                    ->placeholder('—')
+                    ->label(__('Lantai'))
+                    ->placeholder(__('—'))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('media_count')
-                    ->label('Foto')
+                    ->label(__('Foto'))
                     ->badge(),
                 TextColumn::make('notes')
-                    ->label('Keterangan')
+                    ->label(__('Keterangan'))
                     ->limit(40)
-                    ->placeholder('—')
+                    ->placeholder(__('—'))
                     ->toggleable(),
                 TextColumn::make('follow_up')
-                    ->label('Tindak Lanjut')
+                    ->label(__('Tindak Lanjut'))
                     ->limit(40)
-                    ->placeholder('—')
+                    ->placeholder(__('—'))
                     ->toggleable(),
             ])
             ->filters([
@@ -77,13 +77,13 @@ class HkInspectionsTable
                 // history. Copied from ObChecklistsTable, which had the same
                 // problem.
                 Filter::make('created_at')
-                    ->label('Tanggal')
+                    ->label(__('Tanggal'))
                     ->schema([
                         DatePicker::make('from')
-                            ->label('Dari Tanggal')
+                            ->label(__('Dari Tanggal'))
                             ->default(now()->startOfMonth()->toDateString()),
                         DatePicker::make('until')
-                            ->label('Sampai Tanggal')
+                            ->label(__('Sampai Tanggal'))
                             ->default(now()->toDateString()),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
@@ -103,16 +103,16 @@ class HkInspectionsTable
                         return $indicators;
                     }),
                 SelectFilter::make('hk_category_id')
-                    ->label('Kategori')
+                    ->label(__('Kategori'))
                     ->options(fn (): array => HkCategory::query()->orderBy('name')->pluck('name', 'id')->all()),
                 SelectFilter::make('condition')
-                    ->label('Kondisi')
+                    ->label(__('Kondisi'))
                     ->options(HkCondition::options()),
                 SelectFilter::make('shift')
-                    ->label('Shift')
+                    ->label(__('Shift'))
                     ->options(HkShift::options()),
                 SelectFilter::make('user_id')
-                    ->label('Pengawas')
+                    ->label(__('Pengawas'))
                     ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->all()),
             ])
             ->recordActions([

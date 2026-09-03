@@ -20,22 +20,22 @@ class ObChecklistsTable
         return $table
             ->columns([
                 TextColumn::make('area.name')
-                    ->label('Area/Titik')
+                    ->label(__('Area/Titik'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('user.name')
-                    ->label('Petugas')
+                    ->label(__('Petugas'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('media_count')
-                    ->label('Foto')
+                    ->label(__('Foto'))
                     ->badge(),
                 TextColumn::make('notes')
-                    ->label('Catatan')
+                    ->label(__('Catatan'))
                     ->limit(50)
-                    ->placeholder('—'),
+                    ->placeholder(__('—')),
                 TextColumn::make('created_at')
-                    ->label('Waktu')
+                    ->label(__('Waktu'))
                     ->dateTime()
                     ->sortable(),
             ])
@@ -44,13 +44,13 @@ class ObChecklistsTable
                 // Defaults to the current month so this doesn't grow into an
                 // ever-longer unfiltered list — clear the dates for full history.
                 Filter::make('created_at')
-                    ->label('Tanggal')
+                    ->label(__('Tanggal'))
                     ->schema([
                         DatePicker::make('from')
-                            ->label('Dari Tanggal')
+                            ->label(__('Dari Tanggal'))
                             ->default(now()->startOfMonth()->toDateString()),
                         DatePicker::make('until')
-                            ->label('Sampai Tanggal')
+                            ->label(__('Sampai Tanggal'))
                             ->default(now()->toDateString()),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
@@ -70,10 +70,10 @@ class ObChecklistsTable
                         return $indicators;
                     }),
                 SelectFilter::make('ob_area_id')
-                    ->label('Area/Titik')
+                    ->label(__('Area/Titik'))
                     ->options(fn () => ObArea::query()->orderBy('name')->pluck('name', 'id')),
                 SelectFilter::make('user_id')
-                    ->label('Petugas')
+                    ->label(__('Petugas'))
                     ->options(fn () => User::query()->orderBy('name')->pluck('name', 'id')),
             ])
             ->recordActions([

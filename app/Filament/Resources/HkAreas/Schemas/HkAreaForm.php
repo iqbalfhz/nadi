@@ -15,30 +15,30 @@ class HkAreaForm
     {
         return $schema
             ->components([
-                Section::make('Titik HK')
-                    ->description('Titik yang diperiksa pengawas — misalnya "Lt 2 Zona A" di kategori Toilet.')
+                Section::make(__('Titik HK'))
+                    ->description(__('Titik yang diperiksa pengawas — misalnya "Lt 2 Zona A" di kategori Toilet.'))
                     ->icon(Heroicon::OutlinedMapPin)
                     ->columnSpanFull()
                     ->schema([
                         Select::make('hk_category_id')
-                            ->label('Kategori')
+                            ->label(__('Kategori'))
                             ->relationship('category', 'name')
                             ->required()
                             ->searchable()
                             ->preload()
                             ->columnSpanFull(),
                         TextInput::make('name')
-                            ->label('Nama Titik')
+                            ->label(__('Nama Titik'))
                             // Free text because each category names its points
                             // its own way; there is no shared floor/zone
                             // structure to enforce here.
-                            ->helperText('Pakai penamaan yang biasa dipakai di lapangan, misalnya "Lt 2 Zona A".')
+                            ->helperText(__('Pakai penamaan yang biasa dipakai di lapangan, misalnya "Lt 2 Zona A".'))
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),
                         Toggle::make('is_active')
-                            ->label('Aktif')
-                            ->helperText('Hanya titik aktif yang muncul saat pengawas mengisi laporan.')
+                            ->label(__('Aktif'))
+                            ->helperText(__('Hanya titik aktif yang muncul saat pengawas mengisi laporan.'))
                             ->default(true)
                             ->columnSpanFull(),
                     ]),

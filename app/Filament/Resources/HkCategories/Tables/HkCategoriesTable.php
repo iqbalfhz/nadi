@@ -18,21 +18,21 @@ class HkCategoriesTable
             ->defaultSort('name')
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nama Kategori')
+                    ->label(__('Nama Kategori'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('areas_count')
-                    ->label('Jumlah Titik')
+                    ->label(__('Jumlah Titik'))
                     ->badge()
                     ->color(fn (int $state): string => $state > 0 ? 'primary' : 'gray'),
                 IconColumn::make('requires_floor')
-                    ->label('Pakai Lantai')
+                    ->label(__('Pakai Lantai'))
                     ->boolean(),
                 IconColumn::make('is_active')
-                    ->label('Aktif')
+                    ->label(__('Aktif'))
                     ->boolean(),
                 TextColumn::make('inspections_count')
-                    ->label('Laporan Masuk')
+                    ->label(__('Laporan Masuk'))
                     ->badge()
                     ->color('gray'),
             ])
@@ -56,7 +56,7 @@ class HkCategoriesTable
 
                         Notification::make()
                             ->warning()
-                            ->title('Kategori tidak bisa dihapus')
+                            ->title(__('Kategori tidak bisa dihapus'))
                             ->body("Kategori \"{$record->name}\" {$blocker}. Kalau sudah tidak dipakai lagi, matikan saja tombol Aktif supaya tidak muncul saat pengawas mengisi laporan.")
                             ->send();
 

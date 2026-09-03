@@ -20,23 +20,23 @@ class SecurityPatrolsTable
         return $table
             ->columns([
                 TextColumn::make('checkpoint.name')
-                    ->label('Titik Patroli')
+                    ->label(__('Titik Patroli'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('user.name')
-                    ->label('Petugas')
+                    ->label(__('Petugas'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('media_count')
-                    ->label('Foto')
+                    ->label(__('Foto'))
                     ->badge(),
                 TextColumn::make('incident_report')
-                    ->label('Laporan Kejadian')
+                    ->label(__('Laporan Kejadian'))
                     ->limit(50)
-                    ->placeholder('—')
+                    ->placeholder(__('—'))
                     ->color(fn (?string $state): string => $state ? 'danger' : 'gray'),
                 TextColumn::make('created_at')
-                    ->label('Waktu Kunjungan')
+                    ->label(__('Waktu Kunjungan'))
                     ->dateTime()
                     ->sortable(),
             ])
@@ -45,13 +45,13 @@ class SecurityPatrolsTable
                 // Defaults to the current month so this doesn't grow into an
                 // ever-longer unfiltered list — clear the dates for full history.
                 Filter::make('created_at')
-                    ->label('Tanggal')
+                    ->label(__('Tanggal'))
                     ->schema([
                         DatePicker::make('from')
-                            ->label('Dari Tanggal')
+                            ->label(__('Dari Tanggal'))
                             ->default(now()->startOfMonth()->toDateString()),
                         DatePicker::make('until')
-                            ->label('Sampai Tanggal')
+                            ->label(__('Sampai Tanggal'))
                             ->default(now()->toDateString()),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
@@ -71,13 +71,13 @@ class SecurityPatrolsTable
                         return $indicators;
                     }),
                 SelectFilter::make('security_checkpoint_id')
-                    ->label('Titik Patroli')
+                    ->label(__('Titik Patroli'))
                     ->options(fn () => SecurityCheckpoint::query()->orderBy('name')->pluck('name', 'id')),
                 SelectFilter::make('user_id')
-                    ->label('Petugas')
+                    ->label(__('Petugas'))
                     ->options(fn () => User::query()->orderBy('name')->pluck('name', 'id')),
                 Filter::make('has_incident')
-                    ->label('Ada Laporan Kejadian')
+                    ->label(__('Ada Laporan Kejadian'))
                     ->query(fn (Builder $query): Builder => $query->whereNotNull('incident_report')),
             ])
             ->recordActions([

@@ -16,11 +16,11 @@ class ObAreasTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nama Area/Titik')
+                    ->label(__('Nama Area/Titik'))
                     ->searchable()
                     ->sortable(),
                 IconColumn::make('is_active')
-                    ->label('Aktif')
+                    ->label(__('Aktif'))
                     ->boolean(),
             ])
             ->filters([

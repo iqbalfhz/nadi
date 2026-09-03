@@ -19,11 +19,11 @@ class SecurityCheckpointsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nama Titik Patroli')
+                    ->label(__('Nama Titik Patroli'))
                     ->searchable()
                     ->sortable(),
                 IconColumn::make('is_active')
-                    ->label('Aktif')
+                    ->label(__('Aktif'))
                     ->boolean(),
             ])
             ->filters([
@@ -31,7 +31,7 @@ class SecurityCheckpointsTable
             ])
             ->recordActions([
                 Action::make('qrCode')
-                    ->label('Unduh QR')
+                    ->label(__('Unduh QR'))
                     ->icon(Heroicon::OutlinedQrCode)
                     ->color('gray')
                     ->url(fn (SecurityCheckpoint $record): string => route('security-checkpoints.qr-code', $record))

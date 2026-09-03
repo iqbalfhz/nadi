@@ -14,19 +14,19 @@ class ObAreaForm
     {
         return $schema
             ->components([
-                Section::make('Area / Titik OB')
-                    ->description('Daftar titik yang bisa dipilih OB saat submit checklist kebersihan.')
+                Section::make(__('Area / Titik OB'))
+                    ->description(__('Daftar titik yang bisa dipilih OB saat submit checklist kebersihan.'))
                     ->icon(Heroicon::OutlinedClipboardDocumentCheck)
                     ->columnSpanFull()
                     ->schema([
                         TextInput::make('name')
-                            ->label('Nama Area/Titik')
+                            ->label(__('Nama Area/Titik'))
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),
                         Toggle::make('is_active')
-                            ->label('Aktif')
-                            ->helperText('Hanya area aktif yang bisa dipilih OB saat submit checklist.')
+                            ->label(__('Aktif'))
+                            ->helperText(__('Hanya area aktif yang bisa dipilih OB saat submit checklist.'))
                             ->default(true)
                             ->columnSpanFull(),
                     ]),
