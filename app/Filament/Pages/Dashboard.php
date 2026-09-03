@@ -41,26 +41,26 @@ class Dashboard extends BaseDashboard
         return $schema
             ->components([
                 Section::make()
-                    ->heading('Periode Laporan')
-                    ->description('Semua kartu statistik dan grafik di bawah mengikuti rentang tanggal ini.')
+                    ->heading(__('Periode Laporan'))
+                    ->description(__('Semua kartu statistik dan grafik di bawah mengikuti rentang tanggal ini.'))
                     ->icon(Heroicon::OutlinedFunnel)
                     ->columnSpanFull()
                     ->columns(3)
                     ->schema([
                         Select::make('period')
-                            ->label('Rentang')
+                            ->label(__('Rentang'))
                             ->options(DashboardPeriod::options())
                             ->default(DashboardPeriod::ThisMonth->value)
                             ->selectablePlaceholder(false)
                             ->native(false)
                             ->live(),
                         DatePicker::make('startDate')
-                            ->label('Dari Tanggal')
+                            ->label(__('Dari Tanggal'))
                             ->default(now()->startOfMonth())
                             ->maxDate(now())
                             ->visible(fn (Get $get): bool => $get('period') === DashboardPeriod::Custom->value),
                         DatePicker::make('endDate')
-                            ->label('Sampai Tanggal')
+                            ->label(__('Sampai Tanggal'))
                             ->default(now())
                             ->maxDate(now())
                             ->visible(fn (Get $get): bool => $get('period') === DashboardPeriod::Custom->value),

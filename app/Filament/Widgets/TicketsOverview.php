@@ -69,7 +69,7 @@ class TicketsOverview extends StatsOverviewWidget
                 ->description($eventName)
                 ->color('gray'),
             Stat::make('Total Pendapatan', 'Rp '.number_format($revenue, 0, ',', '.'))
-                ->description('Untuk event di atas')
+                ->description(__('Untuk event di atas'))
                 ->color('success'),
             Stat::make('Member', (string) $memberCount)
                 ->color('info'),

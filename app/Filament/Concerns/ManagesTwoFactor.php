@@ -94,7 +94,7 @@ trait ManagesTwoFactor
     protected function enableAction(): Action
     {
         return Action::make('enableTwoFactor')
-            ->label('Aktifkan 2FA')
+            ->label(__('Aktifkan 2FA'))
             ->icon(Heroicon::OutlinedShieldCheck)
             ->visible(fn (): bool => ! $this->isTwoFactorEnabled())
             // Generating the secret on mount, not on submit, is what lets the
@@ -105,15 +105,15 @@ trait ManagesTwoFactor
 
                 $this->loadSetupData();
             })
-            ->modalHeading('Aktifkan autentikasi dua langkah')
-            ->modalDescription('Pindai kode QR ini dengan aplikasi authenticator di HP Anda — Google Authenticator, Authy, atau sejenisnya — lalu masukkan 6 digit kode yang muncul.')
-            ->modalSubmitActionLabel('Aktifkan')
+            ->modalHeading(__('Aktifkan autentikasi dua langkah'))
+            ->modalDescription(__('Pindai kode QR ini dengan aplikasi authenticator di HP Anda — Google Authenticator, Authy, atau sejenisnya — lalu masukkan 6 digit kode yang muncul.'))
+            ->modalSubmitActionLabel(__('Aktifkan'))
             ->schema([
                 Text::make(fn (): Htmlable => $this->setupInstructions())
                     ->columnSpanFull(),
                 TextInput::make('code')
-                    ->label('Kode dari aplikasi')
-                    ->helperText('Enam digit yang sedang ditampilkan aplikasi authenticator Anda.')
+                    ->label(__('Kode dari aplikasi'))
+                    ->helperText(__('Enam digit yang sedang ditampilkan aplikasi authenticator Anda.'))
                     ->required()
                     ->columnSpanFull(),
             ])
@@ -126,8 +126,8 @@ trait ManagesTwoFactor
                     // actually ever wrong.
                     Notification::make()
                         ->danger()
-                        ->title('Kode tidak cocok')
-                        ->body('Pastikan Anda memasukkan kode yang sedang tampil, bukan yang sudah berganti. Cek juga jam di HP Anda — kode ini bergantung pada waktu yang tepat.')
+                        ->title(__('Kode tidak cocok'))
+                        ->body(__('Pastikan Anda memasukkan kode yang sedang tampil, bukan yang sudah berganti. Cek juga jam di HP Anda — kode ini bergantung pada waktu yang tepat.'))
                         ->send();
 
                     return;
@@ -135,8 +135,8 @@ trait ManagesTwoFactor
 
                 Notification::make()
                     ->success()
-                    ->title('Autentikasi dua langkah aktif')
-                    ->body('Sekarang simpan kode pemulihannya — itu satu-satunya jalan masuk kalau HP Anda hilang.')
+                    ->title(__('Autentikasi dua langkah aktif'))
+                    ->body(__('Sekarang simpan kode pemulihannya — itu satu-satunya jalan masuk kalau HP Anda hilang.'))
                     ->send();
             });
     }
@@ -144,20 +144,20 @@ trait ManagesTwoFactor
     protected function disableAction(): Action
     {
         return Action::make('disableTwoFactor')
-            ->label('Nonaktifkan 2FA')
+            ->label(__('Nonaktifkan 2FA'))
             ->icon(Heroicon::OutlinedShieldExclamation)
             ->color('danger')
             ->visible(fn (): bool => $this->isTwoFactorEnabled())
             ->requiresConfirmation()
-            ->modalHeading('Nonaktifkan autentikasi dua langkah?')
-            ->modalDescription('Setelah ini, akun Anda hanya dijaga password. Kode pemulihan yang lama juga ikut hangus.')
-            ->modalSubmitActionLabel('Ya, nonaktifkan')
+            ->modalHeading(__('Nonaktifkan autentikasi dua langkah?'))
+            ->modalDescription(__('Setelah ini, akun Anda hanya dijaga password. Kode pemulihan yang lama juga ikut hangus.'))
+            ->modalSubmitActionLabel(__('Ya, nonaktifkan'))
             ->action(function (): void {
                 app(DisableTwoFactorAuthentication::class)($this->user());
 
                 Notification::make()
                     ->warning()
-                    ->title('Autentikasi dua langkah dimatikan')
+                    ->title(__('Autentikasi dua langkah dimatikan'))
                     ->send();
             });
     }
@@ -165,14 +165,14 @@ trait ManagesTwoFactor
     protected function recoveryCodesAction(): Action
     {
         return Action::make('showRecoveryCodes')
-            ->label('Lihat kode pemulihan')
+            ->label(__('Lihat kode pemulihan'))
             ->icon(Heroicon::OutlinedKey)
             ->color('gray')
             ->visible(fn (): bool => $this->isTwoFactorEnabled())
-            ->modalHeading('Kode pemulihan')
-            ->modalDescription('Simpan di tempat aman dan terpisah dari HP Anda. Setiap kode hanya bisa dipakai sekali.')
+            ->modalHeading(__('Kode pemulihan'))
+            ->modalDescription(__('Simpan di tempat aman dan terpisah dari HP Anda. Setiap kode hanya bisa dipakai sekali.'))
             ->modalSubmitAction(false)
-            ->modalCancelActionLabel('Tutup')
+            ->modalCancelActionLabel(__('Tutup'))
             ->schema([
                 Text::make(fn (): Htmlable => $this->recoveryCodeList())
                     ->columnSpanFull(),
@@ -182,21 +182,21 @@ trait ManagesTwoFactor
     protected function regenerateRecoveryCodesAction(): Action
     {
         return Action::make('regenerateRecoveryCodes')
-            ->label('Buat ulang kode pemulihan')
+            ->label(__('Buat ulang kode pemulihan'))
             ->icon(Heroicon::OutlinedArrowPath)
             ->color('gray')
             ->visible(fn (): bool => $this->isTwoFactorEnabled())
             ->requiresConfirmation()
-            ->modalHeading('Buat ulang kode pemulihan?')
-            ->modalDescription('Kode lama langsung hangus. Kalau Anda sudah menyimpannya di suatu tempat, catatan itu jadi tidak berlaku.')
-            ->modalSubmitActionLabel('Buat ulang')
+            ->modalHeading(__('Buat ulang kode pemulihan?'))
+            ->modalDescription(__('Kode lama langsung hangus. Kalau Anda sudah menyimpannya di suatu tempat, catatan itu jadi tidak berlaku.'))
+            ->modalSubmitActionLabel(__('Buat ulang'))
             ->action(function (): void {
                 app(GenerateNewRecoveryCodes::class)($this->user());
 
                 Notification::make()
                     ->success()
-                    ->title('Kode pemulihan baru dibuat')
-                    ->body('Buka "Lihat kode pemulihan" lalu simpan yang baru.')
+                    ->title(__('Kode pemulihan baru dibuat'))
+                    ->body(__('Buka "Lihat kode pemulihan" lalu simpan yang baru.'))
                     ->send();
             });
     }

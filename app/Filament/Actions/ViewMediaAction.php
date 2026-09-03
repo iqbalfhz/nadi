@@ -25,7 +25,7 @@ class ViewMediaAction
             ->color('gray')
             ->modalHeading($label)
             ->modalSubmitAction(false)
-            ->modalCancelActionLabel('Tutup')
+            ->modalCancelActionLabel(__('Tutup'))
             ->visible(fn (Model $record): bool => $record instanceof HasMedia && $record->getMedia($collection)->isNotEmpty())
             // mountUsing, not action(): the modal has no submit button, so an
             // action() callback would never fire — this has to be recorded

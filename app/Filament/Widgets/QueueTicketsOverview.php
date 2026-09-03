@@ -42,16 +42,16 @@ class QueueTicketsOverview extends StatsOverviewWidget
 
         return [
             Stat::make('Total Hari Ini', (string) $total)
-                ->description('Nomor yang diambil hari ini')
+                ->description(__('Nomor yang diambil hari ini'))
                 ->color('gray'),
             Stat::make('Selesai Dilayani', (string) $done)
-                ->description('Tiket berstatus selesai')
+                ->description(__('Tiket berstatus selesai'))
                 ->color('success'),
             Stat::make('Dilewati', (string) $skipped)
-                ->description('Tiket berstatus dilewati')
+                ->description(__('Tiket berstatus dilewati'))
                 ->color('danger'),
             Stat::make('Rata-rata Waktu Layanan', $averageMinutes ? round($averageMinutes, 1).' menit' : '—')
-                ->description('Dari dipanggil sampai selesai')
+                ->description(__('Dari dipanggil sampai selesai'))
                 ->color('warning'),
         ];
     }

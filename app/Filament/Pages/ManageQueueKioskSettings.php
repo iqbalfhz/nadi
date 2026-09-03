@@ -47,8 +47,8 @@ class ManageQueueKioskSettings extends SettingsPage
     {
         return $schema
             ->components([
-                Section::make('Kiosk Ambil Nomor')
-                    ->description('Tablet yang dipasang di lobi supaya pengunjung bisa ambil nomor antrian sendiri.')
+                Section::make(__('Kiosk Ambil Nomor'))
+                    ->description(__('Tablet yang dipasang di lobi supaya pengunjung bisa ambil nomor antrian sendiri.'))
                     ->icon(Heroicon::OutlinedComputerDesktop)
                     ->columnSpanFull()
                     // Both fields full width: their helper text is long enough
@@ -56,15 +56,15 @@ class ManageQueueKioskSettings extends SettingsPage
                     // an almost empty other half.
                     ->schema([
                         TextInput::make('pin')
-                            ->label('PIN Kiosk')
-                            ->helperText('Diminta sekali saat tablet kiosk pertama kali disetup. Mengganti PIN di sini otomatis membuat semua kiosk yang sudah aktif diminta memasukkan PIN baru lagi — pakai ini kalau ada akses yang mencurigakan.')
+                            ->label(__('PIN Kiosk'))
+                            ->helperText(__('Diminta sekali saat tablet kiosk pertama kali disetup. Mengganti PIN di sini otomatis membuat semua kiosk yang sudah aktif diminta memasukkan PIN baru lagi — pakai ini kalau ada akses yang mencurigakan.'))
                             ->required()
                             ->minLength(6)
                             ->maxLength(32)
                             ->columnSpanFull(),
                         Toggle::make('is_enabled')
-                            ->label('Kiosk Aktif')
-                            ->helperText('Matikan untuk langsung menutup akses ambil-nomor dari semua kiosk, tanpa perlu mengganti PIN.')
+                            ->label(__('Kiosk Aktif'))
+                            ->helperText(__('Matikan untuk langsung menutup akses ambil-nomor dari semua kiosk, tanpa perlu mengganti PIN.'))
                             ->required()
                             ->columnSpanFull(),
                     ]),

@@ -67,26 +67,26 @@ class VendorSettlementOverview extends TableWidget
                     ->withSum(['sales as sales_tax' => fn (Builder $query) => $query
                         ->when($this->scopeToToday, fn (Builder $q) => $q->whereDate('created_at', today()))], 'tax_amount'),
             )
-            ->heading('Rekap Per Kios (Settlement)')
+            ->heading(__('Rekap Per Kios (Settlement)'))
             ->columns([
                 TextColumn::make('name')
-                    ->label('Kios'),
+                    ->label(__('Kios')),
                 // Deliberately a raw row count (line items sold), not a
                 // distinct transaction_number count — a vendor's own tally
                 // cares about units sold, not how many carts they were part
                 // of, unlike VendorSalesOverview's bazaar-wide "Total
                 // Transaksi" stat.
                 TextColumn::make('sales_count')
-                    ->label('Jumlah Item Terjual'),
+                    ->label(__('Jumlah Item Terjual')),
                 TextColumn::make('sales_revenue')
-                    ->label('Jatah Kios')
+                    ->label(__('Jatah Kios'))
                     ->money('IDR', decimalPlaces: 0),
                 TextColumn::make('sales_tax')
-                    ->label('PB1 Terkumpul')
+                    ->label(__('PB1 Terkumpul'))
                     ->money('IDR', decimalPlaces: 0)
-                    ->placeholder('—'),
+                    ->placeholder(__('—')),
                 TextColumn::make('tax_rate')
-                    ->label('Tarif')
+                    ->label(__('Tarif'))
                     ->formatStateUsing(fn ($state): string => ((float) $state > 0 ? rtrim(rtrim(number_format((float) $state, 2, ',', '.'), '0'), ',').'%' : 'Tidak kena'))
                     ->badge()
                     ->color(fn ($state): string => (float) $state > 0 ? 'warning' : 'gray'),

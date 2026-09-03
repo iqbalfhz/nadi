@@ -153,7 +153,7 @@ class BookingCalendarWidget extends CalendarWidget
     {
         return $schema->components([
             Select::make('room_id')
-                ->label('Ruangan')
+                ->label(__('Ruangan'))
                 ->options(fn () => Room::query()
                     ->with('area')
                     ->orderBy('name')
@@ -164,14 +164,14 @@ class BookingCalendarWidget extends CalendarWidget
                 ->searchable()
                 ->live(),
             TextInput::make('title')
-                ->label('Judul')
+                ->label(__('Judul'))
                 ->required(),
             DateTimePicker::make('starts_at')
-                ->label('Mulai')
+                ->label(__('Mulai'))
                 ->required()
                 ->live(),
             DateTimePicker::make('ends_at')
-                ->label('Selesai')
+                ->label(__('Selesai'))
                 ->required()
                 ->after('starts_at')
                 ->rule(fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get) {

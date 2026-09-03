@@ -61,8 +61,8 @@ class ManageBackupSettings extends SettingsPage
                 // for weeks the honest answer was invisible, since failures are
                 // only reported by email and this installation sends mail to
                 // the log file.
-                Section::make('Backup Terakhir')
-                    ->description('Dicatat setiap kali backup selesai, jadi tidak perlu membuka Google Drive untuk tahu hasilnya.')
+                Section::make(__('Backup Terakhir'))
+                    ->description(__('Dicatat setiap kali backup selesai, jadi tidak perlu membuka Google Drive untuk tahu hasilnya.'))
                     ->icon(Heroicon::OutlinedClock)
                     ->columnSpanFull()
                     ->schema([
@@ -70,45 +70,45 @@ class ManageBackupSettings extends SettingsPage
                             ->color(fn (): string => self::lastRunColor())
                             ->columnSpanFull(),
                     ]),
-                Section::make('Backup Otomatis')
-                    ->description('Berjalan tiap hari lewat scheduler. Hanya modul Penomoran Dokumen yang dicadangkan — bukan seluruh data NADI.')
+                Section::make(__('Backup Otomatis'))
+                    ->description(__('Berjalan tiap hari lewat scheduler. Hanya modul Penomoran Dokumen yang dicadangkan — bukan seluruh data NADI.'))
                     ->icon(Heroicon::OutlinedCircleStack)
                     ->columnSpanFull()
                     ->schema([
                         Toggle::make('enabled')
-                            ->label('Backup Otomatis Aktif')
-                            ->helperText('Hanya mencadangkan data modul Penomoran Dokumen (jenis dokumen, PT, departemen, dokumen) — bukan seluruh fitur NADI. Kalau nonaktif, jadwal backup harian tetap ada tapi tidak akan benar-benar jalan.')
+                            ->label(__('Backup Otomatis Aktif'))
+                            ->helperText(__('Hanya mencadangkan data modul Penomoran Dokumen (jenis dokumen, PT, departemen, dokumen) — bukan seluruh fitur NADI. Kalau nonaktif, jadwal backup harian tetap ada tapi tidak akan benar-benar jalan.'))
                             ->live()
                             ->columnSpanFull(),
                         TextInput::make('notify_email')
-                            ->label('Email Google Drive & Notifikasi')
-                            ->helperText('Akun Google Drive tujuan backup, sekaligus alamat yang menerima notifikasi kalau backup gagal.')
+                            ->label(__('Email Google Drive & Notifikasi'))
+                            ->helperText(__('Akun Google Drive tujuan backup, sekaligus alamat yang menerima notifikasi kalau backup gagal.'))
                             ->email()
                             ->required(fn (Get $get): bool => (bool) $get('enabled'))
                             ->columnSpanFull(),
                         TextInput::make('folder')
-                            ->label('Folder di Google Drive')
-                            ->helperText('Dibuat otomatis kalau belum ada. Kosongkan untuk simpan langsung di folder utama (root) Drive.')
+                            ->label(__('Folder di Google Drive'))
+                            ->helperText(__('Dibuat otomatis kalau belum ada. Kosongkan untuk simpan langsung di folder utama (root) Drive.'))
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Kredensial Google Drive')
-                    ->description('Diambil dari Google Cloud Console. Disimpan di database, bukan di .env, supaya bisa diganti tanpa deploy ulang.')
+                Section::make(__('Kredensial Google Drive'))
+                    ->description(__('Diambil dari Google Cloud Console. Disimpan di database, bukan di .env, supaya bisa diganti tanpa deploy ulang.'))
                     ->icon(Heroicon::OutlinedKey)
                     ->columnSpanFull()
                     ->columns(2)
                     ->collapsible()
                     ->schema([
                         TextInput::make('client_id')
-                            ->label('Google Client ID')
+                            ->label(__('Google Client ID'))
                             ->required(fn (Get $get): bool => (bool) $get('enabled')),
                         TextInput::make('client_secret')
-                            ->label('Google Client Secret')
+                            ->label(__('Google Client Secret'))
                             ->password()
                             ->revealable()
                             ->required(fn (Get $get): bool => (bool) $get('enabled')),
                         TextInput::make('refresh_token')
-                            ->label('Google Refresh Token')
+                            ->label(__('Google Refresh Token'))
                             ->password()
                             ->revealable()
                             ->required(fn (Get $get): bool => (bool) $get('enabled'))
@@ -168,11 +168,11 @@ class ManageBackupSettings extends SettingsPage
     {
         return [
             Action::make('runNow')
-                ->label('Jalankan Backup Sekarang')
+                ->label(__('Jalankan Backup Sekarang'))
                 ->icon(Heroicon::OutlinedPlay)
                 ->color('gray')
                 ->requiresConfirmation()
-                ->modalDescription('Data modul Penomoran Dokumen (jenis dokumen, PT, departemen, dokumen) akan langsung dikirim ke Google Drive yang dikonfigurasi di atas.')
+                ->modalDescription(__('Data modul Penomoran Dokumen (jenis dokumen, PT, departemen, dokumen) akan langsung dikirim ke Google Drive yang dikonfigurasi di atas.'))
                 ->action(function (): void {
                     try {
                         BackupDrive::ensureBackupFolderExists();
@@ -187,8 +187,8 @@ class ManageBackupSettings extends SettingsPage
 
                         Notification::make()
                             ->danger()
-                            ->title('Backup gagal terkirim')
-                            ->body('Google Drive menolak koneksinya. Cek Client ID, Client Secret, dan Refresh Token di atas — Refresh Token bisa kedaluwarsa kalau lama tidak dipakai. Rincian teknisnya tercatat di log.')
+                            ->title(__('Backup gagal terkirim'))
+                            ->body(__('Google Drive menolak koneksinya. Cek Client ID, Client Secret, dan Refresh Token di atas — Refresh Token bisa kedaluwarsa kalau lama tidak dipakai. Rincian teknisnya tercatat di log.'))
                             ->persistent()
                             ->send();
 
@@ -202,8 +202,8 @@ class ManageBackupSettings extends SettingsPage
 
                         Notification::make()
                             ->danger()
-                            ->title('Backup gagal diselesaikan')
-                            ->body('Prosesnya berhenti di tengah jalan. Coba ulangi sekali lagi; kalau tetap gagal, rincian teknisnya sudah tercatat di log untuk diperiksa.')
+                            ->title(__('Backup gagal diselesaikan'))
+                            ->body(__('Prosesnya berhenti di tengah jalan. Coba ulangi sekali lagi; kalau tetap gagal, rincian teknisnya sudah tercatat di log untuk diperiksa.'))
                             ->persistent()
                             ->send();
 
@@ -217,7 +217,7 @@ class ManageBackupSettings extends SettingsPage
 
                     Notification::make()
                         ->success()
-                        ->title('Backup berhasil dikirim ke Google Drive')
+                        ->title(__('Backup berhasil dikirim ke Google Drive'))
                         ->send();
                 }),
         ];

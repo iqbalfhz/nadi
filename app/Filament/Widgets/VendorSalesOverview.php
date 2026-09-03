@@ -72,10 +72,10 @@ class VendorSalesOverview extends StatsOverviewWidget
                 ->description($bazaarName)
                 ->color('gray'),
             Stat::make('Total Pendapatan', 'Rp '.number_format($revenue, 0, ',', '.'))
-                ->description('Uang masuk, termasuk PB1')
+                ->description(__('Uang masuk, termasuk PB1'))
                 ->color('success'),
             Stat::make('PB1 Terkumpul', 'Rp '.number_format($tax, 0, ',', '.'))
-                ->description('Disetor, bukan jatah kios')
+                ->description(__('Disetor, bukan jatah kios'))
                 ->color('warning'),
             Stat::make('Tunai', (string) $paymentCounts[TicketPaymentMethod::Cash->value])
                 ->color(TicketPaymentMethod::Cash->color()),
