@@ -10,6 +10,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -69,6 +70,27 @@ class UsersTable
                         return redirect(Filament::getPanel(
                             Impersonation::landingPanelFor($record) ?? 'app',
                         )->getUrl());
+                    }),
+                // For the case deactivation doesn't cover: an employee who is
+                // still with the company but has lost their phone. Switching
+                // the account off would stop their work too, so this cuts the
+                // handset loose and leaves the account alone.
+                Action::make('revokeTokens')
+                    ->label(__('Keluarkan dari semua perangkat'))
+                    ->icon(Heroicon::OutlinedDevicePhoneMobile)
+                    ->color('danger')
+                    ->visible(fn (User $record): bool => $record->tokens()->exists())
+                    ->requiresConfirmation()
+                    ->modalHeading(fn (User $record): string => __('Keluarkan :nama dari semua perangkat?', ['nama' => $record->name]))
+                    ->modalDescription(__('Setiap HP yang sedang masuk dengan akun ini akan diminta login ulang. Akunnya sendiri tetap aktif.'))
+                    ->action(function (User $record): void {
+                        $record->tokens()->delete();
+
+                        Notification::make()
+                            ->success()
+                            ->title(__('Perangkat dikeluarkan'))
+                            ->body(__(':nama harus login ulang di aplikasi.', ['nama' => $record->name]))
+                            ->send();
                     }),
                 DeleteAction::make()
                     ->visible(fn (User $record): bool => $record->id !== Auth::id()),

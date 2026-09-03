@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions;
 
+use App\Support\MediaAccessLog;
 use Filament\Actions\Action;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
@@ -29,19 +30,10 @@ class ViewMediaAction
             ->visible(fn (Model $record): bool => $record instanceof HasMedia && $record->getMedia($collection)->isNotEmpty())
             // mountUsing, not action(): the modal has no submit button, so an
             // action() callback would never fire — this has to be recorded
-            // when the modal opens.
-            //
-            // Opening it hands out signed URLs to evidence photos, and
-            // reading data leaves no trace of its own: nothing is written, so
-            // no model event fires. Without this, the one action that
-            // actually exposes the photos would be the one thing Riwayat
-            // Aktivitas couldn't see.
-            ->mountUsing(function (Model $record) use ($label): void {
-                activity('akses-data')
-                    ->performedOn($record)
-                    ->withProperty('data', $label)
-                    ->log('Lihat foto');
-            })
+            // when the modal opens. Opening it hands out signed URLs to
+            // evidence photos; MediaAccessLog explains why that needs an entry
+            // of its own, and the mobile API writes the same one.
+            ->mountUsing(fn (Model $record) => MediaAccessLog::record($record, $label))
             ->modalContent(fn (Model $record) => view('filament.partials.media-gallery', [
                 'media' => $record instanceof HasMedia ? $record->getMedia($collection) : collect(),
             ]));

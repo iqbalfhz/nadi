@@ -2,10 +2,13 @@
 
 namespace Tests;
 
+use App\Http\Controllers\Api\V1\AuthController;
 use App\Models\User;
 use Database\Seeders\ShieldSeeder;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Str;
 use Laravel\Fortify\Features;
+use Laravel\Sanctum\Sanctum;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -58,5 +61,58 @@ abstract class TestCase extends BaseTestCase
         $this->actingAs($user);
 
         return $user;
+    }
+
+    /**
+     * The same employee, reached over the mobile API instead of a session.
+     *
+     * Sanctum::actingAs rather than actingAs: the API's own middleware checks
+     * the token's abilities, so a session-authenticated user would sail past
+     * a gate that a real request has to satisfy. The 'mobile' ability is what
+     * every issued token carries — see AuthController.
+     *
+     * @param  string|array<int, string>  $permissions
+     */
+    protected function actingAsMobileUser(string|array $permissions): User
+    {
+        $this->seed(ShieldSeeder::class);
+
+        $user = User::factory()->create();
+        $user->givePermissionTo($permissions);
+
+        Sanctum::actingAs($user, [AuthController::MOBILE_ABILITY]);
+
+        return $user;
+    }
+
+    /**
+     * A header set every write endpoint requires. Random per call, because
+     * two unrelated submissions sharing a key is exactly the bug the header
+     * exists to prevent.
+     *
+     * @return array<string, string>
+     */
+    protected function idempotencyHeader(?string $key = null): array
+    {
+        return ['Idempotency-Key' => $key ?? (string) Str::uuid()];
+    }
+
+    /**
+     * Forget who the last request authenticated as.
+     *
+     * RequestGuard caches the user it resolved, and the container survives
+     * from one request to the next *within a single test* — so once any
+     * request has authenticated, every later one is treated as that same
+     * user whatever token it carries. Production never sees this; each real
+     * request builds its own container.
+     *
+     * It matters here because the tests that need it most are the ones
+     * asserting a refusal: without this, "a revoked token is rejected" walks
+     * straight past the auth layer on a cached user and then passes or fails
+     * for reasons that have nothing to do with the code under test.
+     */
+    protected function forgetAuthenticatedUser(): void
+    {
+        $this->app['auth']->forgetGuards();
     }
 }

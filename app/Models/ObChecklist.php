@@ -8,14 +8,34 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-#[Fillable(['ob_area_id', 'user_id', 'notes'])]
+/**
+ * @property int $id
+ * @property int $ob_area_id
+ * @property int $user_id
+ * @property string|null $notes
+ * @property Carbon|null $submitted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
+#[Fillable(['ob_area_id', 'user_id', 'notes', 'submitted_at'])]
 class ObChecklist extends Model implements HasMedia
 {
     /** @use HasFactory<ObChecklistFactory> */
     use HasFactory, InteractsWithMedia, LogsNadiActivity;
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'submitted_at' => 'datetime',
+        ];
+    }
 
     public static function activitySubjectLabel(): string
     {

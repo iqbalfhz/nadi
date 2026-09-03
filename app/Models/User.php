@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -43,7 +44,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, LogsNadiActivity, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, HasRoles, LogsNadiActivity, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
     public static function activitySubjectLabel(): string
     {
@@ -81,6 +82,64 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
         'ViewAny:HkInspection',
         'Create:HkInspection',
     ];
+
+    /**
+     * The permissions that open the mobile app, and the module key each one
+     * unlocks — a subset of APP_PANEL_PERMISSIONS above, not a copy of it.
+     * The phone carries the four field modules, the ones done while walking
+     * the mall; the desk-bound ones (POS, queue, room booking) stay on the
+     * web, where a printer and a stable connection are.
+     *
+     * Kept next to APP_PANEL_PERMISSIONS deliberately. Forgetting to update
+     * that constant is the mistake this project makes most often (NADI.MD
+     * §8.1); there are now two of them, so at least they are in one place.
+     *
+     * @var array<string, string>
+     */
+    private const MOBILE_MODULE_PERMISSIONS = [
+        'Create:ObChecklist' => 'ob',
+        'View:SecurityScan' => 'security',
+        'Create:HkInspection' => 'hk',
+        'View:MessengerTasks' => 'messenger',
+    ];
+
+    /**
+     * Whether this account may sign in to the mobile app at all — the API's
+     * equivalent of canAccessPanel(), which is Filament-only.
+     */
+    public function canUseMobileApp(): bool
+    {
+        return $this->is_active && $this->mobileModules() !== [];
+    }
+
+    /**
+     * The module keys this user's phone should show, driving the mobile home
+     * screen the same way QuickLinksWidget drives /app's.
+     *
+     * Read live from the permission tables rather than baked into the token:
+     * an admin who revokes a role at noon expects that to take effect at
+     * noon, not at the user's next sign-in.
+     *
+     * @return list<string>
+     */
+    public function mobileModules(): array
+    {
+        // Membership test rather than hasPermissionTo(), which throws when the
+        // permission row itself is missing — that happens on any database
+        // where shield:generate hasn't run, and a home screen is no place to
+        // discover it.
+        $held = $this->getAllPermissions()->pluck('name');
+
+        $modules = [];
+
+        foreach (self::MOBILE_MODULE_PERMISSIONS as $permission => $module) {
+            if ($held->contains($permission)) {
+                $modules[] = $module;
+            }
+        }
+
+        return $modules;
+    }
 
     /**
      * Whether this user holds any permission that isn't purely /app

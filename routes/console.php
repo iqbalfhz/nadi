@@ -42,3 +42,10 @@ Schedule::command('activitylog:clean')
     ->daily()
     ->at('04:00')
     ->onOneServer();
+
+// What the mobile API leaves behind: spent idempotency keys, and photos a
+// worker uploaded for a report they never sent.
+Schedule::command('nadi:prune-api-staging')
+    ->daily()
+    ->at('04:30')
+    ->onOneServer();
