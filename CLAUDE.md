@@ -31,5 +31,6 @@ Proyek ini adalah **NADI** — sistem operasional kantor terpadu (web admin + mo
 
 Ringkasan cepat:
 - **Stack:** Laravel 13 + Livewire starter kit, **Filament** multi-panel (`/admin` untuk admin/HR, `/app` untuk karyawan), Filament Shield + `spatie/laravel-permission`, Laravel Reverb (real-time, modul Antrian), Sanctum (API untuk mobile Flutter — dikerjakan belakangan).
-- **Arsitektur:** modular monolith, satu backend/satu database. Modul baru = folder/menu baru dalam sistem yang sama, disarankan di `app/Modules/<NamaModul>/`.
+- **Arsitektur:** modular monolith, satu backend/satu database. Modul baru mengikuti struktur bawaan Laravel/Filament (`app/Filament/Resources/<Nama>/`, `app/Models/`, `app/Filament/App/` untuk panel karyawan) — saran `app/Modules/<NamaModul>/` **sudah dibatalkan**, lihat NADI.MD §6. Pemisahan antar modul cukup diwakili navigation group.
+- **API mobile:** ada di `/api/v1`, Sanctum mode token. Kontrak lengkap di [docs/API-MOBILE.md](docs/API-MOBILE.md) — baca itu sebelum menambah endpoint.
 - **Laravel Boost** sudah terpasang ([boost.json](boost.json)) dengan skills: `laravel-best-practices`, `livewire-development`, `fluxui-development`, `fortify-development`, `tailwindcss-development`, `infer-conventions`. Ikuti guidelines dari skill-skill ini alih-alih pola Laravel generik.
