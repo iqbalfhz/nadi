@@ -357,7 +357,7 @@ class ActivityLogTest extends TestCase
      */
     public function test_every_log_type_has_a_colour_and_a_label(): void
     {
-        foreach (array_keys(ActivityLog::LOG_NAMES) as $logName) {
+        foreach (array_keys(ActivityLog::logNames()) as $logName) {
             $this->assertArrayHasKey($logName, ActivityLog::LOG_COLORS, "[{$logName}] has a label but no colour.");
         }
 

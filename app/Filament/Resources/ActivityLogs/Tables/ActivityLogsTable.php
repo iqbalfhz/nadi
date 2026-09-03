@@ -54,7 +54,7 @@ class ActivityLogsTable
                 TextColumn::make('log_name')
                     ->label(__('Jenis'))
                     ->badge()
-                    ->formatStateUsing(fn (?string $state): string => ActivityLog::LOG_NAMES[$state] ?? ($state ?? '—'))
+                    ->formatStateUsing(fn (?string $state): string => ActivityLog::logNames()[$state] ?? ($state ?? '—'))
                     ->color(fn (?string $state): string => ActivityLog::LOG_COLORS[$state] ?? 'gray'),
             ])
             ->defaultSort('created_at', 'desc')
@@ -96,7 +96,7 @@ class ActivityLogsTable
                     }),
                 SelectFilter::make('log_name')
                     ->label(__('Jenis'))
-                    ->options(ActivityLog::LOG_NAMES),
+                    ->options(ActivityLog::logNames()),
                 SelectFilter::make('event')
                     ->label(__('Aksi'))
                     ->options([

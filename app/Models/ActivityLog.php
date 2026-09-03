@@ -17,16 +17,25 @@ class ActivityLog extends Activity
     /**
      * The log_name each source writes under, so the table can offer a filter
      * an admin recognises instead of raw strings. Ordered by how much
-     * attention an entry deserves, which is also the colour order below.
+     * attention an entry deserves, matching the colour order below.
+     *
+     * A method rather than a const: PHP forbids function calls in constant
+     * expressions, so these cannot be wrapped in __() where they sit. The
+     * keys stay in code as stable identifiers; only the wording moves.
+     *
+     * @return array<string, string>
      */
-    public const LOG_NAMES = [
-        'data' => 'Perubahan Data',
-        'akses' => 'Akses & Login',
-        'akses-data' => 'Lihat & Export Data',
-        'sistem' => 'Sistem',
-        'izin' => 'Role & Izin',
-        'ditolak' => 'Akses Ditolak',
-    ];
+    public static function logNames(): array
+    {
+        return [
+            'data' => __('Perubahan Data'),
+            'akses' => __('Akses & Login'),
+            'akses-data' => __('Lihat & Export Data'),
+            'sistem' => __('Sistem'),
+            'izin' => __('Role & Izin'),
+            'ditolak' => __('Akses Ditolak'),
+        ];
+    }
 
     /**
      * Colour by how much attention the entry deserves, not by giving each
