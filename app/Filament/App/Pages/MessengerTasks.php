@@ -59,7 +59,7 @@ class MessengerTasks extends Page
         return $schema
             ->components([
                 SpatieMediaLibraryFileUpload::make('photo')
-                    ->label('Foto Bukti Serah Terima')
+                    ->label(__('Foto Bukti Serah Terima'))
                     ->collection('proof')
                     ->image()
                     ->maxSize(10240)
@@ -105,7 +105,7 @@ class MessengerTasks extends Page
             // throws a subclass of it, and its own message is the
             // English "No query results for model [App\Models...]" —
             // meaningless to a cashier mid-transaction.
-            Notification::make()->warning()->title('Tugas ini sudah tidak ada. Muat ulang halaman lalu coba lagi.')->send();
+            Notification::make()->warning()->title(__('Tugas ini sudah tidak ada. Muat ulang halaman lalu coba lagi.'))->send();
 
             return;
         } catch (RuntimeException $exception) {
@@ -119,7 +119,7 @@ class MessengerTasks extends Page
 
         Notification::make()
             ->success()
-            ->title('Tugas berhasil diambil')
+            ->title(__('Tugas berhasil diambil'))
             ->send();
     }
 
@@ -137,7 +137,7 @@ class MessengerTasks extends Page
             // throws a subclass of it, and its own message is the
             // English "No query results for model [App\Models...]" —
             // meaningless to a cashier mid-transaction.
-            Notification::make()->warning()->title('Tugas ini sudah tidak ada. Muat ulang halaman lalu coba lagi.')->send();
+            Notification::make()->warning()->title(__('Tugas ini sudah tidak ada. Muat ulang halaman lalu coba lagi.'))->send();
 
             return;
         } catch (RuntimeException $exception) {
@@ -184,7 +184,7 @@ class MessengerTasks extends Page
 
         Notification::make()
             ->success()
-            ->title('Pengiriman ditandai selesai')
+            ->title(__('Pengiriman ditandai selesai'))
             ->send();
     }
 }

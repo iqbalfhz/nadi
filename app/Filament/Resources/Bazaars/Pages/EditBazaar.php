@@ -35,8 +35,8 @@ class EditBazaar extends EditRecord
         } catch (QueryException $exception) {
             Notification::make()
                 ->danger()
-                ->title('Tidak bisa menyimpan')
-                ->body('Kios atau produk yang dihapus dari form ini sudah memiliki transaksi penjualan, jadi tidak bisa dihapus.')
+                ->title(__('Tidak bisa menyimpan'))
+                ->body(__('Kios atau produk yang dihapus dari form ini sudah memiliki transaksi penjualan, jadi tidak bisa dihapus.'))
                 ->send();
         }
     }

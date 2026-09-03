@@ -18,24 +18,24 @@ class BazaarForm
     {
         return $schema
             ->components([
-                Section::make('Detail Bazar')
-                    ->description('Satu baris per kejadian bazar — dibuat baru tiap ada acara, bukan template berulang.')
+                Section::make(__('Detail Bazar'))
+                    ->description(__('Satu baris per kejadian bazar — dibuat baru tiap ada acara, bukan template berulang.'))
                     ->icon(Heroicon::OutlinedBuildingStorefront)
                     ->columnSpanFull()
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
-                            ->label('Nama Bazar')
+                            ->label(__('Nama Bazar'))
                             ->required()
                             ->maxLength(255),
                         Toggle::make('is_open')
-                            ->label('Bazar Dibuka')
-                            ->helperText('Buka manual saat bazar mulai, tutup manual setelah selesai — tidak otomatis berdasarkan jadwal.')
+                            ->label(__('Bazar Dibuka'))
+                            ->helperText(__('Buka manual saat bazar mulai, tutup manual setelah selesai — tidak otomatis berdasarkan jadwal.'))
                             ->default(false),
                     ]),
 
-                Section::make('Kios & Produk')
-                    ->description('Kios dan produknya diketik ulang tiap bazar — harga ditentukan per kombinasi kios + produk, bukan master data yang dipakai lagi.')
+                Section::make(__('Kios & Produk'))
+                    ->description(__('Kios dan produknya diketik ulang tiap bazar — harga ditentukan per kombinasi kios + produk, bukan master data yang dipakai lagi.'))
                     ->icon(Heroicon::OutlinedShoppingBag)
                     ->columnSpanFull()
                     ->schema([
@@ -54,12 +54,12 @@ class BazaarForm
                                 : $state['name'])
                             ->schema([
                                 TextInput::make('name')
-                                    ->label('Nama Kios')
+                                    ->label(__('Nama Kios'))
                                     ->required()
                                     ->maxLength(255),
                                 TextInput::make('tax_rate')
-                                    ->label('PB1 (%)')
-                                    ->helperText('Ditambahkan di atas harga produk. Isi 0 untuk kios yang tidak dikenakan pajak.')
+                                    ->label(__('PB1 (%)'))
+                                    ->helperText(__('Ditambahkan di atas harga produk. Isi 0 untuk kios yang tidak dikenakan pajak.'))
                                     ->numeric()
                                     ->required()
                                     ->minValue(0)
@@ -69,18 +69,18 @@ class BazaarForm
 
                                 Repeater::make('products')
                                     ->relationship()
-                                    ->label('Produk')
+                                    ->label(__('Produk'))
                                     ->columnSpanFull()
                                     ->itemLabel(fn (array $state): string => blank($state['name'] ?? null)
                                         ? 'Produk baru'
                                         : $state['name'])
                                     ->schema([
                                         TextInput::make('name')
-                                            ->label('Nama Produk')
+                                            ->label(__('Nama Produk'))
                                             ->required()
                                             ->maxLength(255),
                                         Select::make('pricing_unit')
-                                            ->label('Satuan Harga')
+                                            ->label(__('Satuan Harga'))
                                             ->options(fn () => collect(PricingUnit::cases())
                                                 ->mapWithKeys(fn (PricingUnit $unit) => [$unit->value => $unit->label()]))
                                             ->required()
@@ -93,7 +93,7 @@ class BazaarForm
                                             ->prefix('Rp'),
                                         TextInput::make('initial_stock')
                                             ->label(fn (Get $get): string => 'Stok Awal ('.(PricingUnit::tryFrom($get('pricing_unit'))?->unitSuffix() ?? 'opsional').')')
-                                            ->helperText('Kosongkan jika tidak ingin membatasi stok.')
+                                            ->helperText(__('Kosongkan jika tidak ingin membatasi stok.'))
                                             ->numeric()
                                             ->minValue(0),
                                     ])

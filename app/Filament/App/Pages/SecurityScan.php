@@ -59,16 +59,16 @@ class SecurityScan extends Page
         return $schema
             ->components([
                 SpatieMediaLibraryFileUpload::make('photos')
-                    ->label('Foto')
-                    ->helperText('Ambil langsung dari kamera atau pilih dari galeri. Bisa lebih dari satu.')
+                    ->label(__('Foto'))
+                    ->helperText(__('Ambil langsung dari kamera atau pilih dari galeri. Bisa lebih dari satu.'))
                     ->collection('photos')
                     ->image()
                     ->multiple()
                     ->maxSize(10240)
                     ->required(),
                 Textarea::make('incident_report')
-                    ->label('Laporan Kejadian')
-                    ->helperText('Kosongkan kalau tidak ada temuan.')
+                    ->label(__('Laporan Kejadian'))
+                    ->helperText(__('Kosongkan kalau tidak ada temuan.'))
                     ->maxLength(1000),
             ])
             ->statePath('data');
@@ -93,7 +93,7 @@ class SecurityScan extends Page
                 ->footer([
                     Actions::make([
                         Action::make('submit')
-                            ->label('Kirim Laporan')
+                            ->label(__('Kirim Laporan'))
                             ->submit('form'),
                     ]),
                 ]),
@@ -118,7 +118,7 @@ class SecurityScan extends Page
 
         Notification::make()
             ->success()
-            ->title('Patroli berhasil dicatat')
+            ->title(__('Patroli berhasil dicatat'))
             ->send();
 
         $this->form->fill();

@@ -14,7 +14,7 @@ class ListMessengerDeliveries extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label('Kirim Dokumen'),
+                ->label(__('Kirim Dokumen')),
         ];
     }
 }

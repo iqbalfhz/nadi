@@ -18,27 +18,27 @@ class UserForm
     {
         return $schema
             ->components([
-                Section::make('Data Karyawan')
+                Section::make(__('Data Karyawan'))
                     ->icon(Heroicon::OutlinedIdentification)
                     ->columnSpanFull()
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
-                            ->label('Nama')
+                            ->label(__('Nama'))
                             ->required()
                             ->maxLength(255),
                         Select::make('department_id')
-                            ->label('Departemen')
+                            ->label(__('Departemen'))
                             ->options(fn () => Department::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id'))
                             ->searchable(),
                         TextInput::make('email')
-                            ->label('Email')
+                            ->label(__('Email'))
                             ->email()
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
                         TextInput::make('password')
-                            ->label('Password')
+                            ->label(__('Password'))
                             ->password()
                             ->revealable()
                             ->required(fn (string $operation): bool => $operation === 'create')
@@ -48,20 +48,20 @@ class UserForm
                                 : null),
                     ]),
 
-                Section::make('Akses')
-                    ->description('Role menentukan menu apa saja yang bisa dibuka user ini di /admin dan /app.')
+                Section::make(__('Akses'))
+                    ->description(__('Role menentukan menu apa saja yang bisa dibuka user ini di /admin dan /app.'))
                     ->icon(Heroicon::OutlinedKey)
                     ->columnSpanFull()
                     ->schema([
                         Select::make('roles')
-                            ->label('Roles')
+                            ->label(__('Roles'))
                             ->relationship('roles', 'name')
                             ->multiple()
                             ->preload()
                             ->searchable()
                             ->columnSpanFull(),
                         Toggle::make('is_active')
-                            ->label('Aktif')
+                            ->label(__('Aktif'))
                             ->default(true)
                             ->disabled(fn (?User $record): bool => $record?->id === Auth::id())
                             ->helperText(fn (?User $record): string => $record?->id === Auth::id()

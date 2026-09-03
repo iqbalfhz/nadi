@@ -13,14 +13,14 @@ class ShortLinkForm
     {
         return $schema
             ->components([
-                Section::make('Perpendek Link')
-                    ->description('Link pendeknya dibuat otomatis setelah disimpan, dan bisa dibuka siapa saja tanpa login.')
+                Section::make(__('Perpendek Link'))
+                    ->description(__('Link pendeknya dibuat otomatis setelah disimpan, dan bisa dibuka siapa saja tanpa login.'))
                     ->icon(Heroicon::OutlinedLink)
                     ->columnSpanFull()
                     ->schema([
                         // A Google Drive URL is far too long for half a row.
                         TextInput::make('target_url')
-                            ->label('URL yang mau dipendekkan')
+                            ->label(__('URL yang mau dipendekkan'))
                             ->url()
                             // Laravel's bare "url" rule accepts any scheme,
                             // including javascript: and data:. Pin it to the
@@ -28,7 +28,7 @@ class ShortLinkForm
                             ->rule('url:http,https')
                             ->required()
                             ->maxLength(2048)
-                            ->placeholder('https://drive.google.com/...')
+                            ->placeholder(__('https://drive.google.com/...'))
                             ->columnSpanFull(),
                     ]),
             ]);

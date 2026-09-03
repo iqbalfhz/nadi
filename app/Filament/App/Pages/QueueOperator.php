@@ -103,7 +103,7 @@ class QueueOperator extends Page
 
         if ($this->currentTicketId) {
             Notification::make()
-                ->title('Selesaikan dulu tiket yang sedang dilayani sebelum memanggil berikutnya.')
+                ->title(__('Selesaikan dulu tiket yang sedang dilayani sebelum memanggil berikutnya.'))
                 ->warning()
                 ->send();
 
@@ -112,7 +112,7 @@ class QueueOperator extends Page
 
         if (trim($this->counterLabel) === '') {
             Notification::make()
-                ->title('Isi dulu Nama Loket / Counter Anda.')
+                ->title(__('Isi dulu Nama Loket / Counter Anda.'))
                 ->warning()
                 ->send();
 
@@ -128,7 +128,7 @@ class QueueOperator extends Page
 
         if (! $ticket) {
             Notification::make()
-                ->title('Tidak ada lagi yang menunggu di loket ini.')
+                ->title(__('Tidak ada lagi yang menunggu di loket ini.'))
                 ->info()
                 ->send();
 

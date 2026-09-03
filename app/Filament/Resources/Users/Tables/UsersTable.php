@@ -25,22 +25,22 @@ class UsersTable
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['department', 'roles']))
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nama')
+                    ->label(__('Nama'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('department.name')
-                    ->label('Departemen')
-                    ->placeholder('—')
+                    ->label(__('Departemen'))
+                    ->placeholder(__('—'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('email')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('roles.name')
-                    ->label('Roles')
+                    ->label(__('Roles'))
                     ->badge(),
                 IconColumn::make('is_active')
-                    ->label('Aktif')
+                    ->label(__('Aktif'))
                     ->boolean(),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -53,7 +53,7 @@ class UsersTable
                 // employee's own view instead of reasoning backwards from
                 // three stacked layers of roles.
                 Action::make('impersonate')
-                    ->label('Masuk sebagai')
+                    ->label(__('Masuk sebagai'))
                     ->icon(Heroicon::OutlinedUserCircle)
                     ->color('warning')
                     // Same rule that guards the action itself: a button that
@@ -61,8 +61,8 @@ class UsersTable
                     ->visible(fn (User $record): bool => Impersonation::isImpersonatable(self::currentUser(), $record))
                     ->requiresConfirmation()
                     ->modalHeading(fn (User $record): string => "Masuk sebagai {$record->name}?")
-                    ->modalDescription('Anda akan melihat NADI persis seperti yang dilihat karyawan ini. Perubahan apa pun tercatat atas namanya, disertai penanda bahwa Anda yang mengerjakannya.')
-                    ->modalSubmitActionLabel('Masuk sebagai dia')
+                    ->modalDescription(__('Anda akan melihat NADI persis seperti yang dilihat karyawan ini. Perubahan apa pun tercatat atas namanya, disertai penanda bahwa Anda yang mengerjakannya.'))
+                    ->modalSubmitActionLabel(__('Masuk sebagai dia'))
                     ->action(function (User $record) {
                         Impersonation::start(self::currentUser(), $record);
 

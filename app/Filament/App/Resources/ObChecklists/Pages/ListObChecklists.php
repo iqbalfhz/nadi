@@ -14,7 +14,7 @@ class ListObChecklists extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label('Submit Checklist'),
+                ->label(__('Submit Checklist')),
         ];
     }
 }

@@ -15,24 +15,24 @@ class RoomBookingsTable
         return $table
             ->columns([
                 TextColumn::make('room.name')
-                    ->label('Ruangan')
+                    ->label(__('Ruangan'))
                     ->searchable(),
                 TextColumn::make('room.area.name')
-                    ->label('Lokasi')
+                    ->label(__('Lokasi'))
                     ->searchable(),
                 TextColumn::make('title')
-                    ->label('Judul')
+                    ->label(__('Judul'))
                     ->searchable(),
                 TextColumn::make('starts_at')
-                    ->label('Mulai')
+                    ->label(__('Mulai'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('ends_at')
-                    ->label('Selesai')
+                    ->label(__('Selesai'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('deleted_at')
-                    ->label('Status')
+                    ->label(__('Status'))
                     ->formatStateUsing(fn (RoomBooking $record): string => $record->trashed() ? 'Dibatalkan' : 'Aktif')
                     ->badge()
                     ->color(fn (RoomBooking $record): string => $record->trashed() ? 'danger' : 'success'),
@@ -43,7 +43,7 @@ class RoomBookingsTable
             ])
             ->recordActions([
                 DeleteAction::make()
-                    ->label('Batalkan')
+                    ->label(__('Batalkan'))
                     ->visible(fn (RoomBooking $record): bool => ! $record->trashed()),
             ]);
     }

@@ -15,29 +15,29 @@ class VendorSaleForm
     {
         return $schema
             ->components([
-                Section::make('Koreksi Penjualan')
-                    ->description('Penjualan dicatat dari kasir di /app — halaman ini hanya untuk membetulkan data yang salah input.')
+                Section::make(__('Koreksi Penjualan'))
+                    ->description(__('Penjualan dicatat dari kasir di /app — halaman ini hanya untuk membetulkan data yang salah input.'))
                     ->icon(Heroicon::OutlinedPencilSquare)
                     ->columnSpanFull()
                     ->columns(2)
                     ->schema([
                         TextInput::make('quantity')
-                            ->label('Jumlah')
+                            ->label(__('Jumlah'))
                             ->numeric()
                             ->required()
                             ->minValue(1),
                         Select::make('payment_method')
-                            ->label('Metode Bayar')
+                            ->label(__('Metode Bayar'))
                             ->options(fn () => collect(TicketPaymentMethod::cases())
                                 ->mapWithKeys(fn (TicketPaymentMethod $method) => [$method->value => $method->label()]))
                             ->required(),
                         TextInput::make('price')
-                            ->label('Harga')
+                            ->label(__('Harga'))
                             ->numeric()
                             ->required()
                             ->minValue(0)
                             ->prefix('Rp')
-                            ->helperText('Tidak dihitung ulang otomatis kalau Jumlah diubah — sesuaikan manual.')
+                            ->helperText(__('Tidak dihitung ulang otomatis kalau Jumlah diubah — sesuaikan manual.'))
                             ->columnSpanFull(),
                     ]),
             ]);

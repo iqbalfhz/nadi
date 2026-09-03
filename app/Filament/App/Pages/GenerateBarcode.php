@@ -69,13 +69,13 @@ class GenerateBarcode extends Page
     public function generate(): void
     {
         if ($this->format === '') {
-            Notification::make()->warning()->title('Pilih jenis dulu.')->send();
+            Notification::make()->warning()->title(__('Pilih jenis dulu.'))->send();
 
             return;
         }
 
         if (trim($this->content) === '') {
-            Notification::make()->warning()->title('Isi konten dulu.')->send();
+            Notification::make()->warning()->title(__('Isi konten dulu.'))->send();
 
             return;
         }
@@ -104,8 +104,8 @@ class GenerateBarcode extends Page
 
             Notification::make()
                 ->danger()
-                ->title('Konten tidak cocok untuk jenis ini')
-                ->body('Cek lagi isinya — EAN-13 hanya menerima 12-13 digit angka, sedangkan Code 128 dan Code 39 bisa teks bebas.')
+                ->title(__('Konten tidak cocok untuk jenis ini'))
+                ->body(__('Cek lagi isinya — EAN-13 hanya menerima 12-13 digit angka, sedangkan Code 128 dan Code 39 bisa teks bebas.'))
                 ->send();
 
             return;

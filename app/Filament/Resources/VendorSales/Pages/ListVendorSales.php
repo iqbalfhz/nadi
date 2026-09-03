@@ -31,28 +31,28 @@ class ListVendorSales extends ListRecords
     {
         return [
             ExportAction::make()
-                ->label('Export Excel')
+                ->label(__('Export Excel'))
                 ->after(fn () => $this->logDataAccess('Export Excel', 'Laporan Penjualan Bazar'))
                 ->exports([
                     ExcelExport::make('penjualan-bazar')
                         ->withFilename(fn (): string => 'penjualan-bazar-'.now()->format('Y-m-d'))
                         ->withColumns([
-                            ExportColumn::make('transaction_number')->heading('No. Transaksi'),
-                            ExportColumn::make('bazaar.name')->heading('Bazar'),
-                            ExportColumn::make('vendor.name')->heading('Kios'),
-                            ExportColumn::make('vendorProduct.name')->heading('Produk'),
-                            ExportColumn::make('quantity')->heading('Jumlah'),
+                            ExportColumn::make('transaction_number')->heading(__('No. Transaksi')),
+                            ExportColumn::make('bazaar.name')->heading(__('Bazar')),
+                            ExportColumn::make('vendor.name')->heading(__('Kios')),
+                            ExportColumn::make('vendorProduct.name')->heading(__('Produk')),
+                            ExportColumn::make('quantity')->heading(__('Jumlah')),
                             ExportColumn::make('pricing_unit')
-                                ->heading('Satuan')
+                                ->heading(__('Satuan'))
                                 ->formatStateUsing(fn (PricingUnit $state): string => $state->label()),
                             ExportColumn::make('payment_method')
-                                ->heading('Metode Bayar')
+                                ->heading(__('Metode Bayar'))
                                 ->formatStateUsing(fn (TicketPaymentMethod $state): string => $state->label()),
-                            ExportColumn::make('price')->heading('Subtotal'),
-                            ExportColumn::make('tax_rate')->heading('Tarif PB1 (%)'),
-                            ExportColumn::make('tax_amount')->heading('PB1'),
-                            ExportColumn::make('soldByUser.name')->heading('Kasir'),
-                            ExportColumn::make('created_at')->heading('Waktu'),
+                            ExportColumn::make('price')->heading(__('Subtotal')),
+                            ExportColumn::make('tax_rate')->heading(__('Tarif PB1 (%)')),
+                            ExportColumn::make('tax_amount')->heading(__('PB1')),
+                            ExportColumn::make('soldByUser.name')->heading(__('Kasir')),
+                            ExportColumn::make('created_at')->heading(__('Waktu')),
                         ]),
                 ]),
         ];

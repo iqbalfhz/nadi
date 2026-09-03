@@ -13,28 +13,28 @@ class HkInspectionsTable
     {
         return $table
             ->defaultSort('created_at', 'desc')
-            ->emptyStateHeading('Belum ada laporan')
-            ->emptyStateDescription('Laporan pemeriksaan yang Anda kirim akan muncul di sini.')
+            ->emptyStateHeading(__('Belum ada laporan'))
+            ->emptyStateDescription(__('Laporan pemeriksaan yang Anda kirim akan muncul di sini.'))
             ->columns([
                 TextColumn::make('created_at')
-                    ->label('Waktu')
+                    ->label(__('Waktu'))
                     ->dateTime('d M Y H:i')
                     ->sortable(),
                 TextColumn::make('category.name')
-                    ->label('Kategori')
+                    ->label(__('Kategori'))
                     ->badge()
                     ->sortable(),
                 TextColumn::make('area.name')
-                    ->label('Titik')
+                    ->label(__('Titik'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('condition')
-                    ->label('Kondisi')
+                    ->label(__('Kondisi'))
                     ->badge()
                     ->formatStateUsing(fn (HkCondition $state): string => $state->label())
                     ->color(fn (HkCondition $state): string => $state->color()),
                 TextColumn::make('staff_name')
-                    ->label('Petugas')
+                    ->label(__('Petugas'))
                     ->searchable(),
             ])
             ->recordActions([

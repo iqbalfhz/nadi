@@ -13,7 +13,7 @@ class ListHkInspections extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()->label('Isi Laporan'),
+            CreateAction::make()->label(__('Isi Laporan')),
         ];
     }
 }

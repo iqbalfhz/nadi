@@ -35,8 +35,8 @@ class HkInspectionForm
     {
         return $schema
             ->components([
-                Section::make('Laporan Pemeriksaan')
-                    ->description('Isi setelah selesai memeriksa satu titik.')
+                Section::make(__('Laporan Pemeriksaan'))
+                    ->description(__('Isi setelah selesai memeriksa satu titik.'))
                     ->icon(Heroicon::OutlinedClipboardDocumentCheck)
                     ->columnSpanFull()
                     // Single column throughout: this is filled one-handed on a
@@ -45,7 +45,7 @@ class HkInspectionForm
                     // ObChecklistForm.
                     ->schema([
                         Select::make('hk_category_id')
-                            ->label('Kategori')
+                            ->label(__('Kategori'))
                             ->options(fn (): array => HkCategory::query()
                                 ->where('is_active', true)
                                 ->orderBy('name')
@@ -60,7 +60,7 @@ class HkInspectionForm
                             ->afterStateUpdated(fn (Set $set) => $set('hk_area_id', null))
                             ->columnSpanFull(),
                         Select::make('hk_area_id')
-                            ->label('Titik')
+                            ->label(__('Titik'))
                             ->options(fn (Get $get): array => HkArea::query()
                                 ->where('is_active', true)
                                 ->where('hk_category_id', $get('hk_category_id'))
@@ -75,31 +75,31 @@ class HkInspectionForm
                                 : 'Pilih titik')
                             ->columnSpanFull(),
                         TextInput::make('floor')
-                            ->label('Lantai')
+                            ->label(__('Lantai'))
                             ->maxLength(255)
                             ->visible(fn (Get $get): bool => self::categoryRequiresFloor($get('hk_category_id')))
                             ->required(fn (Get $get): bool => self::categoryRequiresFloor($get('hk_category_id')))
                             ->columnSpanFull(),
                         TextInput::make('staff_name')
-                            ->label('Petugas')
-                            ->helperText('Nama staf HK yang bertugas di titik ini saat diperiksa.')
+                            ->label(__('Petugas'))
+                            ->helperText(__('Nama staf HK yang bertugas di titik ini saat diperiksa.'))
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),
                         Select::make('shift')
-                            ->label('Shift')
+                            ->label(__('Shift'))
                             ->options(HkShift::options())
                             ->required()
                             ->columnSpanFull(),
                         Select::make('condition')
-                            ->label('Kondisi')
+                            ->label(__('Kondisi'))
                             ->options(HkCondition::options())
                             ->required()
                             ->live()
                             ->columnSpanFull(),
                         SpatieMediaLibraryFileUpload::make('photos')
-                            ->label('Foto')
-                            ->helperText('Ambil langsung dari kamera atau pilih dari galeri. Bisa lebih dari satu.')
+                            ->label(__('Foto'))
+                            ->helperText(__('Ambil langsung dari kamera atau pilih dari galeri. Bisa lebih dari satu.'))
                             ->collection('photos')
                             ->image()
                             ->multiple()
@@ -107,14 +107,14 @@ class HkInspectionForm
                             ->required()
                             ->columnSpanFull(),
                         Textarea::make('notes')
-                            ->label('Keterangan')
-                            ->helperText('Opsional — jelaskan temuannya kalau ada.')
+                            ->label(__('Keterangan'))
+                            ->helperText(__('Opsional — jelaskan temuannya kalau ada.'))
                             ->maxLength(1000)
                             ->rows(3)
                             ->columnSpanFull(),
                         Textarea::make('follow_up')
-                            ->label('Tindak Lanjut')
-                            ->helperText('Apa yang sudah atau akan dilakukan atas temuan ini.')
+                            ->label(__('Tindak Lanjut'))
+                            ->helperText(__('Apa yang sudah atau akan dilakukan atas temuan ini.'))
                             ->maxLength(1000)
                             ->rows(3)
                             // Both visible and required together: reporting a

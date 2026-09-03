@@ -13,24 +13,24 @@ class MessengerDeliveriesTable
         return $table
             ->columns([
                 TextColumn::make('tracking_number')
-                    ->label('No. Tracking')
+                    ->label(__('No. Tracking'))
                     ->weight('bold'),
                 TextColumn::make('destination')
-                    ->label('Tujuan')
+                    ->label(__('Tujuan'))
                     ->searchable(),
                 TextColumn::make('document_description')
-                    ->label('Deskripsi Dokumen')
+                    ->label(__('Deskripsi Dokumen'))
                     ->limit(40),
                 TextColumn::make('status')
-                    ->label('Status')
+                    ->label(__('Status'))
                     ->badge()
                     ->formatStateUsing(fn (MessengerDeliveryStatus $state): string => $state->label())
                     ->color(fn (MessengerDeliveryStatus $state): string => $state->color()),
                 TextColumn::make('messenger.name')
-                    ->label('Messenger')
-                    ->placeholder('—'),
+                    ->label(__('Messenger'))
+                    ->placeholder(__('—')),
                 TextColumn::make('created_at')
-                    ->label('Dibuat')
+                    ->label(__('Dibuat'))
                     ->dateTime()
                     ->sortable(),
             ])

@@ -21,26 +21,26 @@ class ShortLinksTable
         return $table
             ->columns([
                 TextColumn::make('short_url')
-                    ->label('Short Link')
+                    ->label(__('Short Link'))
                     ->copyable()
                     ->copyMessage('Link disalin!')
                     ->weight('bold'),
                 TextColumn::make('target_url')
-                    ->label('URL Asli')
+                    ->label(__('URL Asli'))
                     ->limit(50)
                     ->tooltip(fn (string $state): string => $state)
                     ->url(fn (string $state): string => $state, shouldOpenInNewTab: true),
                 ...($showCreator ? [
                     TextColumn::make('creator.name')
-                        ->label('Dibuat Oleh')
+                        ->label(__('Dibuat Oleh'))
                         ->searchable(),
                 ] : []),
                 TextColumn::make('clicks')
-                    ->label('Klik')
+                    ->label(__('Klik'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->label('Dibuat')
+                    ->label(__('Dibuat'))
                     ->dateTime()
                     ->sortable(),
             ])

@@ -14,7 +14,7 @@ class ListShortLinks extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label('Buat Short Link'),
+                ->label(__('Buat Short Link')),
         ];
     }
 }

@@ -12,15 +12,15 @@ class ObChecklistsTable
         return $table
             ->columns([
                 TextColumn::make('area.name')
-                    ->label('Area/Titik')
+                    ->label(__('Area/Titik'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('notes')
-                    ->label('Catatan')
+                    ->label(__('Catatan'))
                     ->limit(50)
-                    ->placeholder('—'),
+                    ->placeholder(__('—')),
                 TextColumn::make('created_at')
-                    ->label('Waktu')
+                    ->label(__('Waktu'))
                     ->dateTime()
                     ->sortable(),
             ])

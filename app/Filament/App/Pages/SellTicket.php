@@ -93,25 +93,25 @@ class SellTicket extends Page
     public function sell(): void
     {
         if (! $this->eventId) {
-            Notification::make()->warning()->title('Pilih event dulu.')->send();
+            Notification::make()->warning()->title(__('Pilih event dulu.'))->send();
 
             return;
         }
 
         if (trim($this->buyerName) === '') {
-            Notification::make()->warning()->title('Isi nama pembeli dulu.')->send();
+            Notification::make()->warning()->title(__('Isi nama pembeli dulu.'))->send();
 
             return;
         }
 
         if (! $this->paymentMethod) {
-            Notification::make()->warning()->title('Pilih metode pembayaran dulu.')->send();
+            Notification::make()->warning()->title(__('Pilih metode pembayaran dulu.'))->send();
 
             return;
         }
 
         if ($this->isMember && trim((string) $this->memberReference) === '') {
-            Notification::make()->warning()->title('Scan barcode member dulu.')->send();
+            Notification::make()->warning()->title(__('Scan barcode member dulu.'))->send();
 
             return;
         }
@@ -135,7 +135,7 @@ class SellTicket extends Page
             // throws a subclass of it, and its own message is the
             // English "No query results for model [App\Models...]" —
             // meaningless to a cashier mid-transaction.
-            Notification::make()->warning()->title('Data event ini sudah tidak ada. Muat ulang halaman lalu coba lagi.')->send();
+            Notification::make()->warning()->title(__('Data event ini sudah tidak ada. Muat ulang halaman lalu coba lagi.'))->send();
 
             return;
         } catch (RuntimeException $exception) {

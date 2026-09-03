@@ -249,13 +249,13 @@ class SellVendorProduct extends Page
     public function addToCart(): void
     {
         if (! $this->vendorProductId) {
-            Notification::make()->warning()->title('Pilih produk dulu.')->send();
+            Notification::make()->warning()->title(__('Pilih produk dulu.'))->send();
 
             return;
         }
 
         if (! $this->quantity || $this->quantity < 1) {
-            Notification::make()->warning()->title('Isi jumlah/berat dulu.')->send();
+            Notification::make()->warning()->title(__('Isi jumlah/berat dulu.'))->send();
 
             return;
         }
@@ -303,13 +303,13 @@ class SellVendorProduct extends Page
     public function checkout(): void
     {
         if ($this->cart === []) {
-            Notification::make()->warning()->title('Keranjang masih kosong.')->send();
+            Notification::make()->warning()->title(__('Keranjang masih kosong.'))->send();
 
             return;
         }
 
         if (! $this->paymentMethod) {
-            Notification::make()->warning()->title('Pilih metode pembayaran dulu.')->send();
+            Notification::make()->warning()->title(__('Pilih metode pembayaran dulu.'))->send();
 
             return;
         }
@@ -327,7 +327,7 @@ class SellVendorProduct extends Page
         $missingProduct = collect($this->cart)->contains(fn (array $entry): bool => ! $products->has($entry['vendorProductId']));
 
         if ($missingProduct) {
-            Notification::make()->warning()->title('Salah satu produk di keranjang sudah tidak tersedia. Hapus dari keranjang lalu coba lagi.')->send();
+            Notification::make()->warning()->title(__('Salah satu produk di keranjang sudah tidak tersedia. Hapus dari keranjang lalu coba lagi.'))->send();
 
             return;
         }
@@ -359,7 +359,7 @@ class SellVendorProduct extends Page
             // throws a subclass of it, and its own message is the
             // English "No query results for model [App\Models...]" —
             // meaningless to a cashier mid-transaction.
-            Notification::make()->warning()->title('Salah satu data di keranjang sudah tidak ada. Muat ulang halaman lalu coba lagi.')->send();
+            Notification::make()->warning()->title(__('Salah satu data di keranjang sudah tidak ada. Muat ulang halaman lalu coba lagi.'))->send();
 
             return;
         } catch (RuntimeException $exception) {

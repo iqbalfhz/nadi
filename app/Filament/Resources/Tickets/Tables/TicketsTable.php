@@ -43,60 +43,60 @@ class TicketsTable
         return $table
             ->columns([
                 TextColumn::make('transaction_number')
-                    ->label('No. Transaksi')
+                    ->label(__('No. Transaksi'))
                     ->searchable()
-                    ->placeholder('—')
+                    ->placeholder(__('—'))
                     ->toggleable(),
                 TextColumn::make('event.name')
-                    ->label('Event')
+                    ->label(__('Event'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('buyer_name')
-                    ->label('Nama Pembeli')
+                    ->label(__('Nama Pembeli'))
                     ->searchable(),
                 IconColumn::make('is_member')
-                    ->label('Member')
+                    ->label(__('Member'))
                     ->boolean(),
                 TextColumn::make('member_reference')
-                    ->label('Barcode')
-                    ->placeholder('—'),
+                    ->label(__('Barcode'))
+                    ->placeholder(__('—')),
                 TextColumn::make('payment_method')
-                    ->label('Metode Bayar')
+                    ->label(__('Metode Bayar'))
                     ->badge()
                     ->formatStateUsing(fn (TicketPaymentMethod $state): string => $state->label())
                     ->color(fn (TicketPaymentMethod $state): string => $state->color()),
                 TextColumn::make('price')
-                    ->label('Harga')
+                    ->label(__('Harga'))
                     ->money('IDR', decimalPlaces: 0),
                 TextColumn::make('soldByUser.name')
-                    ->label('Kasir')
+                    ->label(__('Kasir'))
                     ->searchable(),
                 TextColumn::make('created_at')
-                    ->label('Waktu')
+                    ->label(__('Waktu'))
                     ->dateTime()
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('event_id')
-                    ->label('Event')
+                    ->label(__('Event'))
                     ->options(fn () => Event::query()->orderBy('name')->pluck('name', 'id'))
                     // latest('id'), not latest(): several rows can share a
                     // created_at to the second, and the tie-break is then
                     // whatever the database feels like returning.
                     ->default(fn () => $defaultToLatestEvent ? Event::query()->latest('id')->value('id') : null),
                 SelectFilter::make('payment_method')
-                    ->label('Metode Bayar')
+                    ->label(__('Metode Bayar'))
                     ->options(fn () => collect(TicketPaymentMethod::cases())
                         ->mapWithKeys(fn (TicketPaymentMethod $method) => [$method->value => $method->label()])),
                 Filter::make('created_at')
-                    ->label('Tanggal')
+                    ->label(__('Tanggal'))
                     ->schema([
                         DatePicker::make('from')
-                            ->label('Dari Tanggal')
+                            ->label(__('Dari Tanggal'))
                             ->default(fn () => $defaultToToday ? now()->toDateString() : null),
                         DatePicker::make('until')
-                            ->label('Sampai Tanggal')
+                            ->label(__('Sampai Tanggal'))
                             ->default(fn () => $defaultToToday ? now()->toDateString() : null),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query

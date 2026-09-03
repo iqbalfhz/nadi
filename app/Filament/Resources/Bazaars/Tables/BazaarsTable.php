@@ -16,16 +16,16 @@ class BazaarsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nama Bazar')
+                    ->label(__('Nama Bazar'))
                     ->searchable()
                     ->sortable(),
                 IconColumn::make('is_open')
-                    ->label('Bazar Dibuka')
+                    ->label(__('Bazar Dibuka'))
                     ->boolean(),
                 TextColumn::make('vendors_count')
-                    ->label('Jumlah Kios'),
+                    ->label(__('Jumlah Kios')),
                 TextColumn::make('sales_count')
-                    ->label('Transaksi'),
+                    ->label(__('Transaksi')),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([

@@ -44,63 +44,63 @@ class VendorSalesTable
         return $table
             ->columns([
                 TextColumn::make('transaction_number')
-                    ->label('No. Transaksi')
+                    ->label(__('No. Transaksi'))
                     ->searchable()
-                    ->placeholder('—')
+                    ->placeholder(__('—'))
                     ->toggleable(),
                 TextColumn::make('bazaar.name')
-                    ->label('Bazar')
+                    ->label(__('Bazar'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('vendor.name')
-                    ->label('Kios')
+                    ->label(__('Kios'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('vendorProduct.name')
-                    ->label('Produk')
+                    ->label(__('Produk'))
                     ->searchable(),
                 TextColumn::make('quantity')
-                    ->label('Jumlah')
+                    ->label(__('Jumlah'))
                     ->formatStateUsing(fn (VendorSale $record): string => number_format($record->quantity, 0, ',', '.').' '.$record->pricing_unit->unitSuffix()),
                 TextColumn::make('payment_method')
-                    ->label('Metode Bayar')
+                    ->label(__('Metode Bayar'))
                     ->badge()
                     ->formatStateUsing(fn (TicketPaymentMethod $state): string => $state->label())
                     ->color(fn (TicketPaymentMethod $state): string => $state->color()),
                 TextColumn::make('price')
-                    ->label('Subtotal')
+                    ->label(__('Subtotal'))
                     ->money('IDR', decimalPlaces: 0)
-                    ->summarize(Sum::make()->label('Jatah kios')->money('IDR', decimalPlaces: 0)),
+                    ->summarize(Sum::make()->label(__('Jatah kios'))->money('IDR', decimalPlaces: 0)),
                 TextColumn::make('tax_amount')
-                    ->label('PB1')
+                    ->label(__('PB1'))
                     ->money('IDR', decimalPlaces: 0)
-                    ->placeholder('—')
-                    ->summarize(Sum::make()->label('PB1 terkumpul')->money('IDR', decimalPlaces: 0))
+                    ->placeholder(__('—'))
+                    ->summarize(Sum::make()->label(__('PB1 terkumpul'))->money('IDR', decimalPlaces: 0))
                     ->toggleable(),
                 TextColumn::make('total')
-                    ->label('Total')
+                    ->label(__('Total'))
                     ->state(fn (VendorSale $record): int => $record->total())
                     ->money('IDR', decimalPlaces: 0)
                     ->weight(FontWeight::SemiBold),
                 TextColumn::make('soldByUser.name')
-                    ->label('Kasir')
+                    ->label(__('Kasir'))
                     ->searchable(),
                 TextColumn::make('created_at')
-                    ->label('Waktu')
+                    ->label(__('Waktu'))
                     ->dateTime()
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('bazaar_id')
-                    ->label('Bazar')
+                    ->label(__('Bazar'))
                     ->options(fn () => Bazaar::query()->orderBy('name')->pluck('name', 'id'))
                     // latest('id'), not latest(): several rows can share a
                     // created_at to the second, and the tie-break is then
                     // whatever the database feels like returning.
                     ->default(fn () => $defaultToLatestBazaar ? Bazaar::query()->latest('id')->value('id') : null),
                 SelectFilter::make('vendor_id')
-                    ->label('Kios')
+                    ->label(__('Kios'))
                     // Vendors aren't reusable master data (typed fresh per
                     // bazaar), so the same vendor name can legitimately recur
                     // across different bazaars — disambiguate with the
@@ -108,17 +108,17 @@ class VendorSalesTable
                     ->options(fn () => Vendor::query()->with('bazaar')->orderBy('name')->get()
                         ->mapWithKeys(fn (Vendor $vendor): array => [$vendor->id => "{$vendor->name} ({$vendor->bazaar->name})"])),
                 SelectFilter::make('payment_method')
-                    ->label('Metode Bayar')
+                    ->label(__('Metode Bayar'))
                     ->options(fn () => collect(TicketPaymentMethod::cases())
                         ->mapWithKeys(fn (TicketPaymentMethod $method) => [$method->value => $method->label()])),
                 Filter::make('created_at')
-                    ->label('Tanggal')
+                    ->label(__('Tanggal'))
                     ->schema([
                         DatePicker::make('from')
-                            ->label('Dari Tanggal')
+                            ->label(__('Dari Tanggal'))
                             ->default(fn () => $defaultToToday ? now()->toDateString() : null),
                         DatePicker::make('until')
-                            ->label('Sampai Tanggal')
+                            ->label(__('Sampai Tanggal'))
                             ->default(fn () => $defaultToToday ? now()->toDateString() : null),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query

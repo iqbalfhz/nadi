@@ -13,20 +13,20 @@ class MessengerDeliveryForm
     {
         return $schema
             ->components([
-                Section::make('Permintaan Kirim Dokumen')
-                    ->description('Setelah disimpan, tugas ini muncul di daftar Tugas Kurir dan bisa diambil kurir mana pun.')
+                Section::make(__('Permintaan Kirim Dokumen'))
+                    ->description(__('Setelah disimpan, tugas ini muncul di daftar Tugas Kurir dan bisa diambil kurir mana pun.'))
                     ->icon(Heroicon::OutlinedTruck)
                     ->columnSpanFull()
                     ->columns(2)
                     ->schema([
                         TextInput::make('destination')
-                            ->label('Tujuan')
-                            ->helperText('Nama atau departemen penerima.')
+                            ->label(__('Tujuan'))
+                            ->helperText(__('Nama atau departemen penerima.'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('document_description')
-                            ->label('Deskripsi Dokumen')
-                            ->helperText('Contoh: Invoice PT ABC, Surat Undangan, dll.')
+                            ->label(__('Deskripsi Dokumen'))
+                            ->helperText(__('Contoh: Invoice PT ABC, Surat Undangan, dll.'))
                             ->required()
                             ->maxLength(255),
                     ]),

@@ -17,24 +17,24 @@ class EventsTable
         return $table
             ->columns([
                 SpatieMediaLibraryImageColumn::make('logo')
-                    ->label('Logo')
+                    ->label(__('Logo'))
                     ->collection('logo')
                     ->circular(),
                 TextColumn::make('name')
-                    ->label('Nama Event')
+                    ->label(__('Nama Event'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('regular_price')
-                    ->label('Harga Reguler')
+                    ->label(__('Harga Reguler'))
                     ->money('IDR', decimalPlaces: 0),
                 TextColumn::make('member_price')
-                    ->label('Harga Member')
+                    ->label(__('Harga Member'))
                     ->money('IDR', decimalPlaces: 0),
                 IconColumn::make('is_open')
-                    ->label('Loket Dibuka')
+                    ->label(__('Loket Dibuka'))
                     ->boolean(),
                 TextColumn::make('tickets_count')
-                    ->label('Tiket Terjual'),
+                    ->label(__('Tiket Terjual')),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([

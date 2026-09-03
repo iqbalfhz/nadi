@@ -21,14 +21,14 @@ class ActivityLogsTable
         return $table
             ->columns([
                 TextColumn::make('created_at')
-                    ->label('Waktu')
+                    ->label(__('Waktu'))
                     ->dateTime('d M Y, H:i:s')
                     ->sortable(),
                 TextColumn::make('causerUser.name')
-                    ->label('Pelaku')
+                    ->label(__('Pelaku'))
                     // A failed login or a scheduled job has no signed-in user
                     // behind it, and that absence is itself information.
-                    ->placeholder('Sistem / tidak login')
+                    ->placeholder(__('Sistem / tidak login'))
                     ->searchable()
                     ->sortable(),
                 // Entries made while an admin was using "Masuk sebagai" belong
@@ -36,23 +36,23 @@ class ActivityLogsTable
                 // as its own column so it is visible while scanning, not buried
                 // in the detail view.
                 TextColumn::make('impersonated_by')
-                    ->label('Diwakili')
+                    ->label(__('Diwakili'))
                     ->badge()
                     ->color('warning')
                     ->icon(Heroicon::OutlinedUserCircle)
-                    ->placeholder('—')
+                    ->placeholder(__('—'))
                     ->state(fn (ActivityLog $record): ?string => $record->impersonatorName()),
                 TextColumn::make('description')
-                    ->label('Aktivitas')
+                    ->label(__('Aktivitas'))
                     ->searchable()
                     ->wrap(),
                 TextColumn::make('subject_type')
-                    ->label('Data Terkait')
-                    ->placeholder('—')
+                    ->label(__('Data Terkait'))
+                    ->placeholder(__('—'))
                     ->state(fn (ActivityLog $record): ?string => $record->subjectLabel())
                     ->wrap(),
                 TextColumn::make('log_name')
-                    ->label('Jenis')
+                    ->label(__('Jenis'))
                     ->badge()
                     ->formatStateUsing(fn (?string $state): string => ActivityLog::LOG_NAMES[$state] ?? ($state ?? '—'))
                     ->color(fn (?string $state): string => ActivityLog::LOG_COLORS[$state] ?? 'gray'),
@@ -62,13 +62,13 @@ class ActivityLogsTable
                 // Defaults to the current month so opening this page doesn't
                 // mean loading a year of history — clear the dates for all.
                 Filter::make('created_at')
-                    ->label('Tanggal')
+                    ->label(__('Tanggal'))
                     ->schema([
                         DatePicker::make('from')
-                            ->label('Dari Tanggal')
+                            ->label(__('Dari Tanggal'))
                             ->default(now()->startOfMonth()->toDateString()),
                         DatePicker::make('until')
-                            ->label('Sampai Tanggal')
+                            ->label(__('Sampai Tanggal'))
                             ->default(now()->toDateString()),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
@@ -95,28 +95,28 @@ class ActivityLogsTable
                         return $indicators;
                     }),
                 SelectFilter::make('log_name')
-                    ->label('Jenis')
+                    ->label(__('Jenis'))
                     ->options(ActivityLog::LOG_NAMES),
                 SelectFilter::make('event')
-                    ->label('Aksi')
+                    ->label(__('Aksi'))
                     ->options([
                         'created' => 'Tambah',
                         'updated' => 'Ubah',
                         'deleted' => 'Hapus',
                     ]),
                 SelectFilter::make('causer_id')
-                    ->label('Pelaku')
+                    ->label(__('Pelaku'))
                     ->options(fn () => User::query()->orderBy('name')->pluck('name', 'id'))
                     ->searchable(),
             ])
             ->recordActions([
                 Action::make('detail')
-                    ->label('Detail')
+                    ->label(__('Detail'))
                     ->icon(Heroicon::OutlinedMagnifyingGlass)
                     ->color('gray')
-                    ->modalHeading('Detail Aktivitas')
+                    ->modalHeading(__('Detail Aktivitas'))
                     ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Tutup')
+                    ->modalCancelActionLabel(__('Tutup'))
                     ->modalContent(fn (ActivityLog $record) => view('filament.partials.activity-detail', [
                         'activity' => $record,
                     ])),

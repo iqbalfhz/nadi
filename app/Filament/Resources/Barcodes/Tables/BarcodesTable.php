@@ -22,36 +22,36 @@ class BarcodesTable
         return $table
             ->columns([
                 TextColumn::make('format')
-                    ->label('Jenis')
+                    ->label(__('Jenis'))
                     ->badge()
                     ->formatStateUsing(fn (BarcodeFormat $state): string => $state->label()),
                 TextColumn::make('content')
-                    ->label('Konten')
+                    ->label(__('Konten'))
                     ->limit(40)
                     ->searchable(),
                 TextColumn::make('label')
-                    ->label('Label')
-                    ->placeholder('—'),
+                    ->label(__('Label'))
+                    ->placeholder(__('—')),
                 ...($showCreator ? [
                     TextColumn::make('creator.name')
-                        ->label('Dibuat Oleh')
+                        ->label(__('Dibuat Oleh'))
                         ->searchable(),
                 ] : []),
                 TextColumn::make('created_at')
-                    ->label('Dibuat')
+                    ->label(__('Dibuat'))
                     ->dateTime()
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('format')
-                    ->label('Jenis')
+                    ->label(__('Jenis'))
                     ->options(fn () => collect(BarcodeFormat::cases())
                         ->mapWithKeys(fn (BarcodeFormat $format) => [$format->value => $format->label()])),
             ])
             ->recordActions([
                 Action::make('download')
-                    ->label('Download')
+                    ->label(__('Download'))
                     ->url(fn (Barcode $record): string => route('barcodes.download', $record))
                     ->openUrlInNewTab(),
                 DeleteAction::make()
