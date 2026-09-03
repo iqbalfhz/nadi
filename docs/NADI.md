@@ -203,7 +203,7 @@ Bagian ini semula berjudul "Belum Dibahas". Sebagian besar sudah terjawab lewat 
 
 **Masih terbuka:**
 
-- **Mobile Flutter + API Sanctum** — belum dimulai sama sekali. Belum ada satu pun endpoint API.
+- **Mobile Flutter + API Sanctum** — **API-nya sudah selesai** (3 Sep 2026). Sanctum mode token di `/api/v1`, login + 2FA tanpa sesi, gerbang akses mobile, kunci idempotensi untuk outbox offline, unggah foto dua langkah, dan keempat modul lapangan: Checklist OB, Patroli Security, Inspeksi HK, Tugas Messenger. Kontraknya di [API-MOBILE.md](API-MOBILE.md). **Yang belum: aplikasi Flutter-nya sendiri.**
 - **2FA** — tersedia lewat Fortify dan halamannya sudah ada, tapi belum diaktifkan di akun mana pun.
 - **Printer** — kode cetak untuk kiosk Antrian dan struk POS sudah ada (`window.print()` + CSS 80mm), tapi **belum pernah diuji ke perangkat fisik**.
 - **Cakupan backup** — sengaja hanya modul Penomoran Dokumen (lihat 9.4).

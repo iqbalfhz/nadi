@@ -21,7 +21,7 @@ Aplikasi Flutter ini bukan versi mobile dari seluruh sistem itu. Ia hanya membaw
 | **Inspeksi HK** | `hk` | Pengawas housekeeping menilai satu titik: kategori, titik, kondisi, foto, dan tindak lanjut bila kondisinya bermasalah |
 | **Tugas Messenger** | `messenger` | Kurir mengambil permintaan antar dokumen, menandai berangkat, lalu mengunggah foto bukti saat terkirim |
 
-**Yang sudah bisa dipanggil hari ini: Checklist OB.** Tiga modul lainnya menyusul dengan pola yang persis sama — lihat [bagian 8](#8-modul-yang-belum-ada).
+**Keempat modul sudah bisa dipanggil.** Semuanya mengikuti pola yang sama: ambil master data → unggah foto satu per satu → kirim laporannya dengan `photo_ids`.
 
 ### Tiga hal yang membentuk seluruh rancangan API ini
 
@@ -386,6 +386,216 @@ Tiga hal yang harus dipahami tentang `url` ini:
 2. **Pakai apa adanya.** Jangan diutak-atik, jangan dibongkar, jangan ditambahi header `Authorization` (URL-nya sudah bertanda tangan sendiri). Foto ada di penyimpanan privat dan tidak punya alamat permanen — itu disengaja.
 3. **Memanggil endpoint ini tercatat di jejak audit.** Setiap pembukaan foto masuk ke Riwayat Aktivitas. Jangan memanggilnya untuk pra-muat spekulatif — panggil saat pengguna benar-benar membuka fotonya.
 
+Ketiga modul lain punya endpoint foto yang bentuknya identik: `/security/patrols/{id}/photos`, `/hk/inspections/{id}/photos`, dan `/messenger/tasks/{id}/proof`.
+
+---
+
+### Patroli Security
+
+**Tidak ada endpoint yang membagikan daftar pos.** Ini disengaja: kode di stiker QR itulah bukti bahwa satpam benar-benar sampai di pos. Kalau aplikasi bisa mengunduh semua kodenya, satu ronde penuh bisa dilaporkan dari kantin. Aplikasi hanya boleh bertanya tentang kode yang sudah dipegang — dan kode itu hanya didapat dengan mendatanginya.
+
+#### `GET /api/v1/security/checkpoints/{code}`
+
+Menerjemahkan satu kode hasil pindai jadi nama pos. **404** kalau kodenya tidak dikenali atau posnya sudah dinonaktifkan.
+
+```json
+{ "data": { "id": 1, "name": "Pos Parkir P2" } }
+```
+
+Perhatikan: `code` **tidak** dikembalikan. Jangan menyusun daftar kode di HP.
+
+Konsekuensinya untuk mode offline: pemindaian pertama di sebuah pos butuh sinyal untuk menampilkan namanya. Simpan pasangan kode→nama yang sudah pernah berhasil, dan untuk kode yang belum dikenal saat offline cukup tampilkan "Pos akan dikonfirmasi saat laporan terkirim" — laporannya sendiri tetap bisa diantre.
+
+#### `POST /api/v1/security/patrols`
+
+```json
+{
+  "checkpoint_code": "aB3xK9...",
+  "incident_report": "Pintu darurat lantai 3 tidak terkunci.",
+  "photo_ids": ["01a06695-..."],
+  "submitted_at": "2026-09-03T16:22:33+07:00"
+}
+```
+
+| Field | Wajib | Aturan |
+|---|---|---|
+| `checkpoint_code` | ya | Kode dari QR. Pos harus masih aktif |
+| `photo_ids` | ya | 1–10 |
+| `incident_report` | tidak | Maks 1000. Kosongkan kalau tidak ada temuan |
+| `submitted_at` | tidak | Waktu satpam sampai di pos |
+
+**201:**
+
+```json
+{
+  "data": {
+    "id": 1,
+    "checkpoint": { "id": 1, "name": "Pos Parkir P2" },
+    "incident_report": "Pintu darurat lantai 3 tidak terkunci.",
+    "photo_count": 1,
+    "submitted_at": "2026-09-03T16:22:33+07:00",
+    "created_at": "2026-09-03T17:02:33+07:00"
+  }
+}
+```
+
+#### `GET /api/v1/security/patrols`
+
+Ronde milik satpam itu sendiri, berhalaman. Ronde rekan tidak muncul — pengawasan ada di `/admin`.
+
+---
+
+### Inspeksi HK
+
+Modul paling rumit: picker dua tingkat dan dua field bersyarat.
+
+#### `GET /api/v1/hk/categories`
+
+Kategori **beserta titik-titiknya** dalam satu panggilan. Cache seluruhnya — `requires_floor` ikut di sini, dan itulah yang membuat aplikasi bisa merender field Lantai bersyarat tanpa bertanya ke server.
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Toilet",
+      "requires_floor": true,
+      "areas": [ { "id": 1, "name": "Lt 2 Zona A" } ]
+    }
+  ]
+}
+```
+
+#### `GET /api/v1/hk/options`
+
+Pilihan shift dan kondisi. **Jangan hardcode di Flutter** — labelnya bisa berubah, dan `needs_follow_up` adalah sumber kebenaran untuk kapan Tindak Lanjut wajib.
+
+```json
+{
+  "data": {
+    "shifts": [
+      { "value": "pagi", "label": "Pagi" },
+      { "value": "siang", "label": "Siang" },
+      { "value": "malam", "label": "Malam" }
+    ],
+    "conditions": [
+      { "value": "bersih", "label": "Bersih", "needs_follow_up": false },
+      { "value": "perlu_perbaikan", "label": "Perlu Perbaikan", "needs_follow_up": true },
+      { "value": "kotor", "label": "Kotor", "needs_follow_up": true }
+    ]
+  }
+}
+```
+
+#### `POST /api/v1/hk/inspections`
+
+| Field | Wajib | Aturan |
+|---|---|---|
+| `hk_area_id` | ya | Titik yang masih aktif |
+| `staff_name` | ya | Maks 255. Nama petugas yang **diperiksa**, bukan pengawas |
+| `shift` | ya | Dari `/hk/options` |
+| `condition` | ya | Dari `/hk/options` |
+| `floor` | **bersyarat** | Wajib bila kategori titik itu `requires_floor: true` |
+| `follow_up` | **bersyarat** | Wajib bila kondisinya `needs_follow_up: true`. Maks 1000 |
+| `notes` | tidak | Maks 1000 |
+| `photo_ids` | ya | 1–10 |
+| `submitted_at` | tidak | |
+
+**Tidak ada `hk_category_id`.** Server menurunkannya dari titik yang dipilih; nilai yang dikirim akan diabaikan. Laporan di `/admin` difilter per kategori, jadi pasangan yang tidak cocok akan mendaratkan laporan di tempat yang tidak dilihat siapa pun.
+
+Field yang tidak sesuai syarat **dibuang**, bukan ditolak: `floor` untuk kategori yang tidak memintanya, dan `follow_up` untuk kondisi "Bersih", disimpan sebagai `null`.
+
+**201:**
+
+```json
+{
+  "data": {
+    "id": 1,
+    "category": { "id": 1, "name": "Toilet", "requires_floor": true },
+    "area": { "id": 1, "name": "Lt 2 Zona A" },
+    "staff_name": "Siti",
+    "shift": "pagi", "shift_label": "Pagi",
+    "condition": "perlu_perbaikan", "condition_label": "Perlu Perbaikan",
+    "floor": "Lantai 2",
+    "notes": "Wastafel nomor 2 bocor.",
+    "follow_up": "Sudah dilaporkan ke teknisi.",
+    "photo_count": 1,
+    "submitted_at": null,
+    "created_at": "2026-09-03T17:02:33+07:00"
+  }
+}
+```
+
+Setiap laporan HK juga dikirim server ke grup Telegram. Aplikasi tidak perlu melakukan apa pun untuk itu, dan Telegram yang mati tidak akan menggagalkan laporan.
+
+---
+
+### Tugas Messenger
+
+Satu-satunya modul dengan alur status:
+
+```
+available → picked_up → in_transit → delivered
+```
+
+#### `GET /api/v1/messenger/tasks/open`
+
+Tugas yang belum diambil siapa pun — **tidak dibatasi per kurir**, karena itulah inti self-pickup.
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "tracking_number": "MSG-KMMWUGII",
+      "destination": "Kantor Manajemen Lt 5",
+      "document_description": "Berkas kontrak vendor",
+      "status": "available",
+      "status_label": "Tersedia",
+      "claimed_at": null,
+      "in_transit_at": null,
+      "delivered_at": null,
+      "created_at": "2026-09-03T17:02:33+07:00"
+    }
+  ],
+  "meta": { "current_page": 1, "last_page": 1, "per_page": 20, "total": 1 }
+}
+```
+
+#### `GET /api/v1/messenger/tasks/mine`
+
+Yang sedang dibawa kurir ini (`picked_up` dan `in_transit`). Yang sudah terkirim hilang dari daftar.
+
+#### `POST /api/v1/messenger/tasks/{id}/claim`
+
+> ### ⚠ Satu-satunya langkah yang TIDAK boleh diantre offline
+>
+> Dua kurir bisa menekan "Ambil" pada tugas yang sama. Server menyelesaikannya dengan penguncian baris dan memberi tahu yang kalah. Klaim yang diantre offline akan **terlihat berhasil di HP** lalu kalah diam-diam — kurir berjalan mengambil dokumen yang sudah diambil orang lain.
+>
+> Wajibkan online untuk langkah ini. Langkah setelahnya boleh diantre.
+
+Tidak ada body. Berhasil → **200** dengan status `picked_up`. Kalah rebutan → **409**:
+
+```json
+{ "message": "Tugas ini sudah diambil messenger lain." }
+```
+
+Pesan itu aman ditampilkan apa adanya.
+
+#### `POST /api/v1/messenger/tasks/{id}/transit`
+
+Tidak ada body. Hanya berlaku untuk tugas ber-status `picked_up` milik kurir itu; selain itu **409**.
+
+#### `POST /api/v1/messenger/tasks/{id}/deliver`
+
+```json
+{ "photo_id": "01a06695-..." }
+```
+
+**Satu foto, bukan array** — koleksi buktinya `singleFile`. Hanya berlaku untuk `in_transit` milik kurir itu.
+
+Tanpa foto: **422**. Pengiriman tanpa bukti itu klaim, bukan catatan.
+
 ---
 
 ## 7. Katalog error
@@ -427,46 +637,64 @@ Tampilkan pesan dari `errors` di bawah field masing-masing. `message` di tingkat
 
 ---
 
-## 8. Modul yang belum ada
+## 8. Perilaku offline per modul
 
-Tiga modul lain belum punya endpoint, tapi datanya sudah ada di sistem dan bentuknya sudah pasti. Semuanya akan mengikuti pola Checklist OB persis: `GET` master data → `POST /uploads` per foto → `POST` laporannya dengan `photo_ids`, `submitted_at`, dan `Idempotency-Key`.
+Tidak semua langkah sama amannya untuk diantre. Tabel ini adalah aturan yang harus ditegakkan aplikasi.
 
-### Patroli Security (`security`)
+| Langkah | Boleh offline? | Alasan |
+|---|---|---|
+| Kirim laporan OB | **Ya** | Tidak ada penguncian, tidak ada nomor urut, tidak ada tabrakan. Basement dan toilet memang tidak ada sinyal |
+| Kirim laporan Patroli Security | **Ya** | Sama. Tangga darurat dan area parkir justru tempat kerjanya |
+| Kirim laporan Inspeksi HK | **Ya** | Sama, asalkan pohon kategori sudah di-cache supaya form bersyaratnya bisa dirender |
+| Unggah foto | **Ya** | Tiap foto yang berhasil tersimpan sebagai kemajuan |
+| Tandai berangkat (`transit`) | **Ya** | Statusnya milik kurir itu sendiri, tidak diperebutkan |
+| Tandai terkirim (`deliver`) | **Ya** | Sama |
+| **Ambil tugas (`claim`)** | **TIDAK** | Diperebutkan. Klaim offline terlihat berhasil di HP lalu kalah diam-diam |
 
-Satpam memindai QR yang tertempel di pos. **Ini kandidat terkuat untuk `mobile_scanner`** — di web, satpam harus membuka aplikasi kamera bawaan yang lalu melempar ke browser. Pemindai di dalam aplikasi menghapus lompatan itu.
+Untuk yang boleh offline, alurnya selalu sama:
 
-QR-nya memuat URL yang mengandung kode acak 32 karakter. Ambil kodenya, cocokkan dengan daftar pos yang di-cache, lalu tampilkan formnya.
+1. Simpan ke outbox lokal **dan beri tahu petugas laporannya tersimpan** — jangan pernah membuat orang menunggu jaringan
+2. Buat UUID sekali, simpan bersama laporannya
+3. Saat ada sinyal: unggah foto yang belum terunggah, simpan `photo_ids` yang berhasil, lalu kirim laporannya dengan UUID yang sama
+4. Hapus dari outbox hanya setelah 2xx
 
-Field: `checkpoint_code` (dari QR), `photos` (wajib, boleh banyak), `incident_report` (opsional, maks 1000).
+### Contoh alur kirim ulang
 
-Tahan offline: **ya**, asalkan daftar pos di-cache supaya pemindaian bisa dikenali tanpa jaringan.
+```dart
+Future<bool> kirim(LaporanTertunda laporan) async {
+  // Foto yang sudah berhasil TIDAK diunggah ulang.
+  for (final path in laporan.fotoBelumTerunggah) {
+    final id = await api.unggahFoto(path);      // punya Idempotency-Key sendiri
+    laporan.photoIds.add(id);
+    laporan.fotoBelumTerunggah.remove(path);
+    await db.simpan(laporan);                   // simpan kemajuannya SEKARANG
+  }
 
-### Inspeksi HK (`hk`)
-
-Paling rumit dari keempatnya. Pengawas memilih **Kategori → Titik** bertingkat (pilihan titik menyempit sesuai kategori), lalu shift, kondisi, foto, dan catatan.
-
-Dua field muncul bersyarat:
-
-- **Lantai** — hanya untuk kategori yang ditandai `requires_floor` di master data
-- **Tindak Lanjut** — **wajib** bila kondisi bukan "Bersih". Ini disengaja: pengawas tidak boleh melapor "Kotor" lalu pergi tanpa menyebutkan apa yang dilakukan
-
-Kondisi: `bersih` / `perlu_perbaikan` / `kotor`. Shift: `pagi` / `siang` / `malam`.
-
-Cache kategori dan titiknya (±90 titik) supaya form bersyaratnya bisa dirender offline. Server tetap menurunkan ulang kategorinya dari titik yang dipilih — jangan kirim kategori sebagai field terpisah.
-
-Laporan HK juga dikirim otomatis ke grup Telegram oleh server. Aplikasi tidak perlu melakukan apa pun untuk itu.
-
-### Tugas Messenger (`messenger`)
-
-Satu-satunya modul dengan alur status:
-
+  try {
+    await api.kirimLaporan(
+      modul: laporan.modul,
+      payload: {...laporan.payload, 'photo_ids': laporan.photoIds},
+      // UUID yang sama di setiap percobaan. Ini yang membuat kirim ulang aman.
+      idempotencyKey: laporan.idempotencyKey,
+    );
+    await db.hapus(laporan);
+    return true;
+  } on ApiException catch (e) {
+    if (e.status == 422 || e.status == 403 || e.status == 400) {
+      laporan.status = 'gagal';                 // butuh tindakan pengguna
+      await db.simpan(laporan);
+      return false;
+    }
+    return false;                               // 5xx / timeout — coba lagi nanti
+  }
+}
 ```
-tersedia → diambil → dalam perjalanan → terkirim
-```
 
-Kurir melihat daftar tugas terbuka (milik semua orang, bukan hanya dirinya), mengambil satu, menandai berangkat, lalu menandai terkirim dengan **satu foto bukti**.
+Tiga kesalahan yang paling mudah terjadi, dan semuanya senyap:
 
-**Pengambilan tugas tidak boleh di-antre offline.** Ini rebutan: dua kurir bisa menekan "Ambil" pada tugas yang sama, dan server menyelesaikannya dengan penguncian baris. Pengambilan offline akan kalah diam-diam — kurir mengira dapat tugas, padahal tidak. Wajibkan online untuk langkah ini; sisanya boleh di-antre.
+1. **Membuat UUID baru saat kirim ulang.** Hasilnya laporan dobel di panel admin. UUID dibuat sekali, saat laporan dibuat
+2. **Mengunggah ulang foto yang sudah berhasil.** Menghabiskan kuota dan waktu justru saat sinyalnya paling buruk
+3. **Menghapus outbox saat kena 401.** Token mati bukan berarti laporannya tidak valid — hapus tokennya, pertahankan laporannya
 
 ---
 
@@ -544,11 +772,14 @@ curl -s -X POST $BASE/ob/checklists \
 Test backend adalah spesifikasi yang bisa dijalankan, dan ditulis sebagai kalimat penuh. Kalau dokumen ini terasa ambigu, jawabannya ada di sana:
 
 ```
-tests/Feature/Api/AuthTest.php             login, 2FA, batas percobaan, logout
-tests/Feature/Api/IdempotencyTest.php      seluruh kontrak kunci idempotensi
-tests/Feature/Api/UploadTest.php           batas foto dan kepemilikan
-tests/Feature/Api/ObChecklistApiTest.php   modul OB dari ujung ke ujung
-tests/Feature/Api/MobileAccessTest.php     siapa boleh masuk, kapan token dicabut
+tests/Feature/Api/AuthTest.php                 login, 2FA, batas percobaan, logout
+tests/Feature/Api/IdempotencyTest.php          seluruh kontrak kunci idempotensi
+tests/Feature/Api/UploadTest.php               batas foto dan kepemilikan
+tests/Feature/Api/MobileAccessTest.php         siapa boleh masuk, kapan token dicabut
+tests/Feature/Api/ObChecklistApiTest.php       modul OB dari ujung ke ujung
+tests/Feature/Api/SecurityPatrolApiTest.php    resolusi kode QR, dan bukti tidak ada endpoint daftar pos
+tests/Feature/Api/HkInspectionApiTest.php      field bersyarat, penurunan kategori, job Telegram
+tests/Feature/Api/MessengerTaskApiTest.php     alur status dan konflik klaim
 ```
 
 Jalankan dengan `php artisan test tests/Feature/Api`.
