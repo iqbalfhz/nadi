@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\HkInspectionController;
 use App\Http\Controllers\Api\V1\MeController;
+use App\Http\Controllers\Api\V1\MessengerTaskController;
 use App\Http\Controllers\Api\V1\ObChecklistController;
 use App\Http\Controllers\Api\V1\SecurityPatrolController;
 use App\Http\Controllers\Api\V1\UploadController;
@@ -70,6 +71,12 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
             Route::get('hk/inspections/{hkInspection}', [HkInspectionController::class, 'show'])->name('hk.show');
             Route::get('hk/inspections/{hkInspection}/photos', [HkInspectionController::class, 'photos'])->name('hk.photos');
 
+            // Open tasks are module-wide on purpose -- self-pickup means a
+            // courier has to see what nobody has taken yet.
+            Route::get('messenger/tasks/open', [MessengerTaskController::class, 'open'])->name('messenger.open');
+            Route::get('messenger/tasks/mine', [MessengerTaskController::class, 'mine'])->name('messenger.mine');
+            Route::get('messenger/tasks/{messengerDelivery}/proof', [MessengerTaskController::class, 'proof'])->name('messenger.proof');
+
             // Everything that writes. The idempotency key is required here,
             // not optional: these are the calls a phone retries after losing
             // signal, and a retry must never produce a second report.
@@ -78,6 +85,12 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
                 Route::post('ob/checklists', [ObChecklistController::class, 'store'])->name('ob.store');
                 Route::post('security/patrols', [SecurityPatrolController::class, 'store'])->name('security.store');
                 Route::post('hk/inspections', [HkInspectionController::class, 'store'])->name('hk.store');
+
+                // claim() must never be queued offline -- see
+                // MessengerTaskController::claim().
+                Route::post('messenger/tasks/{delivery}/claim', [MessengerTaskController::class, 'claim'])->name('messenger.claim');
+                Route::post('messenger/tasks/{messengerDelivery}/transit', [MessengerTaskController::class, 'transit'])->name('messenger.transit');
+                Route::post('messenger/tasks/{messengerDelivery}/deliver', [MessengerTaskController::class, 'deliver'])->name('messenger.deliver');
             });
         });
     });
