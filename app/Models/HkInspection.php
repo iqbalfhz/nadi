@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -24,6 +25,21 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property HkCondition $condition
  * @property HkShift $shift
  */
+/**
+ * @property int $id
+ * @property int $hk_category_id
+ * @property int $hk_area_id
+ * @property int $user_id
+ * @property string $staff_name
+ * @property HkShift $shift
+ * @property HkCondition $condition
+ * @property string|null $floor
+ * @property string|null $notes
+ * @property string|null $follow_up
+ * @property Carbon|null $submitted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 #[Fillable([
     'hk_category_id',
     'hk_area_id',
@@ -34,6 +50,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
     'floor',
     'notes',
     'follow_up',
+    'submitted_at',
 ])]
 class HkInspection extends Model implements HasMedia
 {
@@ -50,6 +67,7 @@ class HkInspection extends Model implements HasMedia
         return [
             'shift' => HkShift::class,
             'condition' => HkCondition::class,
+            'submitted_at' => 'datetime',
         ];
     }
 

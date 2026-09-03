@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\HkInspectionController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\ObChecklistController;
 use App\Http\Controllers\Api\V1\SecurityPatrolController;
@@ -61,6 +62,14 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
             Route::get('security/patrols', [SecurityPatrolController::class, 'index'])->name('security.index');
             Route::get('security/patrols/{securityPatrol}/photos', [SecurityPatrolController::class, 'photos'])->name('security.photos');
 
+            // Categories carry their points and their requires_floor flag, so
+            // one cached call is enough to render the conditional form offline.
+            Route::get('hk/categories', [HkInspectionController::class, 'categories'])->name('hk.categories');
+            Route::get('hk/options', [HkInspectionController::class, 'options'])->name('hk.options');
+            Route::get('hk/inspections', [HkInspectionController::class, 'index'])->name('hk.index');
+            Route::get('hk/inspections/{hkInspection}', [HkInspectionController::class, 'show'])->name('hk.show');
+            Route::get('hk/inspections/{hkInspection}/photos', [HkInspectionController::class, 'photos'])->name('hk.photos');
+
             // Everything that writes. The idempotency key is required here,
             // not optional: these are the calls a phone retries after losing
             // signal, and a retry must never produce a second report.
@@ -68,6 +77,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
                 Route::post('uploads', [UploadController::class, 'store'])->name('uploads.store');
                 Route::post('ob/checklists', [ObChecklistController::class, 'store'])->name('ob.store');
                 Route::post('security/patrols', [SecurityPatrolController::class, 'store'])->name('security.store');
+                Route::post('hk/inspections', [HkInspectionController::class, 'store'])->name('hk.store');
             });
         });
     });
