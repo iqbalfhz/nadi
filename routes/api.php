@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\ObChecklistController;
+use App\Http\Controllers\Api\V1\SecurityPatrolController;
 use App\Http\Controllers\Api\V1\UploadController;
 use App\Http\Middleware\EnsureIdempotency;
 use App\Http\Middleware\EnsureMobileAccess;
@@ -53,12 +54,20 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
             Route::get('ob/checklists/{obChecklist}', [ObChecklistController::class, 'show'])->name('ob.show');
             Route::get('ob/checklists/{obChecklist}/photos', [ObChecklistController::class, 'photos'])->name('ob.photos');
 
+            // No "list all checkpoints" route, on purpose — the code on the QR
+            // sticker is the evidence a guard reached the post, so the app
+            // resolves the one code it just scanned and never holds the set.
+            Route::get('security/checkpoints/{code}', [SecurityPatrolController::class, 'resolve'])->name('security.resolve');
+            Route::get('security/patrols', [SecurityPatrolController::class, 'index'])->name('security.index');
+            Route::get('security/patrols/{securityPatrol}/photos', [SecurityPatrolController::class, 'photos'])->name('security.photos');
+
             // Everything that writes. The idempotency key is required here,
             // not optional: these are the calls a phone retries after losing
             // signal, and a retry must never produce a second report.
             Route::middleware(EnsureIdempotency::class)->group(function (): void {
                 Route::post('uploads', [UploadController::class, 'store'])->name('uploads.store');
                 Route::post('ob/checklists', [ObChecklistController::class, 'store'])->name('ob.store');
+                Route::post('security/patrols', [SecurityPatrolController::class, 'store'])->name('security.store');
             });
         });
     });

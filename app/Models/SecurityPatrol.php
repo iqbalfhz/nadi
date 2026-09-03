@@ -8,10 +8,20 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-#[Fillable(['security_checkpoint_id', 'user_id', 'incident_report'])]
+/**
+ * @property int $id
+ * @property int $security_checkpoint_id
+ * @property int $user_id
+ * @property string|null $incident_report
+ * @property Carbon|null $submitted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
+#[Fillable(['security_checkpoint_id', 'user_id', 'incident_report', 'submitted_at'])]
 class SecurityPatrol extends Model implements HasMedia
 {
     /** @use HasFactory<SecurityPatrolFactory> */
@@ -20,6 +30,16 @@ class SecurityPatrol extends Model implements HasMedia
     public static function activitySubjectLabel(): string
     {
         return 'Patroli Security';
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'submitted_at' => 'datetime',
+        ];
     }
 
     public function registerMediaCollections(): void

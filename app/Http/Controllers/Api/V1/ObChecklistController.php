@@ -9,11 +9,11 @@ use App\Http\Resources\Api\V1\ObChecklistResource;
 use App\Models\ApiUpload;
 use App\Models\ObArea;
 use App\Models\ObChecklist;
+use App\Support\FieldReportTime;
 use App\Support\MediaAccessLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -26,12 +26,6 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class ObChecklistController extends Controller
 {
-    /**
-     * How far back a phone may date a report. Anything older is a device with
-     * a wrong clock, not a genuinely week-old memory.
-     */
-    private const MAX_BACKDATE_DAYS = 7;
-
     /**
      * The areas the picker offers. Small and slow-changing, so the app caches
      * it — without this list a worker in a basement has nothing to pick from.
@@ -82,10 +76,10 @@ class ObChecklistController extends Controller
             // rule CreateObChecklist::mutateFormDataBeforeCreate() enforces.
             'user_id' => $request->user()->id,
             'notes' => $data['notes'] ?? null,
-            'submitted_at' => $this->submittedAt($data['submitted_at'] ?? null),
+            'submitted_at' => FieldReportTime::clamp($data['submitted_at'] ?? null),
         ]);
 
-        $this->attachPhotos($checklist, $data['photo_ids'], $request->user()->id);
+        ApiUpload::claim($checklist, $data['photo_ids'], $request->user()->id);
 
         return (new ObChecklistResource($checklist->load('area')))
             ->response()
@@ -113,50 +107,5 @@ class ObChecklistController extends Controller
         ]);
 
         return response()->json(['data' => $photos]);
-    }
-
-    /**
-     * Move the staged photos into the report and let go of the staging rows.
-     *
-     * Ownership is re-checked here as well as in the request rules: this is
-     * the step that actually reads someone's file, and a check at the point of
-     * use survives a future caller that forgets the rule.
-     *
-     * @param  array<int, string>  $photoIds
-     */
-    private function attachPhotos(ObChecklist $checklist, array $photoIds, int $userId): void
-    {
-        $uploads = ApiUpload::query()
-            ->whereIn('id', $photoIds)
-            ->where('user_id', $userId)
-            ->get();
-
-        foreach ($uploads as $upload) {
-            $checklist
-                ->addMediaFromDisk($upload->path, ApiUpload::DISK)
-                ->toMediaCollection('photos');
-
-            $upload->discard();
-        }
-    }
-
-    /**
-     * A phone's clock is not evidence. A report dated in the future, or
-     * further back than a worker could plausibly remember, is clamped into
-     * range rather than rejected — losing the report over a wrong clock would
-     * defeat the entire point of letting it be filed offline.
-     */
-    private function submittedAt(?string $value): ?Carbon
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        $submitted = Carbon::parse($value);
-        $earliest = now()->subDays(self::MAX_BACKDATE_DAYS);
-
-        return $submitted
-            ->max($earliest)
-            ->min(now());
     }
 }

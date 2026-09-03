@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
+use Spatie\MediaLibrary\HasMedia;
 
 /**
  * A photo the phone has sent but not yet attached to any report.
@@ -52,5 +53,36 @@ class ApiUpload extends Model
         Storage::disk(self::DISK)->delete($this->path);
 
         $this->delete();
+    }
+
+    /**
+     * Move staged photos into a report's media collection.
+     *
+     * Ownership is re-checked here even though the form request already
+     * validated it: this is the step that actually reads someone's file, and
+     * a check at the point of use survives a future caller that forgets the
+     * rule.
+     *
+     * @param  array<int, string>  $photoIds
+     */
+    public static function claim(HasMedia $record, array $photoIds, int $userId, string $collection = 'photos'): void
+    {
+        $uploads = self::query()
+            ->whereIn('id', $photoIds)
+            ->where('user_id', $userId)
+            ->get();
+
+        foreach ($uploads as $upload) {
+            // addMedia() rather than addMediaFromDisk(): the latter lives on
+            // the InteractsWithMedia trait, so a HasMedia parameter cannot
+            // promise it. Storage::path() is safe because 'internal' is a
+            // local disk by design — and if that ever changes, this throws
+            // rather than quietly filing photos in the wrong place.
+            $record
+                ->addMedia(Storage::disk(self::DISK)->path($upload->path))
+                ->toMediaCollection($collection);
+
+            $upload->discard();
+        }
     }
 }
