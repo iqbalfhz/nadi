@@ -86,6 +86,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Venue Locale
+    |--------------------------------------------------------------------------
+    |
+    | The language of anything printed for someone who is not signed in — a
+    | receipt handed across the counter belongs to the building, not to
+    | whichever cashier is at the till. Held separately because
+    | Application::setLocale() overwrites 'locale' above the moment a user's
+    | own language preference is applied, so that key stops describing the
+    | venue as soon as anyone signs in.
+    |
+    */
+
+    'venue_locale' => env('APP_LOCALE', 'id'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

@@ -7,17 +7,22 @@
                 x-init="setTimeout(() => window.print(), 300)"
                 class="flex flex-col items-center gap-2 py-6 text-center"
             >
-                <span class="text-sm text-gray-500 dark:text-gray-400">Tiket berhasil dijual</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('Tiket berhasil dijual') }}</span>
                 <span class="text-2xl font-bold">{{ $this->lastTicket->event->name }}</span>
                 <span class="text-lg">{{ $this->lastTicket->buyer_name }}</span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ $this->lastTicket->is_member ? 'Member' : 'Reguler' }} —
+                    {{ $this->lastTicket->is_member ? __('Member') : __('Reguler') }} —
                     Rp {{ number_format($this->lastTicket->price, 0, ',', '.') }} —
                     {{ $this->lastTicket->payment_method->label() }}
                 </span>
 
                 {{-- Print-only receipt — invisible on screen, this is what
-                actually reaches the thermal printer when window.print() fires. --}}
+                actually reaches the thermal printer when window.print() fires.
+
+                @venueLanguage keeps it in the building's own language: the
+                paper goes to a customer, so it must not change because a
+                cashier switched the panel to English. --}}
+                @venueLanguage
                 <div class="print-only">
                     @if ($logoUrl = $this->lastTicket->event->logoUrl())
                         <img src="{{ $logoUrl }}" alt="" style="display: block; max-width: 45mm; max-height: 30mm; margin: 0 auto 6px;" />
@@ -25,14 +30,14 @@
                         <p style="margin: 0; font-size: 12px;">{{ config('app.name') }}</p>
                     @endif
 
-                    <p style="margin: 0; font-size: 11px; letter-spacing: 1px;">TIKET EVENT</p>
-                    <p style="margin: 4px 0 0; font-size: 10px;">Trx no: {{ $this->lastTicket->transaction_number }}</p>
+                    <p style="margin: 0; font-size: 11px; letter-spacing: 1px;">{{ __('TIKET EVENT') }}</p>
+                    <p style="margin: 4px 0 0; font-size: 10px;">{{ __('Trx no:') }} {{ $this->lastTicket->transaction_number }}</p>
 
                     <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
 
                     <p style="margin: 0; font-size: 16px; font-weight: bold;">{{ $this->lastTicket->event->name }}</p>
                     <p style="margin: 6px 0 0; font-size: 12px;">{{ $this->lastTicket->buyer_name }}</p>
-                    <p style="margin: 2px 0 0; font-size: 12px;">{{ $this->lastTicket->is_member ? 'Member' : 'Reguler' }}</p>
+                    <p style="margin: 2px 0 0; font-size: 12px;">{{ $this->lastTicket->is_member ? __('Member') : __('Reguler') }}</p>
 
                     <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
 
@@ -42,18 +47,19 @@
                     <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
 
                     <p style="margin: 0; font-size: 10px;">{{ $this->lastTicket->created_at->translatedFormat('d M Y, H:i') }}</p>
-                    <p style="margin: 2px 0 0; font-size: 10px;">Kasir: {{ $this->lastTicket->soldByUser->name }}</p>
+                    <p style="margin: 2px 0 0; font-size: 10px;">{{ __('Kasir:') }} {{ $this->lastTicket->soldByUser->name }}</p>
 
-                    <p style="margin: 10px 0 0; font-size: 11px; font-weight: bold;">Terima Kasih</p>
+                    <p style="margin: 10px 0 0; font-size: 11px; font-weight: bold;">{{ __('Terima Kasih') }}</p>
                 </div>
+                @endVenueLanguage
 
                 <div class="mt-4 flex gap-2">
                     <x-filament::button color="gray" onclick="window.print()">
-                        Cetak Ulang
+                        {{ __('Cetak Ulang') }}
                     </x-filament::button>
 
                     <x-filament::button wire:click="nextSale">
-                        Transaksi Berikutnya
+                        {{ __('Transaksi Berikutnya') }}
                     </x-filament::button>
                 </div>
             </div>
@@ -67,10 +73,10 @@
                 works from. --}}
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium">Event</label>
+                        <label class="text-sm font-medium">{{ __('Event') }}</label>
                         <x-filament::input.wrapper>
                             <x-filament::input.select wire:model.live="eventId">
-                                <option value="">— Pilih event —</option>
+                                <option value="">{{ __('— Pilih event —') }}</option>
                                 @foreach ($this->openEvents as $event)
                                     <option value="{{ $event->id }}">{{ $event->name }}</option>
                                 @endforeach
@@ -79,24 +85,24 @@
 
                         @if ($this->selectedEvent)
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                Reguler Rp {{ number_format($this->selectedEvent->regular_price, 0, ',', '.') }} —
-                                Member Rp {{ number_format($this->selectedEvent->member_price, 0, ',', '.') }}
+                                {{ __('Reguler') }} Rp {{ number_format($this->selectedEvent->regular_price, 0, ',', '.') }} —
+                                {{ __('Member') }} Rp {{ number_format($this->selectedEvent->member_price, 0, ',', '.') }}
                             </p>
                         @endif
                     </div>
 
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium">Nama Pembeli</label>
+                        <label class="text-sm font-medium">{{ __('Nama Pembeli') }}</label>
                         <x-filament::input.wrapper>
-                            <x-filament::input type="text" wire:model.live="buyerName" placeholder="Nama pembeli" />
+                            <x-filament::input type="text" wire:model.live="buyerName" placeholder="{{ __('Nama pembeli') }}" />
                         </x-filament::input.wrapper>
                     </div>
 
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium">Metode Pembayaran</label>
+                        <label class="text-sm font-medium">{{ __('Metode Pembayaran') }}</label>
                         <x-filament::input.wrapper>
                             <x-filament::input.select wire:model.live="paymentMethod">
-                                <option value="">— Pilih metode —</option>
+                                <option value="">{{ __('— Pilih metode —') }}</option>
                                 @foreach ($this->paymentMethods as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
@@ -107,7 +113,7 @@
                     <div class="flex flex-col gap-2">
                         <label class="flex items-center gap-2">
                             <x-filament::input.checkbox wire:model.live="isMember" />
-                            <span class="text-sm font-medium">Member</span>
+                            <span class="text-sm font-medium">{{ __('Member') }}</span>
                         </label>
 
                         @if ($isMember)
@@ -115,7 +121,7 @@
                                 <x-filament::input
                                     type="text"
                                     wire:model.live="memberReference"
-                                    placeholder="Scan atau ketik barcode member"
+                                    placeholder="{{ __('Scan atau ketik barcode member') }}"
                                 />
                             </x-filament::input.wrapper>
                         @endif
@@ -124,7 +130,7 @@
 
                 <div class="flex justify-end border-t border-gray-100 pt-4 dark:border-white/10">
                     <x-filament::button size="lg" wire:click="sell">
-                        Bayar &amp; Cetak
+                        {{ __('Bayar') }} &amp; {{ __('Cetak') }}
                     </x-filament::button>
                 </div>
             </div>

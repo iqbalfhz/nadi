@@ -129,4 +129,40 @@ class SellTicketTest extends TestCase
 
         $component->call('nextSale')->assertSet('lastTicketId', null);
     }
+
+    /**
+     * The receipt is handed to a mall visitor, so it must stay in the
+     * building's language even when the cashier has switched the panel to
+     * English — otherwise the customer gets whichever language the person at
+     * the till happened to prefer. Guards the @venueLanguage directive in
+     * AppServiceProvider.
+     */
+    public function test_the_printed_receipt_ignores_the_cashiers_language(): void
+    {
+        $cashier = $this->actingAsEmployeeWithPermissions('View:SellTicket');
+        $cashier->forceFill(['locale' => 'en'])->save();
+
+        app()->setLocale('en');
+
+        $event = Event::factory()->create(['is_open' => true, 'name' => 'Nonton Bareng']);
+
+        $html = Livewire::test(SellTicket::class)
+            ->set('eventId', $event->id)
+            ->set('buyerName', 'Budi')
+            ->set('paymentMethod', TicketPaymentMethod::Cash->value)
+            ->call('sell')
+            ->html();
+
+        // On paper: the venue's language.
+        $this->assertStringContainsString('Terima Kasih', $html);
+        $this->assertStringContainsString('TIKET EVENT', $html);
+        $this->assertStringContainsString('Kasir:', $html);
+
+        // On screen, for the cashier who chose English: theirs.
+        $this->assertStringContainsString('Print Again', $html);
+        $this->assertStringContainsString('Next Sale', $html);
+
+        // And the swap is undone, so the rest of the page is unaffected.
+        $this->assertSame('en', app()->getLocale());
+    }
 }

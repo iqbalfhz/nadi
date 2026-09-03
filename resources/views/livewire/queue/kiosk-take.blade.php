@@ -15,7 +15,12 @@
             <p class="mt-6 text-sm text-white/40">Silakan tunggu nomor Anda dipanggil.</p>
 
             {{-- Print-only receipt — invisible on screen, this is what actually
-            reaches the thermal printer when window.print() fires above. --}}
+            reaches the thermal printer when window.print() fires above.
+
+            The kiosk runs signed out, so it already renders in the venue's
+            language; @venueLanguage is here so that every printed receipt in
+            the app carries the same guard, with no exception to remember. --}}
+            @venueLanguage
             <div class="print-only">
                 <p style="margin: 0; font-size: 12px;">{{ config('app.name') }}</p>
                 <p style="margin: 4px 0 0; font-size: 11px;">NOMOR ANTRIAN</p>
@@ -23,6 +28,7 @@
                 <p style="margin: 0; font-size: 12px;">{{ $this->issuedTicket->category->name }}</p>
                 <p style="margin: 8px 0 0; font-size: 10px;">{{ $this->issuedTicket->created_at->translatedFormat('d M Y, H:i') }}</p>
             </div>
+            @endVenueLanguage
         </div>
     @else
         <div class="flex flex-col items-center gap-3 text-center">

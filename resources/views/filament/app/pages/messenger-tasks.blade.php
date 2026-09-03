@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <x-filament::section heading="Tugas Terbuka">
+    <x-filament::section :heading="__('Tugas Terbuka')">
         @forelse ($this->openTasks as $delivery)
             <div class="flex items-center justify-between gap-4 border-b border-gray-100 py-3 last:border-0 dark:border-white/10">
                 <div>
@@ -7,15 +7,15 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ $delivery->destination }} — {{ $delivery->document_description }}</p>
                 </div>
                 <x-filament::button size="sm" wire:click="claim({{ $delivery->id }})">
-                    Ambil
+                    {{ __('Ambil') }}
                 </x-filament::button>
             </div>
         @empty
-            <p class="text-sm text-gray-500 dark:text-gray-400">Tidak ada tugas terbuka saat ini.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Tidak ada tugas terbuka saat ini.') }}</p>
         @endforelse
     </x-filament::section>
 
-    <x-filament::section heading="Tugas Saya">
+    <x-filament::section :heading="__('Tugas Saya')">
         @forelse ($this->myTasks as $delivery)
             <div class="flex flex-col gap-3 border-b border-gray-100 py-3 last:border-0 dark:border-white/10">
                 <div class="flex flex-wrap items-center justify-between gap-4">
@@ -29,11 +29,11 @@
 
                     @if ($delivery->status === \App\Enums\MessengerDeliveryStatus::PickedUp)
                         <x-filament::button size="sm" wire:click="startTransit({{ $delivery->id }})">
-                            Mulai Perjalanan
+                            {{ __('Mulai Perjalanan') }}
                         </x-filament::button>
                     @elseif ($delivery->status === \App\Enums\MessengerDeliveryStatus::InTransit && $completingDeliveryId !== $delivery->id)
                         <x-filament::button size="sm" color="success" wire:click="startCompleting({{ $delivery->id }})">
-                            Tandai Terkirim
+                            {{ __('Tandai Terkirim') }}
                         </x-filament::button>
                     @endif
                 </div>
@@ -44,17 +44,17 @@
 
                         <div class="mt-4 flex gap-2">
                             <x-filament::button wire:click="completeDelivery">
-                                Submit
+                                {{ __('Submit') }}
                             </x-filament::button>
                             <x-filament::button color="gray" wire:click="cancelCompleting">
-                                Batal
+                                {{ __('Batal') }}
                             </x-filament::button>
                         </div>
                     </div>
                 @endif
             </div>
         @empty
-            <p class="text-sm text-gray-500 dark:text-gray-400">Belum ada tugas yang Anda ambil.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Belum ada tugas yang Anda ambil.') }}</p>
         @endforelse
     </x-filament::section>
 </x-filament-panels::page>

@@ -9,23 +9,28 @@
                 x-init="setTimeout(() => window.print(), 300)"
                 class="flex flex-col items-center gap-2 py-6 text-center"
             >
-                <span class="text-sm text-gray-500 dark:text-gray-400">Penjualan berhasil dicatat</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('Penjualan berhasil dicatat') }}</span>
                 <span class="text-2xl font-bold">{{ $items->count() }} item — Rp {{ number_format($this->receiptTotal, 0, ',', '.') }}</span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">{{ $first->payment_method->label() }}</span>
 
                 {{-- Print-only receipt — invisible on screen, this is what
-                actually reaches the thermal printer when window.print() fires. --}}
+                actually reaches the thermal printer when window.print() fires.
+
+                @venueLanguage keeps it in the building's own language: the
+                paper goes to a customer, so it must not change because a
+                cashier switched the panel to English. --}}
+                @venueLanguage
                 <div class="print-only">
                     <p style="margin: 0; font-size: 12px;">{{ config('app.name') }}</p>
                     <p style="margin: 0; font-size: 11px; letter-spacing: 1px;">{{ $first->bazaar->name }}</p>
-                    <p style="margin: 4px 0 0; font-size: 10px;">Trx no: {{ $this->lastTransactionNumber }}</p>
+                    <p style="margin: 4px 0 0; font-size: 10px;">{{ __('Trx no:') }} {{ $this->lastTransactionNumber }}</p>
 
                     <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
 
                     @foreach ($items as $item)
                         <p style="margin: 6px 0 0; font-size: 12px; font-weight: bold;">{{ $item->vendorProduct->name }}</p>
                         <p style="margin: 0; font-size: 11px;">
-                            Kios {{ $item->vendor->name }} —
+                            {{ __('Kios') }} {{ $item->vendor->name }} —
                             {{ number_format($item->quantity, 0, ',', '.') }} {{ $item->pricing_unit->unitSuffix() }}
                         </p>
                         <p style="margin: 0; font-size: 12px;">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
@@ -35,7 +40,7 @@
 
                     @if ($this->receiptTax > 0)
                         <p style="margin: 0; font-size: 12px; display: flex; justify-content: space-between;">
-                            <span>Subtotal</span><span>Rp {{ number_format($this->receiptSubtotal, 0, ',', '.') }}</span>
+                            <span>{{ __('Subtotal') }}</span><span>Rp {{ number_format($this->receiptSubtotal, 0, ',', '.') }}</span>
                         </p>
                         <p style="margin: 2px 0 6px; font-size: 12px; display: flex; justify-content: space-between;">
                             <span>PB1</span><span>Rp {{ number_format($this->receiptTax, 0, ',', '.') }}</span>
@@ -48,18 +53,19 @@
                     <div style="margin: 8px 0; border-top: 1px dashed #000;"></div>
 
                     <p style="margin: 0; font-size: 10px;">{{ $first->created_at->translatedFormat('d M Y, H:i') }}</p>
-                    <p style="margin: 2px 0 0; font-size: 10px;">Kasir: {{ $first->soldByUser->name }}</p>
+                    <p style="margin: 2px 0 0; font-size: 10px;">{{ __('Kasir:') }} {{ $first->soldByUser->name }}</p>
 
-                    <p style="margin: 10px 0 0; font-size: 11px; font-weight: bold;">Terima Kasih</p>
+                    <p style="margin: 10px 0 0; font-size: 11px; font-weight: bold;">{{ __('Terima Kasih') }}</p>
                 </div>
+                @endVenueLanguage
 
                 <div class="mt-4 flex gap-2">
                     <x-filament::button color="gray" onclick="window.print()">
-                        Cetak Ulang
+                        {{ __('Cetak Ulang') }}
                     </x-filament::button>
 
                     <x-filament::button wire:click="nextSale">
-                        Transaksi Berikutnya
+                        {{ __('Transaksi Berikutnya') }}
                     </x-filament::button>
                 </div>
             </div>
@@ -70,11 +76,11 @@
             browsing kios/produk below. --}}
             <x-filament::section>
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-                    <label class="shrink-0 text-sm font-medium">Bazar</label>
+                    <label class="shrink-0 text-sm font-medium">{{ __('Bazar') }}</label>
                     <div class="w-full sm:max-w-sm">
                         <x-filament::input.wrapper>
                             <x-filament::input.select wire:model.live="bazaarId">
-                                <option value="">— Pilih bazar —</option>
+                                <option value="">{{ __('— Pilih bazar —') }}</option>
                                 @foreach ($this->openBazaars as $bazaar)
                                     <option value="{{ $bazaar->id }}">{{ $bazaar->name }}</option>
                                 @endforeach
@@ -91,7 +97,7 @@
                         <x-filament::section>
                             <div class="flex flex-col gap-4">
                                 <div>
-                                    <span class="mb-2 block text-sm font-medium">Kios</span>
+                                    <span class="mb-2 block text-sm font-medium">{{ __('Kios') }}</span>
                                     <div class="flex flex-wrap gap-2">
                                         @forelse ($this->vendorsForSelectedBazaar as $vendor)
                                             <button
@@ -106,17 +112,17 @@
                                                 {{ $vendor->name }}
                                             </button>
                                         @empty
-                                            <span class="text-sm text-gray-500 dark:text-gray-400">Belum ada kios untuk bazar ini.</span>
+                                            <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('Belum ada kios untuk bazar ini.') }}</span>
                                         @endforelse
                                     </div>
                                 </div>
 
                                 @if ($vendorId)
                                     <div>
-                                        <span class="mb-2 block text-sm font-medium">Produk</span>
+                                        <span class="mb-2 block text-sm font-medium">{{ __('Produk') }}</span>
 
                                         @if ($this->productsForSelectedVendor->isEmpty())
-                                            <span class="text-sm text-gray-500 dark:text-gray-400">Kios ini belum punya produk.</span>
+                                            <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('Kios ini belum punya produk.') }}</span>
                                         @else
                                             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
                                                 @foreach ($this->productsForSelectedVendor as $product)
@@ -141,10 +147,10 @@
                                                             Rp {{ number_format($product->price, 0, ',', '.') }}
                                                         </span>
                                                         @if ($outOfStock)
-                                                            <x-filament::badge color="danger" size="xs">Stok habis</x-filament::badge>
+                                                            <x-filament::badge color="danger" size="xs">{{ __('Stok habis') }}</x-filament::badge>
                                                         @elseif ($remaining !== null)
                                                             <span class="text-xs text-gray-500 dark:text-gray-400">
-                                                                Sisa {{ number_format($remaining, 0, ',', '.') }} {{ $product->pricing_unit->unitSuffix() }}
+                                                                {{ __('Sisa') }} {{ number_format($remaining, 0, ',', '.') }} {{ $product->pricing_unit->unitSuffix() }}
                                                             </span>
                                                         @endif
                                                     </button>
@@ -175,13 +181,13 @@
 
                                             @if ($this->estimatedPrice !== null)
                                                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                                                    Perkiraan harga: Rp {{ number_format($this->estimatedPrice, 0, ',', '.') }}
+                                                    {{ __('Perkiraan harga:') }} Rp {{ number_format($this->estimatedPrice, 0, ',', '.') }}
                                                 </p>
                                             @endif
                                         </div>
 
                                         <x-filament::button wire:click="addToCart" icon="heroicon-o-plus">
-                                            Tambah ke Keranjang
+                                            {{ __('Tambah ke Keranjang') }}
                                         </x-filament::button>
                                     </div>
                                 @endif
@@ -196,18 +202,18 @@
                                 <div class="flex items-center justify-between">
                                     <span class="flex items-center gap-2 text-base font-semibold">
                                         <x-filament::icon icon="heroicon-o-shopping-cart" class="h-5 w-5" />
-                                        Keranjang
+                                        {{ __('Keranjang') }}
                                     </span>
                                     @if (count($this->cartItems) > 0)
-                                        <x-filament::badge color="primary">{{ count($this->cartItems) }} item</x-filament::badge>
+                                        <x-filament::badge color="primary">{{ __(':jumlah item', ['jumlah' => count($this->cartItems)]) }}</x-filament::badge>
                                     @endif
                                 </div>
 
                                 @if (count($this->cartItems) === 0)
                                     <x-filament::empty-state
                                         icon="heroicon-o-shopping-cart"
-                                        heading="Keranjang masih kosong"
-                                        description="Pilih kios dan produk di sebelah kiri untuk mulai menambahkan."
+                                        :heading="__('Keranjang masih kosong')"
+                                        :description="__('Pilih kios dan produk di sebelah kiri untuk mulai menambahkan.')"
                                     />
                                 @else
                                     <div class="flex flex-col gap-3">
@@ -216,7 +222,7 @@
                                                 <div class="flex flex-col">
                                                     <span class="font-medium leading-tight">{{ $item['productName'] }}</span>
                                                     <span class="text-sm text-gray-500 dark:text-gray-400">
-                                                        Kios {{ $item['vendorName'] }} — {{ number_format($item['quantity'], 0, ',', '.') }} {{ $item['unitSuffix'] }}
+                                                        {{ __('Kios') }} {{ $item['vendorName'] }} — {{ number_format($item['quantity'], 0, ',', '.') }} {{ $item['unitSuffix'] }}
                                                     </span>
                                                     <span class="text-sm font-semibold">Rp {{ number_format($item['price'], 0, ',', '.') }}</span>
                                                 </div>
@@ -225,7 +231,7 @@
                                                     icon="heroicon-o-trash"
                                                     color="danger"
                                                     wire:click="removeFromCart({{ $item['index'] }})"
-                                                    label="Hapus"
+                                                    :label="__('Hapus')"
                                                 />
                                             </div>
                                         @endforeach
@@ -233,7 +239,7 @@
                                         @if ($this->cartTax > 0)
                                             <div class="flex flex-col gap-1 border-t border-gray-100 pt-2 dark:border-white/10">
                                                 <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                                                    <span>Subtotal</span>
+                                                    <span>{{ __('Subtotal') }}</span>
                                                     <span>Rp {{ number_format($this->cartSubtotal, 0, ',', '.') }}</span>
                                                 </div>
                                                 <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
@@ -244,15 +250,15 @@
                                         @endif
 
                                         <div class="flex items-center justify-between pt-1">
-                                            <span class="text-lg font-bold">Total</span>
+                                            <span class="text-lg font-bold">{{ __('Total') }}</span>
                                             <span class="text-lg font-bold">Rp {{ number_format($this->cartTotal, 0, ',', '.') }}</span>
                                         </div>
 
                                         <div class="flex flex-col gap-2">
-                                            <label class="text-sm font-medium">Metode Pembayaran</label>
+                                            <label class="text-sm font-medium">{{ __('Metode Pembayaran') }}</label>
                                             <x-filament::input.wrapper>
                                                 <x-filament::input.select wire:model.live="paymentMethod">
-                                                    <option value="">— Pilih metode —</option>
+                                                    <option value="">{{ __('— Pilih metode —') }}</option>
                                                     @foreach ($this->paymentMethods as $value => $label)
                                                         <option value="{{ $value }}">{{ $label }}</option>
                                                     @endforeach
@@ -261,7 +267,7 @@
                                         </div>
 
                                         <x-filament::button wire:click="checkout" size="lg" class="w-full justify-center">
-                                            Bayar &amp; Cetak
+                                            {{ __('Bayar') }} &amp; {{ __('Cetak') }}
                                         </x-filament::button>
                                     </div>
                                 @endif

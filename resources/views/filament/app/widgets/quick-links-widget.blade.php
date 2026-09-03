@@ -1,12 +1,12 @@
 <x-filament-widgets::widget>
     <x-filament::section>
-        <span class="mb-3 block text-base font-semibold">Menu Cepat</span>
+        <span class="mb-3 block text-base font-semibold">{{ __('Menu Cepat') }}</span>
 
         @php($links = $this->getLinks())
 
         @if (empty($links))
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                Belum ada menu yang bisa diakses. Hubungi admin kalau ini seharusnya tidak kosong.
+                {{ __('Belum ada menu yang bisa diakses. Hubungi admin kalau ini seharusnya tidak kosong.') }}
             </p>
         @else
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">

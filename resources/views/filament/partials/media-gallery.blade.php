@@ -11,7 +11,7 @@
         <a href="{{ $item->getTemporaryUrl(now()->addMinutes(30)) }}"
            target="_blank"
            rel="noopener noreferrer"
-           title="Buka ukuran penuh"
+           title="{{ __('Buka ukuran penuh') }}"
            style="display:block;border-radius:0.5rem;overflow:hidden;border:1px solid rgba(128,128,128,0.25)">
             <img src="{{ $item->getTemporaryUrl(now()->addMinutes(30)) }}"
                  alt="{{ $item->file_name }}"
@@ -19,6 +19,6 @@
                  style="display:block;width:100%;height:11rem;object-fit:cover">
         </a>
     @empty
-        <p style="grid-column:1/-1;margin:0;font-size:0.875rem;opacity:0.7">Tidak ada foto pada data ini.</p>
+        <p style="grid-column:1/-1;margin:0;font-size:0.875rem;opacity:0.7">{{ __('Tidak ada foto pada data ini.') }}</p>
     @endforelse
 </div>

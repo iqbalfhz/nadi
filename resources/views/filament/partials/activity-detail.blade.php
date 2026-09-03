@@ -12,31 +12,31 @@
 
 <div style="display:flex;flex-direction:column;gap:1rem;font-size:0.875rem">
     <div style="display:grid;grid-template-columns:9rem 1fr;gap:0.5rem 1rem">
-        <span style="opacity:0.65">Waktu</span>
+        <span style="opacity:0.65">{{ __('Waktu') }}</span>
         <span>{{ $activity->created_at?->format('d M Y, H:i:s') }}</span>
 
-        <span style="opacity:0.65">Pelaku</span>
-        <span>{{ $activity->causerUser?->name ?? 'Sistem / tidak login' }}</span>
+        <span style="opacity:0.65">{{ __('Pelaku') }}</span>
+        <span>{{ $activity->causerUser?->name ?? __('Sistem / tidak login') }}</span>
 
-        <span style="opacity:0.65">Aktivitas</span>
+        <span style="opacity:0.65">{{ __('Aktivitas') }}</span>
         <span>{{ $activity->description }}</span>
 
         @if ($subject = $activity->subjectLabel())
-            <span style="opacity:0.65">Data Terkait</span>
+            <span style="opacity:0.65">{{ __('Data Terkait') }}</span>
             <span>{{ $subject }}</span>
         @endif
     </div>
 
     @if ($fields !== [])
         <div>
-            <p style="margin:0 0 0.5rem;font-weight:600">Perubahan Nilai</p>
+            <p style="margin:0 0 0.5rem;font-weight:600">{{ __('Perubahan Nilai') }}</p>
             <div style="overflow-x:auto">
                 <table style="width:100%;border-collapse:collapse">
                     <thead>
                     <tr style="text-align:left">
-                        <th style="padding:0.5rem;border-bottom:1px solid rgba(128,128,128,0.3)">Kolom</th>
-                        <th style="padding:0.5rem;border-bottom:1px solid rgba(128,128,128,0.3)">Sebelum</th>
-                        <th style="padding:0.5rem;border-bottom:1px solid rgba(128,128,128,0.3)">Sesudah</th>
+                        <th style="padding:0.5rem;border-bottom:1px solid rgba(128,128,128,0.3)">{{ __('Kolom') }}</th>
+                        <th style="padding:0.5rem;border-bottom:1px solid rgba(128,128,128,0.3)">{{ __('Sebelum') }}</th>
+                        <th style="padding:0.5rem;border-bottom:1px solid rgba(128,128,128,0.3)">{{ __('Sesudah') }}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -59,7 +59,7 @@
 
     @if ($properties !== [])
         <div>
-            <p style="margin:0 0 0.5rem;font-weight:600">Keterangan Tambahan</p>
+            <p style="margin:0 0 0.5rem;font-weight:600">{{ __('Keterangan Tambahan') }}</p>
             <div style="display:grid;grid-template-columns:9rem 1fr;gap:0.5rem 1rem">
                 @foreach ($properties as $key => $value)
                     <span style="opacity:0.65;font-family:ui-monospace,monospace">{{ $key }}</span>
@@ -70,6 +70,6 @@
     @endif
 
     @if ($fields === [] && $properties === [])
-        <p style="margin:0;opacity:0.7">Tidak ada rincian tambahan untuk aktivitas ini.</p>
+        <p style="margin:0;opacity:0.7">{{ __('Tidak ada rincian tambahan untuk aktivitas ini.') }}</p>
     @endif
 </div>

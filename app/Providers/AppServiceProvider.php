@@ -10,6 +10,7 @@ use Carbon\CarbonImmutable;
 use Google\Client as GoogleClient;
 use Google\Service\Drive as GoogleDrive;
 use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
@@ -39,11 +40,38 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureGoogleDriveDisk();
         $this->configureActivityLog();
+        $this->configureVenueLanguage();
 
         // The nightly backup only reports failures by email, and this
         // installation sends mail to the log file. This keeps the outcome
         // somewhere the settings page can show it.
         Event::subscribe(RecordBackupOutcome::class);
+    }
+
+    /**
+     * @venueLanguage ... @endVenueLanguage renders a block in the language of
+     * the venue rather than of the signed-in user.
+     *
+     * Only printed receipts use it. A receipt is handed to a mall visitor, so
+     * its language belongs to the building — without this, two cashiers at the
+     * same till would print receipts in two languages depending on which one
+     * happened to switch the panel to English, and the customer would get
+     * whichever they picked.
+     *
+     * Compiled inline rather than wrapped in a component, because a component
+     * renders its slot before it can swap anything.
+     */
+    protected function configureVenueLanguage(): void
+    {
+        Blade::directive(
+            'venueLanguage',
+            fn (): string => "<?php \$__venueLanguage = app()->getLocale(); app()->setLocale(config('app.venue_locale')); ?>",
+        );
+
+        Blade::directive(
+            'endVenueLanguage',
+            fn (): string => '<?php app()->setLocale($__venueLanguage); ?>',
+        );
     }
 
     /**

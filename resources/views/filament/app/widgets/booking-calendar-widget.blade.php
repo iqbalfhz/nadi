@@ -28,7 +28,7 @@
             <div class="flex w-full flex-col gap-4 lg:w-64 lg:shrink-0">
                 <x-filament::input.wrapper>
                     <x-filament::input.select wire:model.live="areaId">
-                        <option value="">Semua Lokasi</option>
+                        <option value="">{{ __('Semua Lokasi') }}</option>
                         @foreach ($this->getAreas() as $id => $name)
                             <option value="{{ $id }}">{{ $name }}</option>
                         @endforeach
@@ -40,28 +40,28 @@
                         <x-filament::icon-button
                             icon="heroicon-o-chevron-left"
                             wire:click="miniCalendarPreviousMonth"
-                            label="Bulan sebelumnya"
+                            :label="__('Bulan sebelumnya')"
                             size="sm"
                         />
                         <span class="text-sm font-medium">
-                            {{ CarbonImmutable::parse($this->miniCalendarMonth)->format('F Y') }}
+                            {{ CarbonImmutable::parse($this->miniCalendarMonth)->translatedFormat('F Y') }}
                         </span>
                         <x-filament::icon-button
                             icon="heroicon-o-chevron-right"
                             wire:click="miniCalendarNextMonth"
-                            label="Bulan berikutnya"
+                            :label="__('Bulan berikutnya')"
                             size="sm"
                         />
                     </div>
 
                     <div class="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 dark:text-gray-400">
-                        <span>Sn</span>
-                        <span>Sl</span>
-                        <span>Rb</span>
-                        <span>Km</span>
-                        <span>Jm</span>
-                        <span>Sb</span>
-                        <span>Mg</span>
+                        <span>{{ __('Sn') }}</span>
+                        <span>{{ __('Sl') }}</span>
+                        <span>{{ __('Rb') }}</span>
+                        <span>{{ __('Km') }}</span>
+                        <span>{{ __('Jm') }}</span>
+                        <span>{{ __('Sb') }}</span>
+                        <span>{{ __('Mg') }}</span>
                     </div>
 
                     @foreach ($this->getMiniCalendarWeeks() as $week)

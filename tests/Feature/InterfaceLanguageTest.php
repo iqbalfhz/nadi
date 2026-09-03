@@ -125,12 +125,17 @@ class InterfaceLanguageTest extends TestCase
     ];
 
     /**
-     * Every translatable string in every view, with no length limit.
+     * Every translatable string in the starter-kit views, with no length limit.
      *
      * The audit script this replaces capped strings at 90 characters, so seven
      * English paragraphs on the two-factor screen were never even looked at —
      * including the one an employee reads while deciding whether to turn 2FA
      * on. A cap is exactly the kind of quiet blind spot a test should not have.
+     *
+     * Scoped away from resources/views/filament on purpose: those views are
+     * NADI's own and are written in Indonesian, so lang/id.json has nothing
+     * to say about them. They travel the other way, and the
+     * English-counterpart test below is what holds them to it.
      */
     public function test_no_view_shows_an_untranslated_string(): void
     {
@@ -142,6 +147,10 @@ class InterfaceLanguageTest extends TestCase
         $checked = 0;
 
         foreach ($this->viewFiles() as $file) {
+            if (str_contains($file, DIRECTORY_SEPARATOR.'filament'.DIRECTORY_SEPARATOR)) {
+                continue;
+            }
+
             $source = (string) file_get_contents($file);
 
             if (! preg_match_all("/__\('([^']{2,400})'\)/", $source, $matches)) {
@@ -225,29 +234,40 @@ class InterfaceLanguageTest extends TestCase
     }
 
     /**
+     * Both places NADI writes its own Indonesian: the PHP under app/, and
+     * the panel views. The starter-kit views under resources/views/pages are
+     * deliberately excluded — they are English-source, and they render before
+     * anyone has signed in, so there is no language preference to follow.
+     *
+     * The pattern stops at the opening quote rather than the closing paren so
+     * that __('Sisa :jumlah', [...]) is caught too — a string left out of the
+     * dictionary is just as visible for having a placeholder in it.
+     *
      * @return array<string, string>
      */
     private function translatableStringsInCode(): array
     {
         $strings = [];
 
-        $directory = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator(app_path()),
-        );
+        foreach ([app_path(), resource_path('views/filament')] as $root) {
+            $directory = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($root),
+            );
 
-        foreach ($directory as $file) {
-            if ($file->getExtension() !== 'php') {
-                continue;
-            }
+            foreach ($directory as $file) {
+                if ($file->getExtension() !== 'php') {
+                    continue;
+                }
 
-            $source = (string) file_get_contents($file->getPathname());
+                $source = (string) file_get_contents($file->getPathname());
 
-            if (! preg_match_all("/__\('((?:[^'\\\\]|\\\\.)*)'\)/", $source, $matches)) {
-                continue;
-            }
+                if (! preg_match_all("/__\(\s*'((?:[^'\\\\]|\\\\.)*)'/", $source, $matches)) {
+                    continue;
+                }
 
-            foreach ($matches[1] as $string) {
-                $strings[stripslashes($string)] = basename($file->getPathname());
+                foreach ($matches[1] as $string) {
+                    $strings[stripslashes($string)] = basename($file->getPathname());
+                }
             }
         }
 
@@ -269,5 +289,39 @@ class InterfaceLanguageTest extends TestCase
         ] as $source => $expected) {
             $this->assertSame($expected, __($source), "[{$source}] is missing from lang/id.json.");
         }
+    }
+
+    /**
+     * SellTicketTest proves the directive works on one receipt. This proves
+     * nobody adds a second receipt without it: a printed page goes to someone
+     * who never signed in and has no language of their own, so it has to
+     * follow the venue rather than the cashier.
+     */
+    public function test_every_printed_receipt_follows_the_venue_language(): void
+    {
+        $unguarded = [];
+        $checked = 0;
+
+        foreach ($this->viewFiles() as $file) {
+            $source = (string) file_get_contents($file);
+
+            if (! str_contains($source, 'class="print-only"')) {
+                continue;
+            }
+
+            $checked++;
+
+            if (! str_contains($source, '@venueLanguage')) {
+                $unguarded[] = basename($file);
+            }
+        }
+
+        $this->assertGreaterThan(0, $checked, 'Expected to find the printed receipts.');
+
+        $this->assertSame(
+            [],
+            $unguarded,
+            'These print in whatever language the cashier picked. Wrap the receipt in @venueLanguage ... @endVenueLanguage.',
+        );
     }
 }

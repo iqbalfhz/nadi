@@ -1,7 +1,7 @@
 @php use App\Support\SocialLinks; @endphp
 
 <div class="nadi-sidebar-credit">
-    <span class="nadi-sidebar-credit-label">Dibuat oleh {{ SocialLinks::AUTHOR }}</span>
+    <span class="nadi-sidebar-credit-label">{{ __('Dibuat oleh :nama', ['nama' => SocialLinks::AUTHOR]) }}</span>
 
     <div class="nadi-sidebar-credit-links">
         <a href="{{ SocialLinks::INSTAGRAM }}" target="_blank" rel="noopener noreferrer"

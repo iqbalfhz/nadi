@@ -2,7 +2,7 @@
     @if ($this->lastBarcode)
         <x-filament::section>
             <div wire:key="result-{{ $this->lastBarcode->id }}" class="flex flex-col items-center gap-4 py-6 text-center">
-                <span class="text-sm text-gray-500 dark:text-gray-400">{{ $this->lastBarcode->format->label() }} berhasil dibuat</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ __(':jenis berhasil dibuat', ['jenis' => $this->lastBarcode->format->label()]) }}</span>
 
                 <img
                     src="data:image/png;base64,{{ base64_encode($this->lastBarcode->renderPng()) }}"
@@ -18,11 +18,11 @@
                         href="{{ route('barcodes.download', $this->lastBarcode) }}"
                         color="gray"
                     >
-                        Download
+                        {{ __('Download') }}
                     </x-filament::button>
 
                     <x-filament::button wire:click="generateAnother">
-                        Generate Lagi
+                        {{ __('Generate Lagi') }}
                     </x-filament::button>
                 </div>
             </div>
@@ -35,10 +35,10 @@
                 again below sm. --}}
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium">Jenis</label>
+                        <label class="text-sm font-medium">{{ __('Jenis') }}</label>
                         <x-filament::input.wrapper>
                             <x-filament::input.select wire:model.live="format">
-                                <option value="">— Pilih jenis —</option>
+                                <option value="">{{ __('— Pilih jenis —') }}</option>
                                 @foreach ($this->formats as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
@@ -47,30 +47,30 @@
                     </div>
 
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium">Label (opsional)</label>
+                        <label class="text-sm font-medium">{{ __('Label (opsional)') }}</label>
                         <x-filament::input.wrapper>
-                            <x-filament::input type="text" wire:model.live="label" placeholder="Nama untuk memudahkan cari lagi nanti" />
+                            <x-filament::input type="text" wire:model.live="label" placeholder="{{ __('Nama untuk memudahkan cari lagi nanti') }}" />
                         </x-filament::input.wrapper>
                     </div>
                 </div>
 
                 <div class="flex flex-col gap-2">
-                    <label class="text-sm font-medium">Konten</label>
+                    <label class="text-sm font-medium">{{ __('Konten') }}</label>
                     <x-filament::input.wrapper>
                         <x-filament::input
                             type="text"
                             wire:model.live="content"
-                            placeholder="Teks, link, atau angka yang mau di-encode"
+                            placeholder="{{ __('Teks, link, atau angka yang mau di-encode') }}"
                         />
                     </x-filament::input.wrapper>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                        EAN-13 butuh 12-13 digit angka. Code 128 dan Code 39 bisa teks bebas.
+                        {{ __('EAN-13 butuh 12-13 digit angka. Code 128 dan Code 39 bisa teks bebas.') }}
                     </p>
                 </div>
 
                 <div class="flex justify-end border-t border-gray-100 pt-4 dark:border-white/10">
                     <x-filament::button size="lg" wire:click="generate">
-                        Generate
+                        {{ __('Generate') }}
                     </x-filament::button>
                 </div>
             </div>
