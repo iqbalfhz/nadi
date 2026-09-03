@@ -23,13 +23,13 @@ enum DashboardPeriod: string
     public function label(): string
     {
         return match ($this) {
-            self::Today => 'Hari Ini',
-            self::Last7Days => '7 Hari Terakhir',
-            self::Last30Days => '30 Hari Terakhir',
-            self::ThisMonth => 'Bulan Ini',
-            self::LastMonth => 'Bulan Lalu',
-            self::ThisYear => 'Tahun Ini',
-            self::Custom => 'Rentang Kustom',
+            self::Today => __('Hari Ini'),
+            self::Last7Days => __('7 Hari Terakhir'),
+            self::Last30Days => __('30 Hari Terakhir'),
+            self::ThisMonth => __('Bulan Ini'),
+            self::LastMonth => __('Bulan Lalu'),
+            self::ThisYear => __('Tahun Ini'),
+            self::Custom => __('Rentang Kustom'),
         };
     }
 

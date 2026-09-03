@@ -11,9 +11,9 @@ enum HkCondition: string
     public function label(): string
     {
         return match ($this) {
-            self::Bersih => 'Bersih',
-            self::PerluPerbaikan => 'Perlu Perbaikan',
-            self::Kotor => 'Kotor',
+            self::Bersih => __('Bersih'),
+            self::PerluPerbaikan => __('Perlu Perbaikan'),
+            self::Kotor => __('Kotor'),
         };
     }
 

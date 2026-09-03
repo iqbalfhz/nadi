@@ -12,10 +12,10 @@ enum MessengerDeliveryStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Available => 'Tersedia',
-            self::PickedUp => 'Diambil Messenger',
-            self::InTransit => 'Dalam Perjalanan',
-            self::Delivered => 'Terkirim',
+            self::Available => __('Tersedia'),
+            self::PickedUp => __('Diambil Messenger'),
+            self::InTransit => __('Dalam Perjalanan'),
+            self::Delivered => __('Terkirim'),
         };
     }
 

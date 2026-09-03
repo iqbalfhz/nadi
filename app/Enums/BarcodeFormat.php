@@ -12,10 +12,10 @@ enum BarcodeFormat: string
     public function label(): string
     {
         return match ($this) {
-            self::Qr => 'QR Code',
-            self::Code128 => 'Barcode (Code 128)',
-            self::Ean13 => 'Barcode (EAN-13)',
-            self::Code39 => 'Barcode (Code 39)',
+            self::Qr => __('QR Code'),
+            self::Code128 => __('Barcode (Code 128)'),
+            self::Ean13 => __('Barcode (EAN-13)'),
+            self::Code39 => __('Barcode (Code 39)'),
         };
     }
 }

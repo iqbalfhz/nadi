@@ -10,8 +10,8 @@ enum PricingUnit: string
     public function label(): string
     {
         return match ($this) {
-            self::PerHundredGrams => 'Per 100 gram',
-            self::PerPiece => 'Per pcs',
+            self::PerHundredGrams => __('Per 100 gram'),
+            self::PerPiece => __('Per pcs'),
         };
     }
 
@@ -21,8 +21,8 @@ enum PricingUnit: string
     public function unitSuffix(): string
     {
         return match ($this) {
-            self::PerHundredGrams => 'gram',
-            self::PerPiece => 'pcs',
+            self::PerHundredGrams => __('gram'),
+            self::PerPiece => __('pcs'),
         };
     }
 
@@ -33,8 +33,8 @@ enum PricingUnit: string
     public function quantityFieldLabel(): string
     {
         return match ($this) {
-            self::PerHundredGrams => 'Berat (gram)',
-            self::PerPiece => 'Jumlah (pcs)',
+            self::PerHundredGrams => __('Berat (gram)'),
+            self::PerPiece => __('Jumlah (pcs)'),
         };
     }
 

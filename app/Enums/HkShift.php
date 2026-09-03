@@ -11,9 +11,9 @@ enum HkShift: string
     public function label(): string
     {
         return match ($this) {
-            self::Pagi => 'Pagi',
-            self::Siang => 'Siang',
-            self::Malam => 'Malam',
+            self::Pagi => __('Pagi'),
+            self::Siang => __('Siang'),
+            self::Malam => __('Malam'),
         };
     }
 

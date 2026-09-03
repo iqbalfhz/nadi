@@ -11,9 +11,9 @@ enum TicketPaymentMethod: string
     public function label(): string
     {
         return match ($this) {
-            self::Cash => 'Tunai',
-            self::Qris => 'QRIS',
-            self::Edc => 'EDC',
+            self::Cash => __('Tunai'),
+            self::Qris => __('QRIS'),
+            self::Edc => __('EDC'),
         };
     }
 
