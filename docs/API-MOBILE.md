@@ -4,7 +4,7 @@ Dokumen ini ditujukan untuk orang yang akan membangun aplikasi Flutter-nya dan b
 
 Contoh request dan respons di bawah **disalin dari server yang benar-benar berjalan**, bukan dikarang.
 
-Terakhir diperbarui: 3 September 2026 · Base URL produksi diberikan terpisah · Semua endpoint diawali `/api/v1`
+Terakhir diperbarui: 4 September 2026 · Base URL produksi diberikan terpisah · Semua endpoint diawali `/api/v1`
 
 ---
 
@@ -148,7 +148,9 @@ Laporannya masuk atau tidak? Aplikasi tidak bisa tahu. Dua-duanya buruk:
 
 ### Aturannya
 
-**Setiap POST ke `/api/v1` wajib membawa header `Idempotency-Key` berisi UUID v4.**
+**Setiap POST ke `/api/v1` wajib membawa header `Idempotency-Key` berisi UUID v4 — kecuali `auth/login` dan `auth/two-factor-challenge`.**
+
+Kedua endpoint autentikasi itu di luar aturan ini: tidak ada catatan yang bisa terduplikasi, dan ponsel yang belum berhasil masuk belum punya apa pun untuk dipakai ulang. Mengirim headernya di sana tidak masalah, hanya diabaikan.
 
 ```
 Idempotency-Key: 3f2504e0-4f89-11d3-9a0c-0305e82c3301
@@ -271,6 +273,8 @@ Daftar berhalaman:
 
 Pakai `meta.current_page` dan `meta.last_page` untuk paginasi; abaikan `meta.links` (itu untuk paginator HTML).
 
+**Master data tidak pernah berhalaman.** `GET /ob/areas` dan `GET /hk/categories` selalu mengembalikan seluruh isinya sebagai array polos tanpa `meta`, berapa pun banyaknya. Ini janji yang disengaja, bukan kebetulan: aplikasi meng-cache keduanya untuk dipakai offline, dan memaginasi salah satunya nanti akan diam-diam membuat cache di HP cuma berisi halaman pertama — tanpa ada apa pun di sisi HP yang bisa menyadarinya. Dijaga oleh `ApiContractTest::test_master_data_is_never_paginated`.
+
 ### Waktu
 
 Semua waktu ISO 8601 dengan offset, zona **Asia/Jakarta**: `2026-09-03T14:23:57+07:00`.
@@ -388,6 +392,8 @@ Tiga hal yang harus dipahami tentang `url` ini:
 
 Ketiga modul lain punya endpoint foto yang bentuknya identik: `/security/patrols/{id}/photos`, `/hk/inspections/{id}/photos`, dan `/messenger/tasks/{id}/proof`.
 
+**Keempatnya selalu mengembalikan array**, termasuk `/proof` — meski koleksi buktinya `singleFile` dan isinya paling banyak satu elemen. Tidak pernah objek tunggal, tidak pernah `null`; kalau belum ada foto, `data` adalah array kosong. Dijaga oleh `ApiContractTest::test_every_photo_endpoint_returns_the_same_shape`.
+
 ---
 
 ### Patroli Security
@@ -396,7 +402,18 @@ Ketiga modul lain punya endpoint foto yang bentuknya identik: `/security/patrols
 
 #### `GET /api/v1/security/checkpoints/{code}`
 
-Menerjemahkan satu kode hasil pindai jadi nama pos. **404** kalau kodenya tidak dikenali atau posnya sudah dinonaktifkan.
+Menerjemahkan satu kode hasil pindai jadi nama pos.
+
+`code` **dijamin alfanumerik** (32 karakter, dari `Str::random()` yang membuang `/`, `+`, dan `=`), jadi aman ditaruh langsung di path tanpa encoding.
+
+Dua kegagalan, dan **sengaja dibedakan** karena tindakan satpamnya berbeda:
+
+| Status | Artinya | Yang harus dilakukan satpam |
+|---|---|---|
+| **404** | Kode tidak dikenali | Stikernya salah atau bukan milik NADI. Pindai ulang |
+| **410** | Pos sudah dinonaktifkan admin | Pindai ulang tidak akan pernah berhasil. Laporkan ke pengawas |
+
+Tampilkan `message`-nya apa adanya; keduanya sudah menyebutkan tindakan yang benar.
 
 ```json
 { "data": { "id": 1, "name": "Pos Parkir P2" } }
@@ -528,6 +545,12 @@ Field yang tidak sesuai syarat **dibuang**, bukan ditolak: `floor` untuk kategor
 
 Setiap laporan HK juga dikirim server ke grup Telegram. Aplikasi tidak perlu melakukan apa pun untuk itu, dan Telegram yang mati tidak akan menggagalkan laporan.
 
+#### `GET /api/v1/hk/inspections`
+
+Riwayat inspeksi milik pengawas itu sendiri, terbaru dulu, 20 per halaman — bentuknya sama persis dengan `GET /ob/checklists`. Ada juga `GET /hk/inspections/{id}` untuk satu laporan.
+
+(Kedua endpoint ini sudah ada sejak awal; sebelumnya luput dari dokumen ini.)
+
 ---
 
 ### Tugas Messenger
@@ -574,13 +597,20 @@ Yang sedang dibawa kurir ini (`picked_up` dan `in_transit`). Yang sudah terkirim
 >
 > Wajibkan online untuk langkah ini. Langkah setelahnya boleh diantre.
 
-Tidak ada body. Berhasil → **200** dengan status `picked_up`. Kalah rebutan → **409**:
+Tidak ada body. Berhasil → **200** dengan status `picked_up`.
+
+Gagal → **409**, dengan **dua pesan berbeda** yang harus dibedakan aplikasi karena tindakannya berbeda:
 
 ```json
 { "message": "Tugas ini sudah diambil messenger lain." }
+{ "message": "Tugas ini sudah Anda ambil. Ada di daftar Tugas Saya." }
 ```
 
-Pesan itu aman ditampilkan apa adanya.
+Yang kedua terjadi kalau balasan pertama hilang dan aplikasi mengulang **dengan kunci baru** (misalnya aplikasi sempat ditutup sebelum kuncinya sempat disimpan). Tugasnya ada di tangan kurir itu sendiri — arahkan dia ke Tugas Saya, jangan suruh mencari tugas lain.
+
+Kalau kuncinya **sama**, ini tidak akan pernah terjadi: server memutar ulang balasan sukses yang pertama. Menyimpan kunci klaim ke penyimpanan permanen, bukan hanya memori, membuat cabang kedua itu hampir tak pernah terpakai.
+
+Kedua pesan aman ditampilkan apa adanya.
 
 #### `POST /api/v1/messenger/tasks/{id}/transit`
 
@@ -626,6 +656,19 @@ Bentuk 422:
 Tampilkan pesan dari `errors` di bawah field masing-masing. `message` di tingkat atas hanya ringkasan dan **memuat teks Inggris "(and N more errors)"** — jangan tampilkan apa adanya ke petugas.
 
 **Semua pesan `message` sudah berbahasa Indonesia dan aman ditampilkan langsung.** Ini aturan keras di NADI: teks teknis mentah tidak pernah sampai ke layar. Kalau menemukan pesan yang terasa seperti pesan programer, itu bug — laporkan.
+
+### Batas percobaan
+
+| Cakupan | Batas |
+|---|---|
+| `POST /auth/login` | **5 per menit** per email + IP |
+| Semua endpoint lain (per token) | **240 per menit** |
+
+Angka 240 itu longgar dengan sengaja. Outbox yang pulang dari basement membawa dua belas laporan beserta fotonya — sekitar 50 request dalam beberapa detik — dan batas konvensional 60/menit justru akan mencekik kasus yang seluruh rancangan offline ini dibuat untuk melayaninya. Ini pagar untuk klien yang lepas kendali, bukan kuota pemakaian. Kalau batas ini pernah kena saat pengiriman normal, berarti angkanya salah — laporkan.
+
+429 menyertakan header **`Retry-After`** (detik). Pakai itu alih-alih menebak jeda sendiri.
+
+**Tidak ada kuota unggah.** Tidak ada batas jumlah foto per petugas per hari, dan tidak ada batas total penyimpanan. Yang ada hanya batas per berkas (10 MB) dan pembersihan foto yatim setelah 7 hari.
 
 ### Aturan mengulang
 

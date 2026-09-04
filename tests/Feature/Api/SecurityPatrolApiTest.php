@@ -111,7 +111,10 @@ class SecurityPatrolApiTest extends TestCase
 
         $retired = SecurityCheckpoint::factory()->create(['is_active' => false]);
 
-        $this->getJson("/api/v1/security/checkpoints/{$retired->code}")->assertNotFound();
+        // 410, not 404: the sticker is real and the guard is standing at it,
+        // so rescanning will never help. See ApiContractTest for why the two
+        // causes are told apart.
+        $this->getJson("/api/v1/security/checkpoints/{$retired->code}")->assertStatus(410);
 
         $this->postJson('/api/v1/security/patrols', [
             'checkpoint_code' => $retired->code,

@@ -103,7 +103,13 @@ class MessengerDelivery extends Model implements HasMedia
             $delivery = static::query()->whereKey($deliveryId)->lockForUpdate()->firstOrFail();
 
             if ($delivery->status !== MessengerDeliveryStatus::Available) {
-                throw new RuntimeException('Tugas ini sudah diambil messenger lain.');
+                // Who holds it changes what the courier should do next. Told
+                // only that it is "taken", someone who claimed it themselves
+                // moments ago — a dropped reply, a restarted app — would stop
+                // looking for a document that is in their own hands.
+                throw new RuntimeException($delivery->messenger_id === $messenger->id
+                    ? 'Tugas ini sudah Anda ambil. Ada di daftar Tugas Saya.'
+                    : 'Tugas ini sudah diambil messenger lain.');
             }
 
             $delivery->update([

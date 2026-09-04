@@ -15,7 +15,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Patroli Security over the API.
@@ -45,17 +44,29 @@ class SecurityPatrolController extends Controller
      * for an unrecognised code offline simply say the post will be confirmed
      * when the report is sent — the report itself still queues fine.
      */
-    public function resolve(Request $request, string $code): SecurityCheckpointResource
+    public function resolve(Request $request, string $code): SecurityCheckpointResource|JsonResponse
     {
         $this->authorizeGuard($request);
 
-        $checkpoint = SecurityCheckpoint::query()
-            ->where('code', $code)
-            ->where('is_active', true)
-            ->first();
+        $checkpoint = SecurityCheckpoint::query()->where('code', $code)->first();
 
+        // Two causes, two different things for the guard to do, so they get
+        // two different sentences. Told only "not found", someone standing
+        // at a post that was retired this morning rescans until they give up.
+        //
+        // Answered here rather than through abort(): the exception mapping in
+        // bootstrap/app.php deliberately ignores exception messages, because
+        // framework-thrown ones carry English ("Too Many Attempts.").
         if (! $checkpoint instanceof SecurityCheckpoint) {
-            throw new NotFoundHttpException;
+            return response()->json([
+                'message' => __('QR ini tidak dikenali. Pastikan stikernya milik NADI, lalu pindai ulang.'),
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        if (! $checkpoint->is_active) {
+            return response()->json([
+                'message' => __('Titik patroli ini sudah dinonaktifkan. Laporkan ke pengawas — memindai ulang tidak akan berhasil.'),
+            ], Response::HTTP_GONE);
         }
 
         return new SecurityCheckpointResource($checkpoint);

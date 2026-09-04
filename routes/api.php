@@ -42,7 +42,14 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         ->middleware(['auth:sanctum', 'ability:'.AuthController::CHALLENGE_ABILITY])
         ->name('auth.two-factor-challenge');
 
-    Route::middleware(['auth:sanctum', 'ability:'.AuthController::MOBILE_ABILITY])->group(function (): void {
+    // Laravel 11 dropped throttle:api from the default group, so without this
+    // the API has no ceiling at all. Deliberately generous rather than
+    // conventional: an outbox coming back from a basement flushes a whole
+    // shift at once — twelve reports plus their photos is ~50 requests in a
+    // few seconds, and a 60/min limit would strand exactly the case the
+    // offline design exists to serve. This is a runaway-client guard, not a
+    // usage quota. Login has its own tighter limit in AuthController.
+    Route::middleware(['auth:sanctum', 'ability:'.AuthController::MOBILE_ABILITY, 'throttle:240,1'])->group(function (): void {
         // Outside the mobile-access gate on purpose: someone whose access was
         // just revoked should still be able to clean up their own token.
         Route::post('auth/logout', [AuthController::class, 'logout'])
@@ -71,7 +78,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
             Route::get('hk/inspections/{hkInspection}', [HkInspectionController::class, 'show'])->name('hk.show');
             Route::get('hk/inspections/{hkInspection}/photos', [HkInspectionController::class, 'photos'])->name('hk.photos');
 
-            // Open tasks are module-wide on purpose -- self-pickup means a
+            // Open tasks are module-wide on purpose — self-pickup means a
             // courier has to see what nobody has taken yet.
             Route::get('messenger/tasks/open', [MessengerTaskController::class, 'open'])->name('messenger.open');
             Route::get('messenger/tasks/mine', [MessengerTaskController::class, 'mine'])->name('messenger.mine');
@@ -86,7 +93,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
                 Route::post('security/patrols', [SecurityPatrolController::class, 'store'])->name('security.store');
                 Route::post('hk/inspections', [HkInspectionController::class, 'store'])->name('hk.store');
 
-                // claim() must never be queued offline -- see
+                // claim() must never be queued offline — see
                 // MessengerTaskController::claim().
                 Route::post('messenger/tasks/{delivery}/claim', [MessengerTaskController::class, 'claim'])->name('messenger.claim');
                 Route::post('messenger/tasks/{messengerDelivery}/transit', [MessengerTaskController::class, 'transit'])->name('messenger.transit');
