@@ -25,6 +25,23 @@ class StoreSecurityPatrolRequest extends FormRequest
     }
 
     /**
+     * Accept whatever the scanner read, not only the bare code.
+     *
+     * A patrol filed offline carries the raw scan in its outbox, and the
+     * sticker holds a URL. Without this, every queued patrol would fail
+     * validation hours later — long after the guard left the post and could
+     * do anything about it.
+     */
+    protected function prepareForValidation(): void
+    {
+        $scanned = $this->input('checkpoint_code');
+
+        if (is_string($scanned)) {
+            $this->merge(['checkpoint_code' => SecurityCheckpoint::codeFromScan($scanned)]);
+        }
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function rules(): array

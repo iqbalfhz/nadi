@@ -6,20 +6,42 @@ Pertanyaannya dijawab pada **4 September 2026**. Teks pertanyaan aslinya dibiark
 
 Tiga di antaranya bukan sekadar dijawab — **backend-nya diubah**, karena temuannya benar.
 
+> ### Dua pertanyaan baru — 5 September 2026
+>
+> Ditemukan pada **pengujian pertama di HP fisik**, bukan dari membaca kode.
+> Keduanya menghentikan pekerjaan petugas di lapangan:
+>
+> - **[B6](#b6-stiker-qr-memuat-url-bukan-kode--dan-itu-tidak-tertulis-di-mana-pun)** — stiker QR memuat **URL**, bukan kode. Pindai pos **gagal total**. Sudah ada tambalan di sisi Flutter, tapi bentuk URL-nya perlu dikunci
+> - **[B7](#b7-tugas-messenger-tidak-menyebut-pengirim-maupun-tempat-pengambilan)** — tugas Messenger tidak menyebut **dari mana barang diambil** maupun siapa pemohonnya. Kurir tahu tujuan, tapi tidak tahu asal
+
 ---
 
 ## Ringkasan: yang berubah di aplikasi
 
-| Butir | Tindakan di Flutter |
-|---|---|
-| **B1** | **Buat tab Riwayat HK.** Endpoint-nya ternyata sudah ada, cuma tidak terdokumentasi |
-| **B2** | **Hapus cabang penanganan objek tunggal** di `MessengerRepository.proofUrls`. Selalu array |
-| **B3** | **Hapus tambalan "segarkan daftar lalu koreksi sendiri".** Pesannya sekarang membedakan. Dan **simpan kunci klaim ke penyimpanan permanen**, bukan memori |
-| **B5** | **Tampilkan satu tindakan, bukan dua.** 404 dan 410 sekarang berbeda |
-| A1, B4 | Tidak ada perubahan. Dokumennya yang diperbaiki |
-| C1, C2, C3 | Tidak ada perubahan, tapi baca batas barunya di C2 |
+| Butir      | Tindakan di Flutter                                                                                                                                       |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **B1**     | **Buat tab Riwayat HK.** Endpoint-nya ternyata sudah ada, cuma tidak terdokumentasi                                                                       |
+| **B2**     | **Hapus cabang penanganan objek tunggal** di `MessengerRepository.proofUrls`. Selalu array                                                                |
+| **B3**     | **Hapus tambalan "segarkan daftar lalu koreksi sendiri".** Pesannya sekarang membedakan. Dan **simpan kunci klaim ke penyimpanan permanen**, bukan memori |
+| **B5**     | **Tampilkan satu tindakan, bukan dua.** 404 dan 410 sekarang berbeda                                                                                      |
+| A1, B4     | Tidak ada perubahan. Dokumennya yang diperbaiki                                                                                                           |
+| C1, C2, C3 | Tidak ada perubahan, tapi baca batas barunya di C2                                                                                                        |
 
 Semua jawaban di bawah juga sudah masuk permanen ke [API-MOBILE.md](API-MOBILE.md), dan **dikunci sebagai test** di `tests/Feature/Api/ApiContractTest.php` — kalau salah satu janji ini dilanggar nanti, suite yang memberi tahu, bukan Anda yang menemukannya di lapangan.
+
+### Status di sisi Flutter — 4 September 2026
+
+Keempat tindakan di tabel atas **sudah dikerjakan dan lolos validasi** (0 issue `flutter analyze`, 122 test hijau).
+
+| Butir  | Yang dilakukan                                                                                                                                      |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **B1** | Tab Riwayat HK dibuat, lengkap dengan layar detail dan fotonya. `HkShell` sekarang tiga tab seperti OB dan Security                                 |
+| **B2** | Cabang objek tunggal dihapus. `proofUrls` hanya membaca array                                                                                       |
+| **B3** | Kunci klaim pindah ke tabel Drift `messenger_claim_keys` — bertahan walau aplikasi ditutup. Pesan 409 ditampilkan apa adanya tanpa tambahan tebakan |
+| **B5** | `ApiGone` (410) ditambahkan dan dibedakan dari 404. Formulir menampilkan **satu** tindakan sesuai sebabnya                                          |
+| **C2** | `Retry-After` dibaca dan dipakai menggantikan jeda menaik aplikasi, baik di interceptor maupun saat menjadwalkan ulang outbox                       |
+
+**Satu temuan tambahan dari jawaban B5.** Menambahkan 410 menyingkap bug yang sudah ada: cabang terakhir pemeta error melempar **semua** status tak dikenal ke `ApiRetryable`. Artinya 410 — dan 402, 405, dan seterusnya — akan diulang otomatis dengan jeda menaik sampai batas percobaan habis. Sekarang 4xx di luar katalog jadi `ApiRejected` dan ditolak permanen; hanya 5xx yang tetap diulang. Terima kasih: pertanyaannya yang membuat ini kelihatan.
 
 ---
 
@@ -59,7 +81,7 @@ Semua jawaban di bawah juga sudah masuk permanen ke [API-MOBILE.md](API-MOBILE.m
 
 > ### → Jawaban: **Keempatnya selalu array. Termasuk `/proof`.**
 >
-> `singleFile` membatasi *isinya* jadi paling banyak satu foto, tapi bentuk responsnya tetap array — `[{...}]` atau `[]` kalau belum ada foto. Tidak pernah objek tunggal, tidak pernah `null`.
+> `singleFile` membatasi _isinya_ jadi paling banyak satu foto, tapi bentuk responsnya tetap array — `[{...}]` atau `[]` kalau belum ada foto. Tidak pernah objek tunggal, tidak pernah `null`.
 >
 > Field-nya sama persis di keempatnya: `data[].id`, `data[].url`, `data[].expires_at`, URL berumur 30 menit.
 >
@@ -77,7 +99,7 @@ Semua jawaban di bawah juga sudah masuk permanen ke [API-MOBILE.md](API-MOBILE.m
 >
 > **Bagian kedua — ini yang penting.** Skenario Anda tetap bisa terjadi, karena kuncinya Anda simpan **di memori**: aplikasi ditutup sebelum balasan sampai → kunci hilang → klaim ulang dengan kunci baru → server melihatnya sebagai klaim baru.
 >
-> Dulu pesannya *"Tugas ini sudah diambil messenger lain."* — salah dan menyesatkan, persis seperti yang Anda tulis. **Sekarang dibedakan:**
+> Dulu pesannya _"Tugas ini sudah diambil messenger lain."_ — salah dan menyesatkan, persis seperti yang Anda tulis. **Sekarang dibedakan:**
 >
 > ```json
 > { "message": "Tugas ini sudah diambil messenger lain." }
@@ -85,6 +107,7 @@ Semua jawaban di bawah juga sudah masuk permanen ke [API-MOBILE.md](API-MOBILE.m
 > ```
 >
 > **Dua hal untuk aplikasi:**
+>
 > 1. **Hapus tambalannya.** Pesannya sekarang sudah mengarahkan sendiri; tidak perlu menyegarkan daftar untuk membiarkan kurir mengoreksi sendiri.
 > 2. **Simpan kunci klaim ke penyimpanan permanen**, bukan memori. Dengan begitu cabang kedua hampir tidak pernah terpakai — yang terjadi cuma pemutaran ulang balasan sukses.
 
@@ -106,14 +129,99 @@ Semua jawaban di bawah juga sudah masuk permanen ke [API-MOBILE.md](API-MOBILE.m
 >
 > Anda benar: dulu kedua sebab menghasilkan 404 dengan pesan generik yang sama. Satpam yang berdiri di pos yang baru dicabut akan memindai ulang berkali-kali tanpa hasil.
 >
-> | Status | Artinya | Tindakan satpam |
-> |---|---|---|
-> | **404** | Kode tidak dikenali | Stikernya salah atau bukan milik NADI. Pindai ulang |
+> | Status  | Artinya                       | Tindakan satpam                                               |
+> | ------- | ----------------------------- | ------------------------------------------------------------- |
+> | **404** | Kode tidak dikenali           | Stikernya salah atau bukan milik NADI. Pindai ulang           |
 > | **410** | Pos sudah dinonaktifkan admin | Pindai ulang tidak akan pernah berhasil. Laporkan ke pengawas |
 >
 > `message`-nya masing-masing sudah menyebutkan tindakan yang benar, jadi tetap bisa ditampilkan apa adanya.
 >
 > **Tampilkan satu tindakan saja sekarang**, tidak perlu menyarankan keduanya sekaligus.
+
+### B6. Stiker QR memuat URL, bukan kode — dan itu tidak tertulis di mana pun
+
+**Terbukti di lapangan, 5 September 2026.** Ini bukan dugaan: APK rilis dipasang di HP Xiaomi (Android 16), stiker QR diunduh dari panel admin (Patrol Point → Download QR), lalu dipindai. **Gagal.** Dipindai dengan aplikasi QR biasa, isinya ternyata sebuah **alamat web**, bukan kode.
+
+**Tertulis di §6:** _"`checkpoint_code` — Kode dari QR"_, dan contoh kodenya `aB3xK9...`. Dokumen tidak pernah menyebut bahwa yang tersimpan di stiker adalah URL yang _memuat_ kode itu.
+
+**Akibatnya berlapis:**
+
+1. Aplikasi mengirim seluruh URL sebagai `checkpoint_code` → ditolak server.
+2. Lebih buruk, URL yang disisipkan ke dalam path (`security/checkpoints/https://...`) menjatuhkan permintaannya **sebelum terkirim**. Satpam tidak melihat pesan apa pun — hanya kartu pos yang membeku.
+
+**Yang sudah dilakukan sementara:** `kodeDariHasilPindai()` mengambil kode dari parameter query (`code`, `kode`, `checkpoint`, `checkpoint_code`, `token`) atau segmen path terakhir, dan isi yang memang sudah berupa kode polos diteruskan apa adanya. Jadi stiker lama maupun baru sama-sama terbaca.
+
+**Pertanyaan:** bentuk URL-nya persis seperti apa, dan **apakah bentuk itu dijamin tidak berubah**? Kalau suatu saat pola path-nya diubah, aplikasi diam-diam mengirim potongan yang salah dan setiap pemindaian berakhir 404 — tanpa ada yang tahu penyebabnya.
+
+**Yang paling kami harapkan:** stikernya memuat **kode telanjang saja**. Itu menghapus seluruh kelas masalah ini, dan aplikasi sudah siap menerimanya. Kalau URL memang disengaja (supaya pemindai umum juga berguna), tolong kunci bentuknya di §6 dan beri satu contoh nyata.
+
+> ### → Jawaban: **Kesalahan saya. Saya merancang endpointnya tanpa memeriksa apa yang tercetak di stiker.**
+>
+> Contoh `aB3xK9...` di §6 memang menyesatkan, dan tidak ada satu kalimat pun yang menyebut isinya URL. Bahwa ini baru ketahuan di HP fisik, bukan dari membaca kode, adalah persis kegagalan yang seharusnya saya cegah saat menulis dokumennya.
+>
+> **Bentuknya, dikunci sekarang:**
+>
+>     https://<domain>/app/security-scan/<kode 32 karakter alfanumerik>
+>
+> **URL-nya sengaja, dan tetap dipertahankan.** Alasannya bukan kenyamanan pemindai umum, tapi jaring pengaman rollout: satpam yang aplikasinya belum terpasang bisa mengarahkan kamera bawaan ke stiker yang sama dan mendarat di formulir web. Kalau stikernya kode telanjang, jalur itu mati, dan selama peralihan itu jalur yang dipakai.
+>
+> **Tapi permintaan Anda yang sebenarnya sudah dipenuhi dengan cara lain — aplikasi tidak perlu mem-parsing apa pun lagi:**
+>
+>     GET /api/v1/security/scan?scanned=<hasil pindai mentah, URL-encoded>
+>
+> Kirim apa adanya yang dibaca kamera. Server yang mengekstrak kodenya — URL penuh, URL dengan query, dengan slash penutup, atau kode telanjang, semuanya diterima. Balasannya sama persis dengan `/security/checkpoints/{code}`.
+>
+> **`checkpoint_code` pada `POST /security/patrols` juga menerima hasil pindai mentah.** Ini yang paling penting untuk outbox: patroli yang mengantre di basement membawa hasil pindai apa adanya, dan tanpa ini akan gagal validasi berjam-jam kemudian — jauh setelah satpamnya meninggalkan pos dan tidak bisa berbuat apa-apa lagi.
+>
+> **Kenapa ini lebih baik daripada `kodeDariHasilPindai()` di aplikasi:** format stiker itu milik backend. Selama parsingnya ada di HP, mengubah pola URL berarti mematikan setiap handset yang belum di-update — persis kekhawatiran yang Anda tulis. Sekarang parsingnya ada di kelas yang **menghasilkan** stikernya (`SecurityCheckpoint::codeFromScan`), jadi format dan pembacanya tidak bisa berpisah.
+>
+> **Yang harus dilakukan aplikasi:** pindah ke `GET /security/scan?scanned=`, dan kirim hasil pindai mentah juga sebagai `checkpoint_code`. `kodeDariHasilPindai()` boleh dihapus. Kalau ingin menahannya sebagai sabuk pengaman, itu tidak akan mengganggu — kode telanjang tetap diterima.
+>
+> Dikunci oleh `ScannedCodeTest`: satu test menegaskan isi stikernya, dan enam bentuk hasil pindai diuji satu per satu, termasuk pengiriman patroli dengan URL mentah.
+
+### B7. Tugas Messenger tidak menyebut pengirim maupun tempat pengambilan
+
+**Ditemukan saat pengujian di HP, 5 September 2026.**
+
+Bentuk tugas di §6 memuat `destination`, `document_description`, `tracking_number`, dan status. **Tidak ada satu pun field yang menyebutkan dari mana barangnya diambil, atau siapa yang mengirim.**
+
+Akibatnya di lapangan: kurir menekan "Ambil tugas", lalu **tidak tahu harus ke mana lebih dulu**. Dia tahu tujuannya — tapi bukan asalnya.
+
+`tracking_number` juga tidak menolong: ia penanda, bukan alamat.
+
+**Pertanyaan:** apakah kedua data ini ada di database tapi belum diekspos ke API, atau memang belum pernah dikumpulkan saat permintaan dibuat di panel?
+
+**Yang dibutuhkan aplikasi**, sekurang-kurangnya satu di antaranya:
+
+| Field       | Isinya                                                                 | Kenapa                                            |
+| ----------- | ---------------------------------------------------------------------- | ------------------------------------------------- |
+| `origin`    | Tempat pengambilan, mis. `"Front Office Lt 1"`                         | Tanpa ini kurir tidak tahu harus ke mana          |
+| `requester` | Nama/departemen pemohon, mis. `{"name": "Sinta", "department": "HRD"}` | Untuk ditanya kalau barangnya tidak ada di tempat |
+
+Bentuk objek seperti `checkpoint` pada Security akan konsisten dengan sisa API.
+
+**Akibat di mobile sekarang:** kartu tugas hanya menampilkan tujuan dan keterangan dokumen. Aplikasi tidak bisa menampilkan apa yang tidak dikirim.
+
+> ### → Jawaban: **Satu ada tapi tidak diekspos. Satu lagi memang tidak pernah ada. Keduanya sudah dikerjakan.**
+>
+> | Field | Keadaannya | Sekarang |
+> |---|---|---|
+> | `requester` | **Ada di database** (`sender_id`), tidak pernah dikirim ke API | Diekspos: `{"name": "Sinta", "department": "HRD"}` |
+> | `origin` | **Tidak ada sama sekali** — bukan cuma tak diekspos | Kolom baru, dan **wajib diisi** di formulir permintaan |
+>
+> Yang perlu Anda tahu: **ini bukan kelalaian API.** Lubangnya ada di modulnya sendiri, dan sama persis di web — kurir yang memakai `/app` juga tidak tahu harus mengambil ke mana. Tidak ada yang menyadarinya karena modul ini memang belum pernah benar-benar dipakai. HP hanya tempat lubang itu akhirnya kelihatan.
+>
+> Bentuknya mengikuti saran Anda — objek, konsisten dengan `checkpoint` di Security:
+>
+>     "origin": "Front Office Lt 1",
+>     "destination": "Kantor Manajemen Lt 5",
+>     "requester": { "name": "Sinta", "department": "HRD" }
+>
+> `requester.department` bisa `null` (tidak semua akun punya departemen); `origin` bisa `null` hanya untuk permintaan yang dibuat sebelum kolomnya ada. Untuk permintaan baru, formulirnya mewajibkannya — tugas yang tidak bisa diambil siapa pun bukan permintaan.
+>
+> Ada di keempat balasan Messenger: `open`, `mine`, `claim`, `transit`, dan `deliver`.
+>
+> **Catatan untuk pemilik proyek:** saya menambahkan field wajib ke formulir yang akan diisi karyawan. Kalau Anda lebih suka opsional, itu satu baris — tapi kurir akan kembali ke masalah yang sama setiap kali pemohon mengosongkannya.
 
 ---
 
@@ -135,10 +243,10 @@ Semua jawaban di bawah juga sudah masuk permanen ke [API-MOBILE.md](API-MOBILE.m
 >
 > Ini yang paling mengejutkan saat saya periksa: grup middleware `api` cuma berisi `SubstituteBindings`. Laravel 11 menghapus `throttle:api` dari default, dan saya tidak pernah mengaktifkannya — jadi seluruh endpoint laporan dan unggahan **tanpa batas apa pun**. Login terlindungi karena punya limiter sendiri di controller.
 >
-> | Cakupan | Batas |
-> |---|---|
-> | `POST /auth/login` | 5 per menit per email + IP |
-> | Semua endpoint lain (per token) | **240 per menit** |
+> | Cakupan                         | Batas                      |
+> | ------------------------------- | -------------------------- |
+> | `POST /auth/login`              | 5 per menit per email + IP |
+> | Semua endpoint lain (per token) | **240 per menit**          |
 >
 > Angka 240 dipilih dari kasus yang Anda sebut: dua belas laporan beserta fotonya ≈ 50 request dalam beberapa detik. Batas konvensional 60/menit justru akan mencekik persis kasus yang seluruh rancangan offline ini dibuat untuk melayani. Ada test yang mensimulasikan flush satu shift penuh (24 request berturut-turut) dan memastikan tidak kena.
 >

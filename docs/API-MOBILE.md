@@ -4,7 +4,7 @@ Dokumen ini ditujukan untuk orang yang akan membangun aplikasi Flutter-nya dan b
 
 Contoh request dan respons di bawah **disalin dari server yang benar-benar berjalan**, bukan dikarang.
 
-Terakhir diperbarui: 4 September 2026 · Base URL produksi diberikan terpisah · Semua endpoint diawali `/api/v1`
+Terakhir diperbarui: 5 September 2026 · Base URL produksi diberikan terpisah · Semua endpoint diawali `/api/v1`
 
 ---
 
@@ -400,7 +400,31 @@ Ketiga modul lain punya endpoint foto yang bentuknya identik: `/security/patrols
 
 **Tidak ada endpoint yang membagikan daftar pos.** Ini disengaja: kode di stiker QR itulah bukti bahwa satpam benar-benar sampai di pos. Kalau aplikasi bisa mengunduh semua kodenya, satu ronde penuh bisa dilaporkan dari kantin. Aplikasi hanya boleh bertanya tentang kode yang sudah dipegang — dan kode itu hanya didapat dengan mendatanginya.
 
+#### Apa yang sebenarnya ada di stiker
+
+**QR-nya memuat URL, bukan kode telanjang:**
+
+```
+https://<domain>/app/security-scan/<kode 32 karakter alfanumerik>
+```
+
+Itu disengaja: satpam yang aplikasinya belum terpasang bisa mengarahkan kamera bawaan ke stiker yang sama dan mendarat di formulir web. Selama masa peralihan, jalur itu yang dipakai.
+
+**Aplikasi tidak perlu mem-parsing URL ini.** Kirim hasil pindai apa adanya ke endpoint di bawah; server yang mengekstrak kodenya. Format stiker itu milik backend, dan parsing di HP berarti perubahan pola URL akan mematikan setiap handset yang belum di-update.
+
+#### `GET /api/v1/security/scan?scanned=<hasil pindai>`
+
+**Ini yang harus dipanggil aplikasi.** Isi `scanned` dengan apa pun yang dibaca kamera, URL-encoded. Diterima: URL penuh, URL dengan query, URL dengan slash penutup, dan kode telanjang.
+
+```
+GET /api/v1/security/scan?scanned=https%3A%2F%2Fnadi.example.com%2Fapp%2Fsecurity-scan%2FaB3xK9...
+```
+
+Balasannya sama persis dengan endpoint di bawah. `scanned` kosong → **400**.
+
 #### `GET /api/v1/security/checkpoints/{code}`
+
+Bentuk lama, menerima **kode telanjang saja**. Masih berfungsi, tapi tidak bisa menerima URL — slash di dalamnya membuat request mendarat di rute lain, atau tidak terkirim sama sekali.
 
 Menerjemahkan satu kode hasil pindai jadi nama pos.
 
@@ -436,7 +460,7 @@ Konsekuensinya untuk mode offline: pemindaian pertama di sebuah pos butuh sinyal
 
 | Field | Wajib | Aturan |
 |---|---|---|
-| `checkpoint_code` | ya | Kode dari QR. Pos harus masih aktif |
+| `checkpoint_code` | ya | **Hasil pindai mentah atau kode telanjang** — keduanya diterima. Pos harus masih aktif |
 | `photo_ids` | ya | 1–10 |
 | `incident_report` | tidak | Maks 1000. Kosongkan kalau tidak ada temuan |
 | `submitted_at` | tidak | Waktu satpam sampai di pos |
@@ -571,7 +595,9 @@ Tugas yang belum diambil siapa pun — **tidak dibatasi per kurir**, karena itul
     {
       "id": 1,
       "tracking_number": "MSG-KMMWUGII",
+      "origin": "Front Office Lt 1",
       "destination": "Kantor Manajemen Lt 5",
+      "requester": { "name": "Sinta", "department": "HRD" },
       "document_description": "Berkas kontrak vendor",
       "status": "available",
       "status_label": "Tersedia",
@@ -584,6 +610,12 @@ Tugas yang belum diambil siapa pun — **tidak dibatasi per kurir**, karena itul
   "meta": { "current_page": 1, "last_page": 1, "per_page": 20, "total": 1 }
 }
 ```
+
+`origin` adalah **tempat kurir mengambil** dokumennya, `destination` tempat mengantarkannya. Keduanya wajib ditampilkan di kartu tugas — tanpa `origin`, kurir tahu tujuan tapi tidak tahu harus ke mana lebih dulu.
+
+`requester` adalah pemohonnya, untuk ditanya kalau dokumennya tidak ada di tempat. `requester.department` bisa `null`. `origin` bisa `null` hanya untuk permintaan lama; permintaan baru mewajibkannya.
+
+Keduanya ada di semua balasan Messenger: `open`, `mine`, `claim`, `transit`, dan `deliver`.
 
 #### `GET /api/v1/messenger/tasks/mine`
 

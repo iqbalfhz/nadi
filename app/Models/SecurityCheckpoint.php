@@ -64,6 +64,42 @@ class SecurityCheckpoint extends Model
      * PNG bytes of a QR code encoding this checkpoint's scan URL, meant to be
      * printed and stuck at the physical location.
      */
+    /**
+     * The checkpoint code inside whatever a scanner just read.
+     *
+     * The sticker holds scan_url, not the bare code, so that a guard
+     * without the app can point a stock camera at it and land on the web
+     * form. That is deliberate — but it means every scanner gets a URL,
+     * and the mobile app would otherwise have to parse a format this class
+     * owns. Parsing it here keeps the two from drifting apart: change
+     * scan_url and this moves with it.
+     *
+     * Accepts a bare code too, so a future sticker printed either way works.
+     */
+    public static function codeFromScan(string $scanned): string
+    {
+        $scanned = trim($scanned);
+
+        // Codes are 32 alphanumeric characters (Str::random strips /, + and
+        // =), so anything shaped like one is already the answer.
+        if (preg_match('/^[A-Za-z0-9]+$/', $scanned) === 1) {
+            return $scanned;
+        }
+
+        $path = parse_url($scanned, PHP_URL_PATH);
+
+        if (! is_string($path)) {
+            return $scanned;
+        }
+
+        $segments = array_values(array_filter(
+            explode('/', $path),
+            static fn (string $segment): bool => $segment !== '',
+        ));
+
+        return $segments === [] ? $scanned : $segments[count($segments) - 1];
+    }
+
     public function qrCodePng(): string
     {
         return (new Builder(

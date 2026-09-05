@@ -66,6 +66,9 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
             // No "list all checkpoints" route, on purpose — the code on the QR
             // sticker is the evidence a guard reached the post, so the app
             // resolves the one code it just scanned and never holds the set.
+            // Takes the raw QR content: stickers hold a URL, and a URL cannot
+            // ride in a path segment. This is the one the app should call.
+            Route::get('security/scan', [SecurityPatrolController::class, 'scan'])->name('security.scan');
             Route::get('security/checkpoints/{code}', [SecurityPatrolController::class, 'resolve'])->name('security.resolve');
             Route::get('security/patrols', [SecurityPatrolController::class, 'index'])->name('security.index');
             Route::get('security/patrols/{securityPatrol}/photos', [SecurityPatrolController::class, 'photos'])->name('security.photos');

@@ -25,6 +25,7 @@ class MessengerDeliveryTest extends TestCase
 
         Livewire::test(CreateMessengerDelivery::class)
             ->fillForm([
+                'origin' => 'Front Office Lt 1',
                 'destination' => 'Departemen Finance',
                 'document_description' => 'Invoice bulan Agustus',
             ])
@@ -34,6 +35,10 @@ class MessengerDeliveryTest extends TestCase
         $delivery = MessengerDelivery::query()->where('destination', 'Departemen Finance')->firstOrFail();
 
         $this->assertSame($sender->id, $delivery->sender_id);
+
+        // Where the courier collects. Without it they know where the
+        // document is going and not where to fetch it.
+        $this->assertSame('Front Office Lt 1', $delivery->origin);
         $this->assertNotEmpty($delivery->tracking_number);
         $this->assertSame(MessengerDeliveryStatus::Available, $delivery->status);
     }
@@ -64,5 +69,25 @@ class MessengerDeliveryTest extends TestCase
 
         Livewire::test(AdminListMessengerDeliveries::class)
             ->assertCanSeeTableRecords([$deliveryA, $deliveryB]);
+    }
+
+    /**
+     * A request nobody can collect is not a request. The module ran without
+     * this field until a courier tried to use it on a phone and had nowhere
+     * to walk to.
+     */
+    public function test_a_request_without_a_pickup_point_is_refused(): void
+    {
+        Filament::setCurrentPanel(Filament::getPanel('app'));
+
+        $this->actingAsEmployeeWithPermissions(['ViewAny:MessengerDelivery', 'Create:MessengerDelivery']);
+
+        Livewire::test(CreateMessengerDelivery::class)
+            ->fillForm([
+                'destination' => 'Departemen Finance',
+                'document_description' => 'Invoice bulan Agustus',
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['origin']);
     }
 }

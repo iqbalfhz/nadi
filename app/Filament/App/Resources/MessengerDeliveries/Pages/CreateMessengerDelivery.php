@@ -25,6 +25,7 @@ class CreateMessengerDelivery extends CreateRecord
             sender: $sender,
             destination: (string) $data['destination'],
             documentDescription: (string) $data['document_description'],
+            origin: (string) $data['origin'],
         );
     }
 }

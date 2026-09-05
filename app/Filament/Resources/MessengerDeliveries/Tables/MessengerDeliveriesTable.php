@@ -27,6 +27,10 @@ class MessengerDeliveriesTable
                     ->label(__('Pengirim'))
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('origin')
+                    ->label(__('Diambil Dari'))
+                    ->placeholder('—')
+                    ->searchable(),
                 TextColumn::make('destination')
                     ->label(__('Tujuan'))
                     ->searchable(),

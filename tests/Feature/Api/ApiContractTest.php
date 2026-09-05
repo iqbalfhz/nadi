@@ -213,4 +213,27 @@ class ApiContractTest extends TestCase
             ], $this->idempotencyHeader())->assertCreated();
         }
     }
+
+    /**
+     * A courier who cannot see where to collect cannot start. The module
+     * shipped without an origin at all — the same hole exists on the web,
+     * and a phone is simply where it finally showed.
+     */
+    public function test_a_task_says_where_to_collect_and_who_asked(): void
+    {
+        $this->actingAsMobileUser('View:MessengerTasks');
+
+        $requester = User::factory()->create(['name' => 'Sinta']);
+
+        MessengerDelivery::factory()->create([
+            'status' => MessengerDeliveryStatus::Available,
+            'sender_id' => $requester->id,
+            'origin' => 'Front Office Lt 1',
+        ]);
+
+        $this->getJson('/api/v1/messenger/tasks/open')
+            ->assertOk()
+            ->assertJsonPath('data.0.origin', 'Front Office Lt 1')
+            ->assertJsonPath('data.0.requester.name', 'Sinta');
+    }
 }

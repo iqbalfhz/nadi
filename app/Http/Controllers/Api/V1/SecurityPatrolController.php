@@ -48,6 +48,38 @@ class SecurityPatrolController extends Controller
     {
         $this->authorizeGuard($request);
 
+        return $this->answerFor($code);
+    }
+
+    /**
+     * The same lookup, but taking whatever the scanner actually read.
+     *
+     * Stickers hold a URL, not a bare code (see
+     * SecurityCheckpoint::codeFromScan). A URL cannot go in a path segment
+     * — its slashes would route the request somewhere else entirely, which
+     * is exactly how the first field test failed: the app froze with no
+     * message because the request never reached this controller.
+     *
+     * So the raw scan travels as a query parameter, and the extraction
+     * happens on the side that owns the sticker format.
+     */
+    public function scan(Request $request): SecurityCheckpointResource|JsonResponse
+    {
+        $this->authorizeGuard($request);
+
+        $scanned = trim((string) $request->query('scanned', ''));
+
+        if ($scanned === '') {
+            return response()->json([
+                'message' => __('Hasil pindai kosong. Coba pindai ulang QR-nya.'),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        return $this->answerFor(SecurityCheckpoint::codeFromScan($scanned));
+    }
+
+    private function answerFor(string $code): SecurityCheckpointResource|JsonResponse
+    {
         $checkpoint = SecurityCheckpoint::query()->where('code', $code)->first();
 
         // Two causes, two different things for the guard to do, so they get

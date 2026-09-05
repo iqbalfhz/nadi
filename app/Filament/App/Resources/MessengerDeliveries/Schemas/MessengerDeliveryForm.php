@@ -19,6 +19,11 @@ class MessengerDeliveryForm
                     ->columnSpanFull()
                     ->columns(2)
                     ->schema([
+                        TextInput::make('origin')
+                            ->label(__('Diambil Dari'))
+                            ->helperText(__('Tempat kurir mengambil dokumennya. Contoh: Front Office Lt 1.'))
+                            ->required()
+                            ->maxLength(255),
                         TextInput::make('destination')
                             ->label(__('Tujuan'))
                             ->helperText(__('Nama atau departemen penerima.'))

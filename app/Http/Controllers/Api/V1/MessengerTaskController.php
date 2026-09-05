@@ -40,6 +40,7 @@ class MessengerTaskController extends Controller
 
         $deliveries = MessengerDelivery::query()
             ->where('status', MessengerDeliveryStatus::Available)
+            ->with('sender.department')
             ->oldest('id')
             ->paginate(20);
 
@@ -59,6 +60,7 @@ class MessengerTaskController extends Controller
                 MessengerDeliveryStatus::PickedUp,
                 MessengerDeliveryStatus::InTransit,
             ])
+            ->with('sender.department')
             ->latest('claimed_at')
             ->paginate(20);
 
@@ -84,7 +86,7 @@ class MessengerTaskController extends Controller
             return $this->conflict($exception);
         }
 
-        return (new MessengerDeliveryResource($claimed))->response();
+        return (new MessengerDeliveryResource($claimed->load('sender.department')))->response();
     }
 
     public function transit(Request $request, MessengerDelivery $messengerDelivery): JsonResponse
@@ -97,7 +99,7 @@ class MessengerTaskController extends Controller
             return $this->conflict($exception);
         }
 
-        return (new MessengerDeliveryResource($messengerDelivery->refresh()))->response();
+        return (new MessengerDeliveryResource($messengerDelivery->refresh()->load('sender.department')))->response();
     }
 
     /**
@@ -128,7 +130,7 @@ class MessengerTaskController extends Controller
 
         ApiUpload::claim($messengerDelivery, [$data['photo_id']], $request->user()->id, 'proof');
 
-        return (new MessengerDeliveryResource($messengerDelivery->refresh()))->response();
+        return (new MessengerDeliveryResource($messengerDelivery->refresh()->load('sender.department')))->response();
     }
 
     public function proof(Request $request, MessengerDelivery $messengerDelivery): JsonResponse

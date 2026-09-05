@@ -22,7 +22,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property Carbon|null $in_transit_at
  * @property Carbon|null $delivered_at
  */
-#[Fillable(['tracking_number', 'sender_id', 'destination', 'document_description', 'status', 'messenger_id', 'claimed_at', 'in_transit_at', 'delivered_at'])]
+#[Fillable(['tracking_number', 'sender_id', 'origin', 'destination', 'document_description', 'status', 'messenger_id', 'claimed_at', 'in_transit_at', 'delivered_at'])]
 class MessengerDelivery extends Model implements HasMedia
 {
     /** @use HasFactory<MessengerDeliveryFactory> */
@@ -82,10 +82,15 @@ class MessengerDelivery extends Model implements HasMedia
         return $this->belongsTo(User::class, 'messenger_id');
     }
 
-    public static function createFor(User $sender, string $destination, string $documentDescription): self
-    {
+    public static function createFor(
+        User $sender,
+        string $destination,
+        string $documentDescription,
+        ?string $origin = null,
+    ): self {
         return static::create([
             'sender_id' => $sender->id,
+            'origin' => $origin,
             'destination' => $destination,
             'document_description' => $documentDescription,
         ]);
