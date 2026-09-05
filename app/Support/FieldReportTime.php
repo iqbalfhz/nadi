@@ -33,7 +33,17 @@ class FieldReportTime
             return null;
         }
 
+        // Pulled into the app timezone before anything else, and this line is
+        // load-bearing. Carbon::parse() keeps whatever zone the string carried,
+        // and Eloquent's datetime cast writes a Carbon out in *its own* zone —
+        // so a phone sending 16:58Z (23:58 in Jakarta) was stored as 16:58, and a
+        // dawn patrol read back as the previous evening. Nothing downstream
+        // notices: the column only ever holds wall-clock time, with no zone.
+        //
+        // The app has sent Z-suffixed times since 1.0.3. Before that it sent no
+        // offset at all, which happened to parse as local — and hid this.
         return Carbon::parse($value)
+            ->setTimezone(config('app.timezone'))
             ->max(now()->subDays(self::MAX_BACKDATE_DAYS))
             ->min(now());
     }
