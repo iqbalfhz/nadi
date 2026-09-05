@@ -4,7 +4,9 @@ Dokumen ini ditujukan untuk orang yang akan membangun aplikasi Flutter-nya dan b
 
 Contoh request dan respons di bawah **disalin dari server yang benar-benar berjalan**, bukan dikarang.
 
-Terakhir diperbarui: 5 September 2026 · Perubahan antar-tanggal dicatat di [API-PERUBAHAN.md](API-PERUBAHAN.md)
+Terakhir diperbarui: 6 September 2026 · Perubahan antar-tanggal dicatat di [API-PERUBAHAN.md](API-PERUBAHAN.md)
+
+> **Dokumen ini yang berlaku, dan ia tinggal di repo backend** ([`nadi/docs/API-MOBILE.md`](https://github.com/iqbalfhz/nadi/blob/main/docs/API-MOBILE.md)). Kalau Anda membaca salinannya di repo lain, salinan itu bisa saja tertinggal — cocokkan tanggal di atas sebelum memercayainya.
 
 Base URL produksi diberikan terpisah · Semua endpoint diawali `/api/v1`
 
@@ -67,6 +69,8 @@ Content-Type: application/json
   }
 }
 ```
+
+`user` bentuknya sama persis dengan balasan `GET /me`, termasuk blok `app` yang opsional itu (lihat §6) — jadi pengecekan versi sudah bisa dilakukan sejak layar login, tanpa menunggu panggilan berikutnya.
 
 Simpan `token` di penyimpanan aman (`flutter_secure_storage`, bukan `SharedPreferences`). Kirim di setiap request berikutnya:
 
@@ -150,9 +154,11 @@ Laporannya masuk atau tidak? Aplikasi tidak bisa tahu. Dua-duanya buruk:
 
 ### Aturannya
 
-**Setiap POST ke `/api/v1` wajib membawa header `Idempotency-Key` berisi UUID v4 — kecuali `auth/login` dan `auth/two-factor-challenge`.**
+**Setiap POST ke `/api/v1` wajib membawa header `Idempotency-Key` berisi UUID v4 — kecuali `auth/login`, `auth/two-factor-challenge`, dan `crash`.**
 
 Kedua endpoint autentikasi itu di luar aturan ini: tidak ada catatan yang bisa terduplikasi, dan ponsel yang belum berhasil masuk belum punya apa pun untuk dipakai ulang. Mengirim headernya di sana tidak masalah, hanya diabaikan.
+
+`crash` di luar aturan ini karena alasan yang berlawanan: di situ pengulangan justru datanya, bukan kesalahan yang perlu ditelan. Server menggabungkan yang identik dengan caranya sendiri — lihat §6.
 
 ```
 Idempotency-Key: 3f2504e0-4f89-11d3-9a0c-0305e82c3301
@@ -279,14 +285,18 @@ Pakai `meta.current_page` dan `meta.last_page` untuk paginasi; abaikan `meta.lin
 
 ### Waktu
 
-Semua waktu ISO 8601 dengan offset, zona **Asia/Jakarta**: `2026-09-03T14:23:57+07:00`.
+Semua waktu yang **dikeluarkan** server berbentuk ISO 8601 dengan offset, zona **Asia/Jakarta**: `2026-09-03T14:23:57+07:00`.
+
+Untuk waktu yang **dikirim** aplikasi (`submitted_at`, `occurred_at`): **selalu sertakan penanda zona** — `Z` atau `+07:00`, keduanya sama benarnya. Server mengubahnya ke Asia/Jakarta sebelum menyimpan, jadi `2026-09-05T16:58:00Z` dan `2026-09-05T23:58:00+07:00` menghasilkan catatan yang identik.
+
+Waktu tanpa offset sama sekali (`2026-09-05T23:58:00`) masih diterima dan dibaca sebagai waktu Jakarta, tapi jangan mengandalkan itu — kirim offsetnya.
 
 ---
 
 ## 6. Referensi endpoint
 
 Semua endpoint kecuali `auth/login` butuh header `Authorization: Bearer <token>`.
-Semua POST butuh header `Idempotency-Key`.
+Semua POST butuh header `Idempotency-Key` — **kecuali `POST /crash`**, yang justru tidak boleh dianggap duplikat (lihat bagiannya di bawah).
 
 ### `GET /api/v1/me`
 
@@ -300,12 +310,33 @@ Profil dan daftar modul. Panggil setiap aplikasi dibuka.
     "email": "budi@tangcity.com",
     "locale": null,
     "department": null,
-    "modules": ["ob"]
+    "modules": ["ob"],
+    "app": {
+      "latest_version": "1.0.3+4",
+      "minimum_version": "1.0.0+1",
+      "download_url": "https://nadi.example.com/apk"
+    }
   }
 }
 ```
 
 `locale` bernilai `null`, `"id"`, atau `"en"` — bahasa pilihan pengguna di web. `null` berarti mengikuti bahasa aplikasi (Indonesia). Pesan error dari server mengikuti pilihan ini.
+
+#### Blok `app` — versi yang seharusnya dipakai
+
+APK dibagikan langsung ke petugas, bukan lewat Play Store. Tidak ada pembaruan otomatis, dan tidak ada yang memberi tahu petugas bahwa versinya sudah usang. Blok ini yang menutup celah itu.
+
+| Field | Yang harus dilakukan aplikasi |
+|---|---|
+| `latest_version` | Kalau versi terpasang lebih rendah, tampilkan spanduk **"Versi baru tersedia"**. Petugas tetap bisa bekerja seperti biasa |
+| `minimum_version` | Kalau versi terpasang lebih rendah, **blokir** dan minta perbarui |
+| `download_url` | Tujuan tombol di spanduk itu. Bisa `null` — kalau kosong, cukup beri tahu ada versi baru tanpa tautan |
+
+Formatnya sama persis dengan `version:` di `pubspec.yaml` — `MAJOR.MINOR.PATCH+BUILD`. **Yang dibandingkan adalah angka `+BUILD`**, karena itu satu-satunya bagian yang dijamin selalu naik.
+
+**Seluruh blok `app` bisa tidak ada.** Itu keadaan normal, bukan error: selama admin belum mengisi versinya di `/admin`, servernya memang tidak mengirim apa pun. Aplikasi harus berjalan seperti biasa — tanpa spanduk, tanpa blokir. `minimum_version` dan `download_url` masing-masing juga bisa `null`.
+
+`minimum_version` sengaja jarang dinaikkan. Petugas yang terblokir di tengah shift tidak bisa melapor sama sekali, dan laporan yang sudah mengantre di outbox-nya ikut tertahan sampai dia sempat memperbarui.
 
 ### `GET /api/v1/ob/areas`
 
@@ -660,6 +691,51 @@ Tidak ada body. Hanya berlaku untuk tugas ber-status `picked_up` milik kurir itu
 
 Tanpa foto: **422**. Pengiriman tanpa bukti itu klaim, bukan catatan.
 
+### Laporan kegagalan aplikasi
+
+#### `POST /api/v1/crash`
+
+Satu-satunya jalur agar kegagalan di lapangan sampai ke pengembang. APK dibagikan langsung, bukan lewat Play Store, jadi tidak ada laporan crash bawaan sama sekali — tanpa endpoint ini, aplikasi yang gagal di HP petugas jam 3 pagi hanya diketahui HP itu sendiri.
+
+```json
+{
+  "message": "Null check operator used on a null value",
+  "stack": "#0 _PatrolFormScreenState._pindai ...",
+  "app_version": "1.0.3+4",
+  "platform": "android",
+  "device": "Xiaomi 24115RA8EG",
+  "os_version": "16",
+  "occurred_at": "2026-09-05T14:23:57+07:00"
+}
+```
+
+Balasannya **201 tanpa isi**. Tidak ada yang perlu dibaca.
+
+**Hanya `message` yang wajib.** Sisanya boleh dikosongkan — sebuah laporan kegagalan datang saat sesuatu sudah tidak beres, dan menolaknya karena nama perangkat kosong berarti membuang satu-satunya bukti yang ada. String kosong diperlakukan sama dengan tidak dikirim.
+
+| Field | Batas |
+|---|---|
+| `message` | wajib, maks 1000 karakter |
+| `stack` | maks 20.000 karakter |
+| `app_version` | maks 32 |
+| `platform` | maks 16 |
+| `device` | maks 128 |
+| `os_version` | maks 32 |
+
+`occurred_at` adalah waktu aplikasi gagal, bukan waktu laporannya terkirim. Aturannya sama dengan `submitted_at` (lihat §5): diperlakukan apa adanya kalau masuk akal, dan **dijepit** ke rentang wajar kalau jam HP-nya salah — tidak pernah ditolak. Kosongkan kalau tidak tahu; server memakai waktu terima.
+
+**Tiga hal yang berbeda dari endpoint lain, dan semuanya disengaja:**
+
+1. **Tidak butuh `Idempotency-Key`.** Ini satu-satunya POST yang tidak memerlukannya. Di sini pengulangan justru informasinya — lima ratus kejadian yang sama adalah fakta yang berbeda dari satu kejadian. Server menggabungkan yang identik sendiri, berdasar hash dari `message` + bagian atas `stack`, dan penggabungan itu bekerja lintas perangkat (yang tidak mungkin dilakukan kunci idempotensi).
+2. **Batasnya lebih ketat: 12 per menit**, di atas batas 240 yang umum. Layar yang gagal di setiap rebuild bisa mengirim laporan secepat loop-nya berjalan, dan ledakan itu tidak boleh memakan jatah yang dibutuhkan outbox untuk mengirim laporan satu shift. Kalau kena 429 di sini, **buang saja** laporan yang tertahan — yang hilang cuma pengulangan, bukan penampakan pertama sesuatu yang baru.
+3. **Tidak memerlukan akses modul.** Akun yang izinnya baru saja dicabut tetap bisa melapor — pencabutan itu sendiri adalah salah satu sebab crash yang masuk akal. Yang tetap diperlukan hanya token yang sah.
+
+Penggabungannya memisahkan per **versi aplikasi**: kegagalan yang sama muncul lagi di versi baru menjadi baris tersendiri, bukan menambah hitungan baris lama. Itu disengaja — "bug yang sudah diperbaiki ternyata kembali" adalah hal terpenting yang bisa disampaikan tabel ini.
+
+Sisi aplikasi disarankan **mengantre laporannya dulu di lokal** lalu mengirim saat ada jaringan: kegagalan justru sering terjadi saat sinyal buruk. Antreannya jangan memakai tabel outbox laporan petugas — aturannya berbeda, laporan crash boleh dibuang kalau menumpuk, laporan petugas tidak pernah boleh.
+
+Hasilnya dibaca admin di `/admin` → **Sistem → Kegagalan Aplikasi**.
+
 ---
 
 ## 7. Katalog error
@@ -671,6 +747,7 @@ Tanpa foto: **422**. Pengiriman tanpa bukti itu klaim, bukan catatan.
 | **403** | `{"message": "Anda tidak punya akses ke bagian ini."}` | Tidak punya izin untuk modul itu | Segarkan `/me` dan sesuaikan menunya |
 | **404** | `{"message": "Data yang diminta tidak ditemukan."}` | Id tidak ada | Jangan ulangi |
 | **409** | `{"message": ...}` | Kunci idempotensi bentrok | Kalau "sedang diproses": tunggu lalu ulangi. Kalau "sudah dipakai untuk permintaan lain": bug aplikasi |
+| **410** | `{"message": ...}` | Pos patroli sudah dinonaktifkan admin — lihat §6 | Jangan ulangi. Pindai ulang tidak akan pernah berhasil; tampilkan pesannya, minta satpam lapor ke pengawas |
 | **422** | `{"message": ..., "errors": {...}}` | Data tidak lolos validasi | Tampilkan pesannya. **Boleh dikirim ulang dengan kunci yang sama** setelah diperbaiki |
 | **429** | `{"message": ...}` | Terlalu banyak percobaan | Tunggu, lalu ulangi dengan jeda menaik |
 | **5xx** | `{"message": "Terjadi kesalahan di server. Coba lagi nanti."}` | Masalah server | Ulangi dengan jeda menaik. Pertahankan di outbox |
@@ -696,6 +773,7 @@ Tampilkan pesan dari `errors` di bawah field masing-masing. `message` di tingkat
 | Cakupan | Batas |
 |---|---|
 | `POST /auth/login` | **5 per menit** per email + IP |
+| `POST /crash` | **12 per menit** per token, di atas batas 240 di bawah |
 | Semua endpoint lain (per token) | **240 per menit** |
 
 Angka 240 itu longgar dengan sengaja. Outbox yang pulang dari basement membawa dua belas laporan beserta fotonya — sekitar 50 request dalam beberapa detik — dan batas konvensional 60/menit justru akan mencekik kasus yang seluruh rancangan offline ini dibuat untuk melayaninya. Ini pagar untuk klien yang lepas kendali, bukan kuota pemakaian. Kalau batas ini pernah kena saat pengiriman normal, berarti angkanya salah — laporkan.
@@ -710,7 +788,7 @@ Angka 240 itu longgar dengan sengaja. Outbox yang pulang dari basement membawa d
 |---|---|
 | 408, 429, 5xx, timeout jaringan | Ya, jeda menaik: 1s, 2s, 4s, … maksimal ~5 menit |
 | 409 "sedang diproses" | Ya, setelah beberapa detik |
-| 400, 401, 403, 404, 422 | **Tidak.** Perlu tindakan pengguna atau perbaikan aplikasi |
+| 400, 401, 403, 404, 410, 422 | **Tidak.** Perlu tindakan pengguna atau perbaikan aplikasi |
 
 ---
 
@@ -727,6 +805,7 @@ Tidak semua langkah sama amannya untuk diantre. Tabel ini adalah aturan yang har
 | Tandai berangkat (`transit`) | **Ya** | Statusnya milik kurir itu sendiri, tidak diperebutkan |
 | Tandai terkirim (`deliver`) | **Ya** | Sama |
 | **Ambil tugas (`claim`)** | **TIDAK** | Diperebutkan. Klaim offline terlihat berhasil di HP lalu kalah diam-diam |
+| Laporan kegagalan (`crash`) | **Ya**, tapi antreannya terpisah | Kegagalan justru sering terjadi saat sinyal buruk. Antreannya sendiri, bukan outbox laporan petugas: laporan crash boleh dibuang kalau menumpuk, laporan petugas tidak pernah boleh |
 
 Untuk yang boleh offline, alurnya selalu sama:
 
@@ -873,8 +952,11 @@ Jalankan dengan `php artisan test tests/Feature/Api`.
 - [ ] `photo_ids` yang sudah berhasil disimpan, tidak diunggah ulang
 - [ ] Foto dikompres di HP sebelum diunggah (batas 10 MB)
 - [ ] `submitted_at` diisi waktu petugas menekan Kirim, bukan waktu terkirim
+- [ ] `submitted_at` dikirim **dengan penanda zona** (`Z` atau `+07:00`), bukan tanpa offset
 - [ ] URL foto tidak pernah disimpan (berumur 30 menit)
 - [ ] 401 menghapus token tapi **tidak** menghapus outbox
 - [ ] Pengulangan otomatis hanya untuk 408/429/5xx/timeout
 - [ ] Master data (area, pos, kategori HK) di-cache untuk mode offline
 - [ ] Pengambilan tugas Messenger diwajibkan online
+- [ ] Kegagalan tak tertangani dikirim ke `POST /crash`, lewat antrean yang **terpisah** dari outbox laporan
+- [ ] Blok `app` yang tidak ada diperlakukan sebagai "tidak ada pembaruan", bukan error
