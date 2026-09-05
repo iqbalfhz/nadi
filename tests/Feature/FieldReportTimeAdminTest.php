@@ -71,8 +71,7 @@ class FieldReportTimeAdminTest extends TestCase
 
     /**
      * Older reports, and anything filed from the web, have no submitted_at.
-     * They must still show a time rather than a dash — and must say which
-     * time it is, so a server clock is never read as the worker's own claim.
+     * They must still show a time rather than a dash.
      */
     public function test_a_report_without_a_filed_time_falls_back_to_the_arrival_time(): void
     {
@@ -82,8 +81,25 @@ class FieldReportTimeAdminTest extends TestCase
         ]);
 
         Livewire::test(ListObChecklists::class)
-            ->assertTableColumnStateSet('submitted_at', $checklist->created_at, $checklist)
-            ->assertSee('waktu terima server');
+            ->assertTableColumnStateSet('submitted_at', $checklist->created_at, $checklist);
+    }
+
+    /**
+     * One time, one line. An earlier version printed the delay underneath;
+     * for a supervisor, two timestamps at once only raise the question of
+     * which one is real, and a large number reads as a warning about a report
+     * that is perfectly fine.
+     */
+    public function test_the_list_shows_one_time_per_report_not_the_delay(): void
+    {
+        SecurityPatrol::factory()->create([
+            'submitted_at' => '2026-09-05 23:55:00',
+            'created_at' => '2026-09-06 07:20:00',
+        ]);
+
+        Livewire::test(ListSecurityPatrols::class)
+            ->assertDontSee('kemudian')
+            ->assertDontSee('waktu terima server');
     }
 
     /**

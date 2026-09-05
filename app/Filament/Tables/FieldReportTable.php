@@ -31,19 +31,20 @@ use Illuminate\Support\Carbon;
 class FieldReportTable
 {
     /**
-     * Below this, the report effectively went straight through and saying so
-     * is noise. Above it, the gap is the interesting part.
-     */
-    private const NOTEWORTHY_DELAY_MINUTES = 2;
-
-    /**
      * When the worker says they did it — the column a supervisor should be
      * reading, and so the one that sorts the list.
      *
-     * Falls back to created_at, because submitted_at is null for every report
-     * filed before the column existed and for anything the web filed. The
-     * description line says which of the two is being shown, so a fallback is
-     * never silently passed off as the worker's own claim.
+     * **One time, one line.** An earlier version printed the delay underneath
+     * ("diterima 7 jam 25 menit kemudian"). It was accurate and it was wrong
+     * for this audience: a supervisor reading two timestamps at once asks
+     * which of them is the real one, and a large number reads as a warning
+     * about a report that is perfectly fine. The gap is developer detail —
+     * it belongs in receivedAtColumn(), which is one click away.
+     *
+     * Falls back to created_at when there is no claimed time. That is not a
+     * fudge: reports filed on the web are filed at a desk, so their arrival
+     * time *is* when they were reported. Only phone reports can differ, and
+     * every one of those carries submitted_at.
      */
     public static function reportedAtColumn(): TextColumn
     {
@@ -51,7 +52,6 @@ class FieldReportTable
             ->label(__('Dilaporkan'))
             ->state(fn (ObChecklist|SecurityPatrol|HkInspection $record): ?CarbonInterface => $record->submitted_at ?? $record->created_at)
             ->dateTime('d M Y H:i')
-            ->description(fn (ObChecklist|SecurityPatrol|HkInspection $record): ?string => self::delayLabel($record))
             // COALESCE, not the bare column: sorting on submitted_at alone
             // drops every older report to one end of the list regardless of
             // when it actually happened.
@@ -60,9 +60,12 @@ class FieldReportTable
     }
 
     /**
-     * When the server heard about it. Off by default — the delay under
-     * "Dilaporkan" already says whether the two differ, and this is only
-     * wanted when someone needs the exact arrival time.
+     * When the server heard about it. Off by default, and deliberately so:
+     * this is the answer to a question most readers never ask, and putting it
+     * on screen unasked was what made the list confusing.
+     *
+     * Switched on from the column menu when somebody genuinely needs it —
+     * auditing a report, or checking that an outbox flushed.
      */
     public static function receivedAtColumn(): TextColumn
     {
@@ -113,33 +116,5 @@ class FieldReportTable
 
                 return $indicators;
             });
-    }
-
-    /**
-     * The sentence under the reported time.
-     *
-     * Three cases worth distinguishing, and the reader needs all three: this
-     * is the worker's own time and it arrived at once; this is the worker's
-     * own time and it sat in an outbox for a while; this is not the worker's
-     * time at all, because none was recorded.
-     */
-    private static function delayLabel(ObChecklist|SecurityPatrol|HkInspection $record): ?string
-    {
-        if ($record->submitted_at === null) {
-            return __('waktu terima server');
-        }
-
-        $minutes = (int) $record->submitted_at->diffInMinutes($record->created_at);
-
-        if ($minutes < self::NOTEWORTHY_DELAY_MINUTES) {
-            return null;
-        }
-
-        return __('diterima :selisih kemudian', [
-            'selisih' => $record->submitted_at->diffForHumans($record->created_at, [
-                'syntax' => Carbon::DIFF_ABSOLUTE,
-                'parts' => 2,
-            ]),
-        ]);
     }
 }
