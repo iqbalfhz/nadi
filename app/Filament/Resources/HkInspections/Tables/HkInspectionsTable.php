@@ -5,27 +5,22 @@ namespace App\Filament\Resources\HkInspections\Tables;
 use App\Enums\HkCondition;
 use App\Enums\HkShift;
 use App\Filament\Actions\ViewMediaAction;
+use App\Filament\Tables\FieldReportTable;
 use App\Models\HkCategory;
 use App\Models\User;
-use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
 
 class HkInspectionsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('submitted_at', 'desc')
             ->columns([
-                TextColumn::make('created_at')
-                    ->label(__('Waktu'))
-                    ->dateTime('d M Y H:i')
-                    ->sortable(),
+                FieldReportTable::reportedAtColumn()->label(__('Waktu')),
+                FieldReportTable::receivedAtColumn(),
                 TextColumn::make('category.name')
                     ->label(__('Kategori'))
                     ->badge()
@@ -72,36 +67,7 @@ class HkInspectionsTable
                     ->toggleable(),
             ])
             ->filters([
-                // Defaults to the current month so this doesn't grow into an
-                // ever-longer unfiltered list — clear the dates for full
-                // history. Copied from ObChecklistsTable, which had the same
-                // problem.
-                Filter::make('created_at')
-                    ->label(__('Tanggal'))
-                    ->schema([
-                        DatePicker::make('from')
-                            ->label(__('Dari Tanggal'))
-                            ->default(now()->startOfMonth()->toDateString()),
-                        DatePicker::make('until')
-                            ->label(__('Sampai Tanggal'))
-                            ->default(now()->toDateString()),
-                    ])
-                    ->query(fn (Builder $query, array $data): Builder => $query
-                        ->when($data['from'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '>=', $date))
-                        ->when($data['until'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '<=', $date)))
-                    ->indicateUsing(function (array $data): array {
-                        $indicators = [];
-
-                        if ($data['from'] ?? null) {
-                            $indicators[] = 'Dari '.Carbon::parse($data['from'])->format('d M Y');
-                        }
-
-                        if ($data['until'] ?? null) {
-                            $indicators[] = 'Sampai '.Carbon::parse($data['until'])->format('d M Y');
-                        }
-
-                        return $indicators;
-                    }),
+                FieldReportTable::dateFilter(),
                 SelectFilter::make('hk_category_id')
                     ->label(__('Kategori'))
                     ->options(fn (): array => HkCategory::query()->orderBy('name')->pluck('name', 'id')->all()),
