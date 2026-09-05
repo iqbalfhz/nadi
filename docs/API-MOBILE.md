@@ -4,7 +4,9 @@ Dokumen ini ditujukan untuk orang yang akan membangun aplikasi Flutter-nya dan b
 
 Contoh request dan respons di bawah **disalin dari server yang benar-benar berjalan**, bukan dikarang.
 
-Terakhir diperbarui: 5 September 2026 · Base URL produksi diberikan terpisah · Semua endpoint diawali `/api/v1`
+Terakhir diperbarui: 5 September 2026 · Perubahan antar-tanggal dicatat di [API-PERUBAHAN.md](API-PERUBAHAN.md)
+
+Base URL produksi diberikan terpisah · Semua endpoint diawali `/api/v1`
 
 ---
 

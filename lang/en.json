@@ -379,6 +379,7 @@
     "pcs": "pcs",
     "Pekerjaan yang gagal sudah diantrekan ulang. Klik \"Proses Sekarang\" kalau ingin langsung dijalankan.": "The failed jobs are queued again. Click \"Process Now\" to run them immediately.",
     "Pelaku": "Performed by",
+    "Pemohon": "Requested by",
     "Pemutaran di Layar Antrian": "Playback on the Queue Display",
     "Pengaturan Backup Penomoran Dokumen": "Document Numbering Backup Settings",
     "Pengaturan Kiosk Antrian": "Queue Kiosk Settings",

@@ -97,4 +97,24 @@ class MessengerTasksTest extends TestCase
 
         $this->assertSame(MessengerDeliveryStatus::PickedUp, $delivery->fresh()->status);
     }
+
+    /**
+     * A courier needs to know where to go first, not only where the
+     * document ends up. The web page carried the same blind spot as the
+     * API did — it was simply the phone that made it visible.
+     */
+    public function test_an_open_task_names_where_to_collect_and_who_asked(): void
+    {
+        $this->actingAsEmployeeWithPermissions('View:MessengerTasks');
+
+        MessengerDelivery::factory()->create([
+            'status' => MessengerDeliveryStatus::Available,
+            'origin' => 'Front Office Lt 1',
+            'sender_id' => User::factory()->create(['name' => 'Sinta'])->id,
+        ]);
+
+        Livewire::test(MessengerTasks::class)
+            ->assertSee('Front Office Lt 1')
+            ->assertSee('Sinta');
+    }
 }

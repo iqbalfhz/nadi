@@ -76,6 +76,9 @@ class MessengerTasks extends Page
     {
         return MessengerDelivery::query()
             ->where('status', MessengerDeliveryStatus::Available)
+            // The card names the requester, so load them once rather than
+            // once per row.
+            ->with('sender')
             ->orderBy('created_at')
             ->get();
     }
@@ -89,6 +92,7 @@ class MessengerTasks extends Page
         return MessengerDelivery::query()
             ->where('messenger_id', Auth::id())
             ->whereIn('status', [MessengerDeliveryStatus::PickedUp, MessengerDeliveryStatus::InTransit])
+            ->with('sender')
             ->orderBy('claimed_at')
             ->get();
     }

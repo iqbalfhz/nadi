@@ -4,7 +4,18 @@
             <div class="flex items-center justify-between gap-4 border-b border-gray-100 py-3 last:border-0 dark:border-white/10">
                 <div>
                     <p class="font-medium">{{ $delivery->tracking_number }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $delivery->destination }} — {{ $delivery->document_description }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $delivery->document_description }}</p>
+                    {{-- Asal sebelum tujuan: kurir perlu tahu ke mana dulu,
+                    bukan ke mana akhirnya. --}}
+                    <p class="text-sm">
+                        <span class="text-gray-500 dark:text-gray-400">{{ __('Diambil Dari') }}:</span>
+                        <span class="font-medium">{{ $delivery->origin ?? '—' }}</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="font-medium">{{ $delivery->destination }}</span>
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ __('Pemohon') }}: {{ $delivery->sender?->name ?? '—' }}
+                    </p>
                 </div>
                 <x-filament::button size="sm" wire:click="claim({{ $delivery->id }})">
                     {{ __('Ambil') }}
@@ -21,7 +32,18 @@
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div class="flex flex-col gap-1">
                         <p class="font-medium">{{ $delivery->tracking_number }}</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $delivery->destination }} — {{ $delivery->document_description }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $delivery->document_description }}</p>
+                    {{-- Asal sebelum tujuan: kurir perlu tahu ke mana dulu,
+                    bukan ke mana akhirnya. --}}
+                    <p class="text-sm">
+                        <span class="text-gray-500 dark:text-gray-400">{{ __('Diambil Dari') }}:</span>
+                        <span class="font-medium">{{ $delivery->origin ?? '—' }}</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="font-medium">{{ $delivery->destination }}</span>
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ __('Pemohon') }}: {{ $delivery->sender?->name ?? '—' }}
+                    </p>
                         <x-filament::badge :color="$delivery->status->color()">
                             {{ $delivery->status->label() }}
                         </x-filament::badge>
