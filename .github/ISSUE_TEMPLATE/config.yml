@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Aplikasi Flutter NADI Mobile
+    url: https://github.com/iqbalfhz/nadi_mobile
+    about: Sisi mobile — kontrak API, catatan perubahan, dan arsitekturnya
+  - name: Catatan perubahan API
+    url: https://github.com/iqbalfhz/nadi_mobile/blob/main/docs/API-PERUBAHAN.md
+    about: Daftar perubahan /api/v1 dengan label WAJIB / DISARANKAN / INFO
