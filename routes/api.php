@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CrashReportController;
 use App\Http\Controllers\Api\V1\HkInspectionController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\MessengerTaskController;
@@ -54,6 +55,19 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         // just revoked should still be able to clean up their own token.
         Route::post('auth/logout', [AuthController::class, 'logout'])
             ->name('auth.logout');
+
+        // Outside the mobile-access gate for the same reason as logout, and a
+        // sharper one: an account that just lost its access is a plausible
+        // cause of the crash being reported.
+        //
+        // Its own ceiling on top of the shared 240. A screen that fails on
+        // every rebuild can fire reports as fast as the loop runs, and that
+        // burst must not eat the budget the outbox needs to flush a shift's
+        // work. Deduplication happens in the model, so a client held at this
+        // limit loses repeats, never the first sighting of something new.
+        Route::post('crash', CrashReportController::class)
+            ->middleware('throttle:12,1')
+            ->name('crash');
 
         Route::middleware([EnsureMobileAccess::class, SetInterfaceLanguage::class])->group(function (): void {
             Route::get('me', MeController::class)->name('me');
