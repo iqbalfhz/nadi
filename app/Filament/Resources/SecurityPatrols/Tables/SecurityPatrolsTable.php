@@ -3,9 +3,16 @@
 namespace App\Filament\Resources\SecurityPatrols\Tables;
 
 use App\Filament\Actions\ViewMediaAction;
+use App\Filament\Resources\SecurityPatrols\SecurityPatrolResource;
 use App\Filament\Tables\FieldReportTable;
 use App\Models\SecurityCheckpoint;
+use App\Models\SecurityPatrol;
 use App\Models\User;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -53,8 +60,17 @@ class SecurityPatrolsTable
                     ->label(__('Ada Laporan Kejadian'))
                     ->query(fn (Builder $query): Builder => $query->whereNotNull('incident_report')),
             ])
+            ->recordUrl(fn (SecurityPatrol $record): string => SecurityPatrolResource::getUrl('view', ['record' => $record]))
             ->recordActions([
                 ViewMediaAction::make('photos', 'Lihat Foto'),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }

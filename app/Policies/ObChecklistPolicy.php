@@ -29,8 +29,11 @@ class ObChecklistPolicy
 
     public function update(AuthUser $authUser, ObChecklist $obChecklist): bool
     {
-        // Immutable once submitted — no edit page exists for this resource in
-        // either panel, so this only matters if it's ever checked directly.
+        // No longer immutable: /admin has an edit page. What it edits is
+        // narrow on purpose — the note only, never the area, the photos, the
+        // worker or the times. That limit lives in ObChecklistForm rather
+        // than here, because it is about which fields a correction may touch,
+        // not about who may correct.
         return $authUser->can('Update:ObChecklist');
     }
 

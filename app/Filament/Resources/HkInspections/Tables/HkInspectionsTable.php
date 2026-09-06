@@ -5,9 +5,16 @@ namespace App\Filament\Resources\HkInspections\Tables;
 use App\Enums\HkCondition;
 use App\Enums\HkShift;
 use App\Filament\Actions\ViewMediaAction;
+use App\Filament\Resources\HkInspections\HkInspectionResource;
 use App\Filament\Tables\FieldReportTable;
 use App\Models\HkCategory;
+use App\Models\HkInspection;
 use App\Models\User;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -81,8 +88,17 @@ class HkInspectionsTable
                     ->label(__('Pengawas'))
                     ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->all()),
             ])
+            ->recordUrl(fn (HkInspection $record): string => HkInspectionResource::getUrl('view', ['record' => $record]))
             ->recordActions([
                 ViewMediaAction::make('photos', 'Lihat Foto'),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }

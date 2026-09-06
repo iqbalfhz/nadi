@@ -2,11 +2,16 @@
 
 namespace App\Filament\Resources\MessengerDeliveries;
 
+use App\Filament\Resources\MessengerDeliveries\Pages\EditMessengerDelivery;
 use App\Filament\Resources\MessengerDeliveries\Pages\ListMessengerDeliveries;
+use App\Filament\Resources\MessengerDeliveries\Pages\ViewMessengerDelivery;
+use App\Filament\Resources\MessengerDeliveries\Schemas\MessengerDeliveryForm;
+use App\Filament\Resources\MessengerDeliveries\Schemas\MessengerDeliveryInfolist;
 use App\Filament\Resources\MessengerDeliveries\Tables\MessengerDeliveriesTable;
 use App\Models\MessengerDelivery;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -55,10 +60,32 @@ class MessengerDeliveryResource extends Resource
         return MessengerDeliveriesTable::configure($table);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return MessengerDeliveryInfolist::configure($schema);
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return MessengerDeliveryForm::configure($schema);
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => ListMessengerDeliveries::route('/'),
+            'view' => ViewMessengerDelivery::route('/{record}'),
+            'edit' => EditMessengerDelivery::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * Requests are raised by the person who needs the document moved, in
+     * /app — that is who the courier calls when it is not where it should be.
+     * A request with no requester behind it has nobody to ask.
+     */
+    public static function canCreate(): bool
+    {
+        return false;
     }
 }

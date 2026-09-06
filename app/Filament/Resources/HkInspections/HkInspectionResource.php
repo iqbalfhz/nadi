@@ -2,11 +2,16 @@
 
 namespace App\Filament\Resources\HkInspections;
 
+use App\Filament\Resources\HkInspections\Pages\EditHkInspection;
 use App\Filament\Resources\HkInspections\Pages\ListHkInspections;
+use App\Filament\Resources\HkInspections\Pages\ViewHkInspection;
+use App\Filament\Resources\HkInspections\Schemas\HkInspectionForm;
+use App\Filament\Resources\HkInspections\Schemas\HkInspectionInfolist;
 use App\Filament\Resources\HkInspections\Tables\HkInspectionsTable;
 use App\Models\HkInspection;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -63,10 +68,31 @@ class HkInspectionResource extends Resource
      * a moment in time, so there is deliberately no edit or delete page —
      * same stance as the OB and Security checklists.
      */
+    public static function infolist(Schema $schema): Schema
+    {
+        return HkInspectionInfolist::configure($schema);
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return HkInspectionForm::configure($schema);
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => ListHkInspections::route('/'),
+            'view' => ViewHkInspection::route('/{record}'),
+            'edit' => EditHkInspection::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * Inspections are filed by the supervisor who stood at the point, in /app
+     * or on a phone. One created here would be a finding nobody observed.
+     */
+    public static function canCreate(): bool
+    {
+        return false;
     }
 }

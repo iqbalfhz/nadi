@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
 
 /**
  * Records that somebody looked at a record's evidence photos.
@@ -23,5 +24,26 @@ class MediaAccessLog
             ->performedOn($record)
             ->withProperty('data', $label)
             ->log('Lihat foto');
+    }
+
+    /**
+     * Log a detail page that renders the photos as part of itself.
+     *
+     * A view page hands out the same signed URLs the modal does, just without
+     * anyone having to click — so it needs the same entry. Silent when the
+     * record has no photos: nothing was exposed, and an "opened the photos"
+     * line for a report that has none is noise in an audit trail.
+     */
+    public static function forEvidence(?Model $record, string $collection, string $label): void
+    {
+        if (! $record instanceof HasMedia) {
+            return;
+        }
+
+        if ($record->getMedia($collection)->isEmpty()) {
+            return;
+        }
+
+        self::record($record, $label);
     }
 }

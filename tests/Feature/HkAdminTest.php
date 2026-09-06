@@ -84,12 +84,19 @@ class HkAdminTest extends TestCase
     }
 
     /**
-     * A filed inspection records what a supervisor found at a moment in time,
-     * so there is deliberately no way to alter it after the fact.
+     * A filed inspection records what a supervisor found at a moment in time.
+     *
+     * That used to mean no pages beyond the list at all. It now means
+     * something narrower and more useful: an admin can read the whole report
+     * and correct how it was written down, but cannot file one — a finding
+     * created at a desk is one nobody observed. Which *fields* a correction
+     * may touch is enforced by HkInspectionForm and covered in
+     * FieldReportDetailAdminTest.
      */
-    public function test_reports_are_read_only(): void
+    public function test_reports_cannot_be_created_from_admin(): void
     {
-        $this->assertSame(['index'], array_keys(HkInspectionResource::getPages()));
+        $this->assertSame(['index', 'view', 'edit'], array_keys(HkInspectionResource::getPages()));
+        $this->assertFalse(HkInspectionResource::canCreate());
     }
 
     public function test_reports_can_be_filtered_by_category_and_condition(): void

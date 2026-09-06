@@ -4,7 +4,14 @@ namespace App\Filament\Resources\MessengerDeliveries\Tables;
 
 use App\Enums\MessengerDeliveryStatus;
 use App\Filament\Actions\ViewMediaAction;
+use App\Filament\Resources\MessengerDeliveries\MessengerDeliveryResource;
+use App\Models\MessengerDelivery;
 use App\Models\User;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -96,8 +103,17 @@ class MessengerDeliveriesTable
                     ->label(__('Messenger'))
                     ->options(fn () => User::query()->orderBy('name')->pluck('name', 'id')),
             ])
+            ->recordUrl(fn (MessengerDelivery $record): string => MessengerDeliveryResource::getUrl('view', ['record' => $record]))
             ->recordActions([
                 ViewMediaAction::make('proof', 'Lihat Bukti'),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }
