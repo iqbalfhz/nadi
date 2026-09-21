@@ -73,12 +73,23 @@ services:
     pull_policy: never
     restart: unless-stopped
     command: php artisan schedule:work
-    # No port to probe, so no check at all rather than a check that always
-    # fails. If schedule:work dies the container exits with it, and
-    # `restart: unless-stopped` brings it back — that already is the health
-    # mechanism. See the note on `reverb`.
+    # A crash is already covered: schedule:work dying takes the container
+    # with it and `restart` brings it back. What this catches is the failure
+    # restart cannot see — alive but wedged, and the nightly backup, the
+    # patrol assessment and every clean-up quietly stop running.
+    #
+    # A job in routes/console.php touches this file every minute
+    # (App\Support\Heartbeat); unhealthy once it is three minutes old. Plain
+    # `php -r` rather than artisan, so the check does not boot the framework
+    # once a minute. No `$` — Compose would substitute it. The path is the
+    # contract with Heartbeat::path(), and HeartbeatTest enforces it.
     healthcheck:
-      disable: true
+      test: ["CMD", "php", "-r", "exit(time() - (int) @filemtime('/app/storage/framework/heartbeats/scheduler') < 180 ? 0 : 1);"]
+      interval: 60s
+      timeout: 5s
+      retries: 2
+      # The first beat lands on the next minute boundary after start.
+      start_period: 120s
     depends_on:
       - app
       - nadi-redis
@@ -106,10 +117,17 @@ services:
     # The restart policy above already brings the worker back if it
     # genuinely dies.
     command: php artisan queue:work --tries=3
-    # Same reasoning as `scheduler`: nothing to probe, and a dead worker takes
-    # the container down with it.
+    # Same idea as `scheduler`: the worker touches this file on every loop
+    # (throttled to once per 30 s — see App\Support\Heartbeat), so a worker
+    # that stops looping goes stale. Five minutes, not three: while a job is
+    # running the loop does not turn, and a job may take up to its 60 s
+    # timeout, three times over.
     healthcheck:
-      disable: true
+      test: ["CMD", "php", "-r", "exit(time() - (int) @filemtime('/app/storage/framework/heartbeats/queue') < 300 ? 0 : 1);"]
+      interval: 60s
+      timeout: 5s
+      retries: 2
+      start_period: 60s
     depends_on:
       - app
       - nadi-redis
@@ -141,6 +159,21 @@ services:
   nadi-redis:
     image: redis:7-alpine
     restart: unless-stopped
+    # redis-cli reads its password from this variable, so the healthcheck
+    # below carries no password in its command line and needs no quoting
+    # for whatever characters the password happens to contain. The password
+    # is already in this container's own arguments (see `command`), so this
+    # exposes nothing new.
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD}
+    # The image ships no healthcheck of its own. Checking the reply rather
+    # than the exit code, because redis-cli's exit code on an error reply
+    # (a wrong password, say) has differed between versions — "PONG" does not.
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     # No persistence on purpose: everything in here is a session or a cache
     # entry, so losing it on restart costs a re-login and a cold cache, not
     # data. Skipping RDB snapshots also avoids the fork-and-copy memory spike

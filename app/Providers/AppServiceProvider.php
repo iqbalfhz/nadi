@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Listeners\LogAccessActivity;
 use App\Listeners\RecordBackupOutcome;
 use App\Settings\BackupSettings;
+use App\Support\Heartbeat;
 use App\Support\Impersonation;
 use Carbon\CarbonImmutable;
 use Google\Client as GoogleClient;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -46,6 +48,18 @@ class AppServiceProvider extends ServiceProvider
         // installation sends mail to the log file. This keeps the outcome
         // somewhere the settings page can show it.
         Event::subscribe(RecordBackupOutcome::class);
+
+        // Proof the queue worker is still looping; the `queue` container's
+        // healthcheck reads it. See App\Support\Heartbeat.
+        //
+        // A block body, not an arrow function, and that is load-bearing: the
+        // worker asks this event whether to keep going, and a listener that
+        // returns `false` makes it stop picking up jobs. An arrow function
+        // returns whatever its expression returns — one refactor away from
+        // silently pausing the queue.
+        Queue::looping(function (): void {
+            Heartbeat::beat(Heartbeat::QUEUE);
+        });
     }
 
     /**

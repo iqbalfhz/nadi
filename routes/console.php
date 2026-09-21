@@ -2,6 +2,7 @@
 
 use App\Settings\BackupSettings;
 use App\Support\BackupDrive;
+use App\Support\Heartbeat;
 use Illuminate\Support\Facades\Schedule;
 
 // Gated on BackupSettings::$enabled (checked fresh on every run) rather than
@@ -49,6 +50,18 @@ Schedule::command('nadi:prune-api-staging')
     ->daily()
     ->at('04:30')
     ->onOneServer();
+
+// Proof the scheduler itself is alive — the container healthcheck reads it.
+// Every job above depends on schedule:work, and a wedged one fails silently:
+// no crash, no restart, just a backup that quietly never runs again. See
+// App\Support\Heartbeat. Not onOneServer(): it has to run in *this*
+// container, because the file it writes is only visible here.
+Schedule::call(function (): void {
+    Heartbeat::beat(Heartbeat::SCHEDULER);
+})
+    ->everyMinute()
+    ->name('heartbeat')
+    ->description('Tanda hidup scheduler untuk healthcheck container');
 
 // Which patrols deserve a second look. Runs after the night shift has ended
 // and its outbox has had time to come home — flags depend on a scan's
