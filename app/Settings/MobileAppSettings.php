@@ -23,8 +23,13 @@ class MobileAppSettings extends Settings
     /**
      * Newest released build. A handset below it shows a "new version
      * available" banner and carries on working.
+     *
+     * All three properties are nullable, and must stay so. The settings page
+     * lets every field be left empty, and Filament hands an empty input over
+     * as null — declared as plain `string`, the page answered with a 500 the
+     * first time an admin took "opsional" at its word.
      */
-    public string $latest_version;
+    public ?string $latest_version;
 
     /**
      * Oldest build still allowed to run. A handset below it is blocked until
@@ -34,14 +39,14 @@ class MobileAppSettings extends Settings
      * file anything at all, and whatever is already queued in their outbox is
      * held with them until they find a way to install the new APK.
      */
-    public string $minimum_version;
+    public ?string $minimum_version;
 
     /**
      * Where to get the new build. Optional — without it the banner can only
      * say that an update exists, which leaves the officer to work out who to
      * ask.
      */
-    public string $download_url;
+    public ?string $download_url;
 
     public static function group(): string
     {
@@ -68,12 +73,14 @@ class MobileAppSettings extends Settings
      */
     public function forApi(): ?array
     {
-        if (! $this->isConfigured()) {
+        $latest = $this->latest_version;
+
+        if ($latest === null || $latest === '') {
             return null;
         }
 
         return [
-            'latest_version' => $this->latest_version,
+            'latest_version' => $latest,
             'minimum_version' => filled($this->minimum_version) ? $this->minimum_version : null,
             'download_url' => filled($this->download_url) ? $this->download_url : null,
         ];
