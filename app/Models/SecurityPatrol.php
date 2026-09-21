@@ -18,10 +18,13 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property int $user_id
  * @property string|null $incident_report
  * @property Carbon|null $submitted_at
+ * @property Carbon|null $submitted_at_claimed
+ * @property array<int, string>|null $review_flags
+ * @property Carbon|null $reviewed_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['security_checkpoint_id', 'user_id', 'incident_report', 'submitted_at'])]
+#[Fillable(['security_checkpoint_id', 'user_id', 'incident_report', 'submitted_at', 'submitted_at_claimed', 'reviewed_at'])]
 class SecurityPatrol extends Model implements HasMedia
 {
     /** @use HasFactory<SecurityPatrolFactory> */
@@ -39,6 +42,9 @@ class SecurityPatrol extends Model implements HasMedia
     {
         return [
             'submitted_at' => 'datetime',
+            'submitted_at_claimed' => 'datetime',
+            'review_flags' => 'array',
+            'reviewed_at' => 'datetime',
         ];
     }
 

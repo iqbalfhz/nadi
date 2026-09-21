@@ -131,6 +131,8 @@ class SecurityPatrolController extends Controller
             'user_id' => $request->user()->id,
             'incident_report' => $data['incident_report'] ?? null,
             'submitted_at' => FieldReportTime::clamp($data['submitted_at'] ?? null),
+            // Null unless the clock was implausible. See FieldReportTime::claimed().
+            'submitted_at_claimed' => FieldReportTime::claimed($data['submitted_at'] ?? null),
         ]);
 
         ApiUpload::claim($patrol, $data['photo_ids'], $request->user()->id);

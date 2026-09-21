@@ -37,6 +37,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property string|null $notes
  * @property string|null $follow_up
  * @property Carbon|null $submitted_at
+ * @property Carbon|null $submitted_at_claimed
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -51,6 +52,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
     'notes',
     'follow_up',
     'submitted_at',
+    'submitted_at_claimed',
 ])]
 class HkInspection extends Model implements HasMedia
 {
@@ -68,6 +70,7 @@ class HkInspection extends Model implements HasMedia
             'shift' => HkShift::class,
             'condition' => HkCondition::class,
             'submitted_at' => 'datetime',
+            'submitted_at_claimed' => 'datetime',
         ];
     }
 

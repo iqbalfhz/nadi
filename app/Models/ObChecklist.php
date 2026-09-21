@@ -18,10 +18,11 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property int $user_id
  * @property string|null $notes
  * @property Carbon|null $submitted_at
+ * @property Carbon|null $submitted_at_claimed
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['ob_area_id', 'user_id', 'notes', 'submitted_at'])]
+#[Fillable(['ob_area_id', 'user_id', 'notes', 'submitted_at', 'submitted_at_claimed'])]
 class ObChecklist extends Model implements HasMedia
 {
     /** @use HasFactory<ObChecklistFactory> */
@@ -34,6 +35,7 @@ class ObChecklist extends Model implements HasMedia
     {
         return [
             'submitted_at' => 'datetime',
+            'submitted_at_claimed' => 'datetime',
         ];
     }
 

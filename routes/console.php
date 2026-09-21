@@ -49,3 +49,12 @@ Schedule::command('nadi:prune-api-staging')
     ->daily()
     ->at('04:30')
     ->onOneServer();
+
+// Which patrols deserve a second look. Runs after the night shift has ended
+// and its outbox has had time to come home — flags depend on a scan's
+// neighbours, and a basement report can arrive hours after the one it makes
+// impossible. Nothing here refuses a report; it only marks what to review.
+Schedule::command('nadi:assess-patrols')
+    ->daily()
+    ->at('05:00')
+    ->onOneServer();

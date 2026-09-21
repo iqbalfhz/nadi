@@ -77,6 +77,8 @@ class ObChecklistController extends Controller
             'user_id' => $request->user()->id,
             'notes' => $data['notes'] ?? null,
             'submitted_at' => FieldReportTime::clamp($data['submitted_at'] ?? null),
+            // Null unless the clock was implausible. See FieldReportTime::claimed().
+            'submitted_at_claimed' => FieldReportTime::claimed($data['submitted_at'] ?? null),
         ]);
 
         ApiUpload::claim($checklist, $data['photo_ids'], $request->user()->id);

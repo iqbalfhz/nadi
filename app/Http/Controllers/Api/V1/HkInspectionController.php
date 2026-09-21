@@ -120,6 +120,8 @@ class HkInspectionController extends Controller
             'follow_up' => $condition->needsFollowUp() ? ($data['follow_up'] ?? null) : null,
             'notes' => $data['notes'] ?? null,
             'submitted_at' => FieldReportTime::clamp($data['submitted_at'] ?? null),
+            // Null unless the clock was implausible. See FieldReportTime::claimed().
+            'submitted_at_claimed' => FieldReportTime::claimed($data['submitted_at'] ?? null),
         ]);
 
         ApiUpload::claim($inspection, $data['photo_ids'], $request->user()->id);

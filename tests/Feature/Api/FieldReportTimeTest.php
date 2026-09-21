@@ -114,6 +114,71 @@ class FieldReportTimeTest extends TestCase
         $this->assertSame('2026-09-06 00:21:18', $clamped->format('Y-m-d H:i:s'));
     }
 
+    /**
+     * Issue #1, Ask 2. A handset whose clock runs ahead used to have its claim
+     * quietly replaced with "now", and the row came out looking ordinary —
+     * the one clock signal with no false positives, thrown away by the server
+     * itself. The report is still clamped so it survives; the claim is now
+     * kept beside it.
+     */
+    public function test_a_clock_running_ahead_is_kept_not_erased(): void
+    {
+        $this->actingAsMobileUser(self::PERMISSIONS);
+        $this->travelTo('2026-09-20 01:00:00');
+
+        $this->postJson('/api/v1/ob/checklists', [
+            'ob_area_id' => ObArea::factory()->create(['is_active' => true])->id,
+            'photo_ids' => [$this->upload()],
+            // Three hours fast: 04:00 WIB, sent as UTC.
+            'submitted_at' => '2026-09-19T21:00:00Z',
+        ], $this->idempotencyHeader())->assertCreated();
+
+        $checklist = ObChecklist::query()->sole();
+
+        $this->assertSame('2026-09-20 01:00', $checklist->submitted_at->format('Y-m-d H:i'));
+        $this->assertSame('2026-09-20 04:00', $checklist->submitted_at_claimed?->format('Y-m-d H:i'));
+    }
+
+    /**
+     * Phone clocks drift by seconds. A report sent at once from a handset
+     * thirty seconds fast arrives "in the future" — and recording that would
+     * put a warning on ordinary reports until every supervisor learned to
+     * ignore it. The issue proposed a tolerance for exactly this reason.
+     */
+    public function test_ordinary_clock_drift_is_not_recorded(): void
+    {
+        $this->travelTo('2026-09-20 01:00:00');
+
+        // 01:00:30 WIB: thirty seconds fast.
+        $this->assertNull(FieldReportTime::claimed('2026-09-19T18:00:30Z'));
+
+        // 01:06:00 WIB: six minutes fast is past any honest drift.
+        $this->assertNotNull(FieldReportTime::claimed('2026-09-19T18:06:00Z'));
+    }
+
+    /**
+     * The ordinary case must stay empty — above all a report that queued for
+     * hours in a basement. That is the outbox working, not a wrong clock, and
+     * the issue is explicit that it must not be marked.
+     */
+    public function test_an_honest_time_leaves_nothing_behind(): void
+    {
+        $this->actingAsMobileUser(self::PERMISSIONS);
+        $this->travelTo('2026-09-20 07:02:00');
+
+        $this->postJson('/api/v1/ob/checklists', [
+            'ob_area_id' => ObArea::factory()->create(['is_active' => true])->id,
+            'photo_ids' => [$this->upload()],
+            // Filed at 03:15 WIB, arriving nearly four hours later.
+            'submitted_at' => '2026-09-19T20:15:00Z',
+        ], $this->idempotencyHeader())->assertCreated();
+
+        $checklist = ObChecklist::query()->sole();
+
+        $this->assertSame('2026-09-20 03:15', $checklist->submitted_at->format('Y-m-d H:i'));
+        $this->assertNull($checklist->submitted_at_claimed);
+    }
+
     private function upload(): string
     {
         return $this->postJson('/api/v1/uploads', [

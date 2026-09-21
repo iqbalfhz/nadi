@@ -82,6 +82,7 @@ class HkInspectionInfolist
                     ->schema([
                         FieldReportEntries::reportedAt(),
                         FieldReportEntries::receivedAt(),
+                        FieldReportEntries::claimedAt(),
                     ]),
             ]);
     }

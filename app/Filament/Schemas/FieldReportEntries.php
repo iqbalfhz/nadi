@@ -40,4 +40,22 @@ class FieldReportEntries
             ->label(__('Diterima Server'))
             ->dateTime('d M Y H:i:s');
     }
+
+    /**
+     * What the handset claimed before the server pulled it back into range.
+     *
+     * Hidden on an ordinary report, which is nearly all of them. When it does
+     * appear, it is the one clock signal with no honest explanation: a time
+     * that had not happened yet. See FieldReportTime::claimed().
+     */
+    public static function claimedAt(): TextEntry
+    {
+        return TextEntry::make('submitted_at_claimed')
+            ->label(__('Diklaim HP'))
+            ->dateTime('d M Y H:i:s')
+            ->badge()
+            ->color('warning')
+            ->helperText(__('Jam di HP petugas tidak wajar, jadi waktunya dikoreksi server. Laporannya sendiri tetap tersimpan.'))
+            ->visible(fn ($record): bool => $record->submitted_at_claimed !== null);
+    }
 }

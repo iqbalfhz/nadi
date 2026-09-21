@@ -49,6 +49,7 @@ class ObChecklistInfolist
                     ->schema([
                         FieldReportEntries::reportedAt(),
                         FieldReportEntries::receivedAt(),
+                        FieldReportEntries::claimedAt(),
                     ]),
             ]);
     }
