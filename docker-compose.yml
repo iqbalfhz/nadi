@@ -40,6 +40,23 @@ services:
     pull_policy: never
     restart: unless-stopped
     command: php artisan reverb:start --host=0.0.0.0
+    # Every service here inherits the FrankenPHP image's HEALTHCHECK, which
+    # curls Caddy's admin API on :2019. Only `app` runs Caddy, so on the other
+    # three that check failed from the first deploy onward — Coolify showed
+    # the whole project "Degraded" permanently, which meant a real outage
+    # would have looked exactly like an ordinary day.
+    #
+    # Reverb gets a check that actually means something: is it accepting
+    # connections on the port it serves. A bare TCP connect rather than an
+    # HTTP request, because Reverb answers an unknown path with a 404 and
+    # `curl -f` would count that as down. No `$` anywhere in the command —
+    # Compose would read it as a variable to substitute.
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1', 8080) ? 0 : 1);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     ports:
       - "8086:8080"
     depends_on:
@@ -56,6 +73,12 @@ services:
     pull_policy: never
     restart: unless-stopped
     command: php artisan schedule:work
+    # No port to probe, so no check at all rather than a check that always
+    # fails. If schedule:work dies the container exits with it, and
+    # `restart: unless-stopped` brings it back — that already is the health
+    # mechanism. See the note on `reverb`.
+    healthcheck:
+      disable: true
     depends_on:
       - app
       - nadi-redis
@@ -83,6 +106,10 @@ services:
     # The restart policy above already brings the worker back if it
     # genuinely dies.
     command: php artisan queue:work --tries=3
+    # Same reasoning as `scheduler`: nothing to probe, and a dead worker takes
+    # the container down with it.
+    healthcheck:
+      disable: true
     depends_on:
       - app
       - nadi-redis
