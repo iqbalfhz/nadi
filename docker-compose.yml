@@ -27,8 +27,17 @@ services:
       - storage_app:/app/storage/app
       - storage_logs:/app/storage/logs
 
+  # reverb, scheduler and queue all run the image `app` builds, and none of
+  # them has a build: section of its own — so `pull_policy: never` on each is
+  # load-bearing. Coolify runs `docker compose pull --ignore-buildable` before
+  # every deploy; --ignore-buildable only skips services that *have* build:,
+  # so without this Compose tries to fetch nadi-app:latest from Docker Hub,
+  # is refused, and the whole deploy stops. `missing` would not do: Compose
+  # still pulls a :latest tag under that policy. The image exists locally
+  # because `app` is built first, in the same deploy.
   reverb:
     image: nadi-app:latest
+    pull_policy: never
     restart: unless-stopped
     command: php artisan reverb:start --host=0.0.0.0
     ports:
@@ -44,6 +53,7 @@ services:
 
   scheduler:
     image: nadi-app:latest
+    pull_policy: never
     restart: unless-stopped
     command: php artisan schedule:work
     depends_on:
@@ -63,6 +73,7 @@ services:
   # private 'internal' disk in order to upload them to Telegram.
   queue:
     image: nadi-app:latest
+    pull_policy: never
     restart: unless-stopped
     # Deliberately no --max-time. It used to recycle the worker hourly, which
     # bought nothing (a deploy already replaces the container, and this queue
