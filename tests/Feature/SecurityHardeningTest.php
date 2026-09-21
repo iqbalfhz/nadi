@@ -137,6 +137,45 @@ class SecurityHardeningTest extends TestCase
         $this->assertSame('false', $this->sessionSecureUnder('local'));
     }
 
+    // ---- Debug mode ----
+
+    /**
+     * The debug page shows source code, file paths and framework versions to
+     * whoever triggers an error. It reached the live site once, because
+     * .env.example ships APP_DEBUG=true and that value found its way into
+     * production's environment — so production refuses it outright rather
+     * than trusting the variable.
+     */
+    public function test_debug_mode_can_never_be_on_in_production(): void
+    {
+        $this->assertSame('false', $this->debugUnder('production', 'true'));
+
+        // Everywhere else it still follows APP_DEBUG, or local development
+        // would lose its error pages.
+        $this->assertSame('true', $this->debugUnder('local', 'true'));
+        $this->assertSame('false', $this->debugUnder('local', 'false'));
+    }
+
+    private function debugUnder(string $environment, string $debug): string
+    {
+        // Separate process for the same reason as sessionSecureUnder(): the
+        // config file was already evaluated by this run's own bootstrap.
+        $script = <<<'PHP_SCRIPT'
+            require "vendor/autoload.php";
+            $app = require "bootstrap/app.php";
+            $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+            echo var_export((bool) config("app.debug"), true);
+            PHP_SCRIPT;
+
+        return trim(Process::env(['APP_ENV' => $environment, 'APP_DEBUG' => $debug])
+            ->path(base_path())
+            // Booting the whole framework in a child process is slow on this
+            // machine; the default 60 s has already timed out once.
+            ->timeout(180)
+            ->run([PHP_BINARY, '-r', $script])
+            ->output());
+    }
+
     private function sessionSecureUnder(string $environment): string
     {
         $script = <<<'PHP_SCRIPT'
@@ -148,6 +187,7 @@ class SecurityHardeningTest extends TestCase
 
         return trim(Process::env(['APP_ENV' => $environment])
             ->path(base_path())
+            ->timeout(180)
             ->run([PHP_BINARY, '-r', $script])
             ->output());
     }

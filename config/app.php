@@ -39,7 +39,14 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    // Never on in production, whatever APP_DEBUG says. The debug page shows
+    // source code, file paths and framework versions to whoever triggers an
+    // error, and it did exactly that on the live site in September 2026:
+    // .env.example ships APP_DEBUG=true for local work, and the value made
+    // it into production's environment. The branded pages in
+    // resources/views/errors only render with debug off. The full trace is
+    // still written to storage/logs/laravel.log.
+    'debug' => (bool) env('APP_DEBUG', false) && env('APP_ENV', 'production') !== 'production',
 
     /*
     |--------------------------------------------------------------------------
