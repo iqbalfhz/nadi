@@ -30,6 +30,10 @@ class CrashReportApiTest extends TestCase
 
     public function test_the_app_can_report_its_own_failure(): void
     {
+        // Pinned: occurred_at is clamped to the last seven days, so a fixed
+        // date in this test is only valid for a week after it was written.
+        $this->travelTo('2026-09-06 12:00:00');
+
         $user = $this->actingAsMobileUser([]);
 
         $this->postJson('/api/v1/crash', [
@@ -211,6 +215,10 @@ class CrashReportApiTest extends TestCase
      */
     public function test_a_late_arrival_widens_the_window_rather_than_overwriting_it(): void
     {
+        // Pinned for the same reason as above: both dates must sit inside the
+        // seven-day window, whenever this suite happens to run.
+        $this->travelTo('2026-09-06 12:00:00');
+
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['mobile']);
 

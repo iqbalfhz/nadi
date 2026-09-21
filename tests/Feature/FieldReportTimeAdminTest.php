@@ -31,6 +31,11 @@ class FieldReportTimeAdminTest extends TestCase
 
         Filament::setCurrentPanel(Filament::getPanel('admin'));
         $this->actingAsSuperAdmin();
+
+        // Pinned: the list's date filter defaults to "start of this month to
+        // today", so the fixed September dates below would silently fall
+        // outside it from 1 October onward.
+        $this->travelTo('2026-09-06 12:00:00');
     }
 
     public function test_the_ob_report_shows_when_the_worker_filed_it_not_when_it_arrived(): void
