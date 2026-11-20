@@ -45,7 +45,9 @@ ENV VITE_APP_NAME=${VITE_APP_NAME} \
     VITE_REVERB_PORT=${VITE_REVERB_PORT} \
     VITE_REVERB_SCHEME=${VITE_REVERB_SCHEME}
 
-COPY package.json package-lock.json ./
+# .npmrc carries ignore-scripts=true; without it here, npm ci runs every
+# dependency's install scripts.
+COPY package.json package-lock.json .npmrc ./
 RUN npm ci
 COPY . .
 # resources/css/**/*.css imports Flux/Filament's own CSS straight out of
