@@ -172,6 +172,39 @@ class AuthTest extends TestCase
         ])->assertJsonValidationErrors('code');
     }
 
+    /**
+     * Someone holding the password must not buy fresh guesses at the code by
+     * switching address — the web's Fortify limiter counts per account too.
+     */
+    public function test_two_factor_guesses_are_counted_per_account_not_per_address(): void
+    {
+        $this->employeeWithTwoFactor();
+
+        $challenge = $this->postJson('/api/v1/auth/login', [
+            'email' => 'budi@tangcity.com',
+            'password' => 'rahasia-sekali',
+            'device_name' => 'Redmi Note 12',
+        ])->json('challenge_token');
+
+        foreach (range(1, 5) as $attempt) {
+            $this->withServerVariables(['REMOTE_ADDR' => "10.0.0.{$attempt}"])
+                ->withToken($challenge)
+                ->postJson('/api/v1/auth/two-factor-challenge', [
+                    'code' => '000000',
+                    'device_name' => 'Redmi Note 12',
+                ])
+                ->assertJsonValidationErrors('code');
+        }
+
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.99'])
+            ->withToken($challenge)
+            ->postJson('/api/v1/auth/two-factor-challenge', [
+                'code' => '000000',
+                'device_name' => 'Redmi Note 12',
+            ])
+            ->assertStatus(429);
+    }
+
     public function test_a_recovery_code_works_once(): void
     {
         $user = $this->employeeWithTwoFactor();

@@ -50,12 +50,14 @@ class AuthController extends Controller
             'device_name' => ['required', 'string', 'max:255'],
         ]);
 
-        $this->assertNotThrottled($request, $credentials['email']);
+        $throttleKey = $this->throttleKey($request, $credentials['email']);
+
+        $this->assertNotThrottled($throttleKey);
 
         $user = User::query()->where('email', $credentials['email'])->first();
 
         if (! $user instanceof User || ! Hash::check($credentials['password'], $user->password)) {
-            RateLimiter::hit($this->throttleKey($request, $credentials['email']));
+            RateLimiter::hit($throttleKey);
 
             throw ValidationException::withMessages([
                 'email' => __('Email atau password salah.'),
@@ -77,7 +79,7 @@ class AuthController extends Controller
             ]);
         }
 
-        RateLimiter::clear($this->throttleKey($request, $credentials['email']));
+        RateLimiter::clear($throttleKey);
 
         if ($user->two_factor_secret !== null && $user->two_factor_confirmed_at !== null) {
             return $this->challenge($user, $credentials['device_name']);
@@ -105,14 +107,14 @@ class AuthController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $this->assertNotThrottled($request, 'two-factor:'.$user->id);
+        $this->assertNotThrottled($this->twoFactorThrottleKey($user));
 
         if (isset($data['recovery_code'])) {
             return $this->completeWithRecoveryCode($request, $user, $data['recovery_code'], $data['device_name']);
         }
 
         if (! isset($data['code']) || ! $provider->verify(decrypt($user->two_factor_secret), $data['code'])) {
-            RateLimiter::hit($this->throttleKey($request, 'two-factor:'.$user->id));
+            RateLimiter::hit($this->twoFactorThrottleKey($user));
 
             throw ValidationException::withMessages([
                 'code' => __('Kode autentikasi tidak cocok.'),
@@ -154,7 +156,7 @@ class AuthController extends Controller
         $codes = is_array($decoded) ? array_values(array_filter($decoded, 'is_string')) : [];
 
         if (! in_array($code, $codes, true)) {
-            RateLimiter::hit($this->throttleKey($request, 'two-factor:'.$user->id));
+            RateLimiter::hit($this->twoFactorThrottleKey($user));
 
             throw ValidationException::withMessages([
                 'recovery_code' => __('Kode pemulihan tidak cocok.'),
@@ -177,7 +179,7 @@ class AuthController extends Controller
 
     private function completeChallenge(Request $request, User $user, string $deviceName): JsonResponse
     {
-        RateLimiter::clear($this->throttleKey($request, 'two-factor:'.$user->id));
+        RateLimiter::clear($this->twoFactorThrottleKey($user));
 
         // The challenge token has done its job, and leaving it alive would
         // let the same half-login be completed twice.
@@ -199,10 +201,8 @@ class AuthController extends Controller
         ]);
     }
 
-    private function assertNotThrottled(Request $request, string $identifier): void
+    private function assertNotThrottled(string $key): void
     {
-        $key = $this->throttleKey($request, $identifier);
-
         if (! RateLimiter::tooManyAttempts($key, self::MAX_ATTEMPTS)) {
             return;
         }
@@ -217,5 +217,13 @@ class AuthController extends Controller
     private function throttleKey(Request $request, string $identifier): string
     {
         return Str::transliterate(Str::lower($identifier).'|'.$request->ip());
+    }
+
+    /**
+     * Per account, not per address — like Fortify's own two-factor limiter.
+     */
+    private function twoFactorThrottleKey(User $user): string
+    {
+        return 'two-factor:'.$user->id;
     }
 }
