@@ -6,11 +6,10 @@ use App\Models\HkInspection;
 use App\Models\ObChecklist;
 use App\Models\SecurityPatrol;
 use Carbon\CarbonInterface;
-use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * The two times every offline field report carries, and the date filter that
@@ -88,33 +87,10 @@ class FieldReportTable
      */
     public static function dateFilter(): Filter
     {
-        return Filter::make('reported_at')
-            ->label(__('Tanggal'))
-            ->schema([
-                DatePicker::make('from')
-                    ->label(__('Dari Tanggal'))
-                    ->default(now()->startOfMonth()->toDateString()),
-                DatePicker::make('until')
-                    ->label(__('Sampai Tanggal'))
-                    ->default(now()->toDateString()),
-            ])
-            ->query(fn (Builder $query, array $data): Builder => $query
-                ->when($data['from'] ?? null, fn (Builder $q, string $date) => $q
-                    ->whereRaw('DATE(COALESCE(submitted_at, created_at)) >= ?', [$date]))
-                ->when($data['until'] ?? null, fn (Builder $q, string $date) => $q
-                    ->whereRaw('DATE(COALESCE(submitted_at, created_at)) <= ?', [$date])))
-            ->indicateUsing(function (array $data): array {
-                $indicators = [];
-
-                if ($data['from'] ?? null) {
-                    $indicators[] = 'Dari '.Carbon::parse($data['from'])->format('d M Y');
-                }
-
-                if ($data['until'] ?? null) {
-                    $indicators[] = 'Sampai '.Carbon::parse($data['until'])->format('d M Y');
-                }
-
-                return $indicators;
-            });
+        return DateRangeFilter::make(
+            'reported_at',
+            defaultFrom: now()->startOfMonth()->toDateString(),
+            column: DB::raw('COALESCE(submitted_at, created_at)'),
+        );
     }
 }

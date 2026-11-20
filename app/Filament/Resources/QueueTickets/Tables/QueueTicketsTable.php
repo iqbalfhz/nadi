@@ -3,16 +3,14 @@
 namespace App\Filament\Resources\QueueTickets\Tables;
 
 use App\Enums\QueueTicketStatus;
+use App\Filament\Tables\DateRangeFilter;
 use App\Models\QueueTicket;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 class QueueTicketsTable
@@ -53,32 +51,7 @@ class QueueTicketsTable
             ->filters([
                 // Defaults to today so this doesn't grow into an ever-longer,
                 // unfiltered list — clear the dates to see the full history.
-                Filter::make('created_at')
-                    ->label(__('Tanggal'))
-                    ->schema([
-                        DatePicker::make('from')
-                            ->label(__('Dari Tanggal'))
-                            ->default(now()->toDateString()),
-                        DatePicker::make('until')
-                            ->label(__('Sampai Tanggal'))
-                            ->default(now()->toDateString()),
-                    ])
-                    ->query(fn (Builder $query, array $data): Builder => $query
-                        ->when($data['from'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '>=', $date))
-                        ->when($data['until'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '<=', $date)))
-                    ->indicateUsing(function (array $data): array {
-                        $indicators = [];
-
-                        if ($data['from'] ?? null) {
-                            $indicators[] = 'Dari '.Carbon::parse($data['from'])->format('d M Y');
-                        }
-
-                        if ($data['until'] ?? null) {
-                            $indicators[] = 'Sampai '.Carbon::parse($data['until'])->format('d M Y');
-                        }
-
-                        return $indicators;
-                    }),
+                DateRangeFilter::make(defaultFrom: now()->toDateString()),
                 SelectFilter::make('status')
                     ->label(__('Status'))
                     ->options(fn (): array => collect(QueueTicketStatus::cases())

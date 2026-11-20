@@ -2,16 +2,14 @@
 
 namespace App\Filament\Resources\Documents\Tables;
 
+use App\Filament\Tables\DateRangeFilter;
 use App\Models\Company;
 use App\Models\Department;
 use App\Models\DocumentType;
-use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
 
 class DocumentsTable
 {
@@ -47,42 +45,7 @@ class DocumentsTable
             ->filters([
                 // Defaults to the current month so this doesn't grow into an
                 // ever-longer unfiltered list — clear the dates for full history.
-                Filter::make('created_at')
-                    ->label(__('Tanggal'))
-                    ->schema([
-                        DatePicker::make('from')
-                            ->label(__('Dari Tanggal'))
-                            ->default(now()->startOfMonth()->toDateString()),
-                        DatePicker::make('until')
-                            ->label(__('Sampai Tanggal'))
-                            ->default(now()->toDateString()),
-                    ])
-                    ->query(fn (Builder $query, array $data): Builder => $query
-                        ->when($data['from'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '>=', $date))
-                        ->when($data['until'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '<=', $date)))
-                    ->indicateUsing(function (array $data): array {
-                        $from = $data['from'] ?? null;
-                        $until = $data['until'] ?? null;
-
-                        // Collapse the untouched default (start of this month
-                        // through today) into one readable chip instead of
-                        // two separate "Dari"/"Sampai" ones.
-                        if ($from === now()->startOfMonth()->toDateString() && $until === now()->toDateString()) {
-                            return ['Bulan ini ('.now()->format('M Y').')'];
-                        }
-
-                        $indicators = [];
-
-                        if ($from) {
-                            $indicators[] = 'Dari '.Carbon::parse($from)->format('d M Y');
-                        }
-
-                        if ($until) {
-                            $indicators[] = 'Sampai '.Carbon::parse($until)->format('d M Y');
-                        }
-
-                        return $indicators;
-                    }),
+                DateRangeFilter::make(defaultFrom: now()->startOfMonth()->toDateString()),
                 SelectFilter::make('document_type_id')
                     ->label(__('Jenis Dokumen'))
                     ->options(fn () => DocumentType::query()->orderBy('name')->pluck('name', 'id')),

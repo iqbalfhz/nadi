@@ -3,19 +3,17 @@
 namespace App\Filament\Resources\VendorSales\Tables;
 
 use App\Enums\TicketPaymentMethod;
+use App\Filament\Tables\DateRangeFilter;
 use App\Models\Bazaar;
 use App\Models\Vendor;
 use App\Models\VendorSale;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\DatePicker;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
 
 /**
  * Shared between the admin ("Riwayat Penjualan Bazar") and /app ("Laporan
@@ -111,39 +109,7 @@ class VendorSalesTable
                     ->label(__('Metode Bayar'))
                     ->options(fn () => collect(TicketPaymentMethod::cases())
                         ->mapWithKeys(fn (TicketPaymentMethod $method) => [$method->value => $method->label()])),
-                Filter::make('created_at')
-                    ->label(__('Tanggal'))
-                    ->schema([
-                        DatePicker::make('from')
-                            ->label(__('Dari Tanggal'))
-                            ->default(fn () => $defaultToToday ? now()->toDateString() : null),
-                        DatePicker::make('until')
-                            ->label(__('Sampai Tanggal'))
-                            ->default(fn () => $defaultToToday ? now()->toDateString() : null),
-                    ])
-                    ->query(fn (Builder $query, array $data): Builder => $query
-                        ->when($data['from'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '>=', $date))
-                        ->when($data['until'] ?? null, fn (Builder $q, string $date) => $q->whereDate('created_at', '<=', $date)))
-                    ->indicateUsing(function (array $data): array {
-                        $from = $data['from'] ?? null;
-                        $until = $data['until'] ?? null;
-
-                        if ($from === now()->toDateString() && $until === now()->toDateString()) {
-                            return ['Hari ini ('.now()->format('d M Y').')'];
-                        }
-
-                        $indicators = [];
-
-                        if ($from) {
-                            $indicators[] = 'Dari '.Carbon::parse($from)->format('d M Y');
-                        }
-
-                        if ($until) {
-                            $indicators[] = 'Sampai '.Carbon::parse($until)->format('d M Y');
-                        }
-
-                        return $indicators;
-                    }),
+                DateRangeFilter::make(defaultFrom: $defaultToToday ? now()->toDateString() : null),
             ])
             ->recordActions([
                 ...($canEdit ? [EditAction::make()] : []),
