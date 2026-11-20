@@ -77,12 +77,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 429 => 'Terlalu banyak permintaan. Coba lagi sebentar.',
             ];
 
-            // Nothing above 500 is expected, so it is worth a log entry even
-            // though the phone is told something reassuring.
-            if ($status >= 500) {
-                report($e);
-            }
-
             return response()->json([
                 'message' => __($messages[$status] ?? 'Terjadi kesalahan di server. Coba lagi nanti.'),
             ], $status);
