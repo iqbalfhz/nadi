@@ -27,7 +27,7 @@ RUN composer dump-autoload --optimize --no-dev --classmap-authoritative --no-scr
 # the "-gnu" native binaries for Rollup/Tailwind oxide/lightningcss (not
 # "-musl"), so building on musl-based Alpine leaves those binaries
 # unresolved and crashes Rolldown/Vite's build.
-FROM node:22-bookworm-slim AS node_builder
+FROM node:26-bookworm-slim AS node_builder
 WORKDIR /app
 
 # Vite bakes VITE_* values into the built JS at build time, not runtime — so
@@ -58,10 +58,9 @@ COPY --from=composer_builder /app/vendor /app/vendor
 RUN npm run build
 
 # ---- Stage 3: runtime image ----
-# php8.4, matching composer.lock's actually-resolved dependency versions
-# (Symfony 8.1 components require PHP >= 8.4.1) and local dev (Herd runs
-# 8.4.20) — composer.json's own "^8.3" constraint no longer reflects reality.
-FROM dunglas/frankenphp:1-php8.4
+# Keep in step with composer.json's config.platform.php, which is the PHP
+# version composer.lock is resolved for.
+FROM dunglas/frankenphp:1-php8.5
 
 # spatie/laravel-backup does not dump the database itself — it shells out to
 # mysqldump. The PHP extensions below let the app *talk* to MySQL, but they

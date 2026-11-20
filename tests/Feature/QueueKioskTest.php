@@ -7,7 +7,6 @@ use App\Livewire\Queue\KioskTake;
 use App\Models\QueueCategory;
 use App\Models\QueueTicket;
 use App\Settings\QueueKioskSettings;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cookie;
 use Livewire\Livewire;
@@ -117,9 +116,12 @@ class QueueKioskTest extends TestCase
     {
         $category = QueueCategory::factory()->create(['is_active' => false]);
 
-        $this->expectException(ModelNotFoundException::class);
+        // Livewire 4.4 answers a not-found model with a 404, as it does in production.
+        Livewire::test(KioskTake::class)
+            ->call('take', $category->id)
+            ->assertNotFound();
 
-        Livewire::test(KioskTake::class)->call('take', $category->id);
+        $this->assertDatabaseCount('queue_tickets', 0);
     }
 
     public function test_dismissing_the_issued_ticket_returns_to_the_category_grid(): void

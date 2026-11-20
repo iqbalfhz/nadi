@@ -179,7 +179,8 @@ class BookingRoomTest extends TestCase
                 'ends_at' => '2026-09-01 10:00:00',
             ])
             ->callMountedAction()
-            ->assertHasNoActionErrors();
+            // Not assertHasNoActionErrors(): since Filament 5.11 it needs a default schema, which a widget lacks.
+            ->assertHasNoErrors();
 
         $this->assertDatabaseHas('room_bookings', [
             'room_id' => $room->id,
@@ -310,7 +311,7 @@ class BookingRoomTest extends TestCase
             ])
             ->setActionData(['title' => 'Booking Klik Tunggal'])
             ->callMountedAction()
-            ->assertHasNoActionErrors();
+            ->assertHasNoErrors();
 
         // Stored value must be Jakarta wall-clock time (09:00), matching what the
         // admin panel displays — not the raw UTC instant the browser sent (02:00).
