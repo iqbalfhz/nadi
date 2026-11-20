@@ -1,9 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/livewire-starter-kit",
+    "name": "iqbalfhz/nadi",
     "type": "project",
-    "description": "The official Laravel starter kit for Livewire.",
-    "keywords": ["laravel", "framework"],
+    "description": "NADI, sistem operasional kantor terpadu.",
     "license": "MIT",
     "require": {
         "php": "^8.5",
@@ -13,7 +12,6 @@
         "filament/spatie-laravel-media-library-plugin": "^5.11.4",
         "filament/spatie-laravel-settings-plugin": "^5.11.4",
         "guava/calendar": "^3.2.2",
-        "laravel/chisel": "^0.1.1",
         "laravel/fortify": "^1.43.0",
         "laravel/framework": "^13.43",
         "laravel/reverb": "^1.14",
@@ -35,7 +33,6 @@
         "laravel/pail": "^1.3.0",
         "laravel/pao": "^1.1.6",
         "laravel/pint": "^1.32.3",
-        "laravel/sail": "^1.71",
         "mockery/mockery": "^1.6.15",
         "nunomaduro/collision": "^8.9.6",
         "phpunit/phpunit": "^12.5.45"
@@ -93,24 +90,13 @@
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
             "@php artisan boost:update --ansi"
         ],
-        "post-root-package-install": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ],
-        "post-create-project-cmd": [
-            "@php artisan key:generate --ansi",
-            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
-            "@php artisan migrate --graceful --ansi"
-        ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ]
     },
     "extra": {
         "laravel": {
-            "dont-discover": [],
-            "installer": {
-                "post-create-project": []
-            }
+            "dont-discover": []
         }
     },
     "config": {
@@ -121,7 +107,6 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
-            "pestphp/pest-plugin": true,
             "php-http/discovery": true
         }
     },

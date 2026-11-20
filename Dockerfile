@@ -24,7 +24,7 @@ RUN composer dump-autoload --optimize --no-dev --classmap-authoritative --no-scr
 
 # ---- Stage 2: build frontend assets ----
 # Debian-based (glibc), not alpine: package.json's optionalDependencies pins
-# the "-gnu" native binaries for Rollup/Tailwind oxide/lightningcss (not
+# the "-gnu" native binaries for Tailwind oxide/lightningcss (not
 # "-musl"), so building on musl-based Alpine leaves those binaries
 # unresolved and crashes Rolldown/Vite's build.
 FROM node:26-bookworm-slim AS node_builder
