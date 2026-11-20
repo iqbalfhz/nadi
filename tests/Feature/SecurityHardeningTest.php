@@ -122,6 +122,16 @@ class SecurityHardeningTest extends TestCase
         $response->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     }
 
+    public function test_an_https_response_keeps_the_browser_on_https(): void
+    {
+        $this->get('https://localhost/kebijakan-privasi')
+            ->assertHeader('Strict-Transport-Security', 'max-age=31536000');
+
+        // Sent over plain http it would be ignored anyway, and it must never lock out local dev.
+        $this->get('http://localhost/kebijakan-privasi')
+            ->assertHeaderMissing('Strict-Transport-Security');
+    }
+
     // ---- Session cookie ----
 
     public function test_the_session_cookie_is_https_only_in_production(): void

@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
  * rely on inline scripts and styles, so a CSP strict enough to be worth
  * having would need nonces threaded through every one of them — that is its
  * own project, and a half-strict policy buys nothing while breaking panels.
- * These three are unconditional wins with no such tradeoff.
+ * The headers below are wins with no such tradeoff.
  */
 class AddSecurityHeaders
 {
@@ -33,6 +33,12 @@ class AddSecurityHeaders
         // Don't hand this office's internal URLs — which spell out module and
         // record ids — to whatever external site someone clicks through to.
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+        // A browser that has seen this once refuses plain http to this host for a
+        // year. No includeSubDomains: other services live under the same domain.
+        if ($request->isSecure()) {
+            $response->headers->set('Strict-Transport-Security', 'max-age=31536000');
+        }
 
         return $response;
     }
