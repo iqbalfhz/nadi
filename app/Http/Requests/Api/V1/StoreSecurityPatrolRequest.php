@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Http\Requests\Api\V1\Concerns\ValidatesFieldReport;
 use App\Models\SecurityCheckpoint;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -11,6 +12,8 @@ use Illuminate\Validation\Rule;
  */
 class StoreSecurityPatrolRequest extends FormRequest
 {
+    use ValidatesFieldReport;
+
     /**
      * Gated on the page permission, not on Create:SecurityPatrol.
      *
@@ -58,13 +61,7 @@ class StoreSecurityPatrolRequest extends FormRequest
 
             'incident_report' => ['nullable', 'string', 'max:1000'],
 
-            'photo_ids' => ['required', 'array', 'min:1', 'max:10'],
-            'photo_ids.*' => [
-                'uuid',
-                Rule::exists('api_uploads', 'id')->where('user_id', $this->user()?->id),
-            ],
-
-            'submitted_at' => ['nullable', 'date'],
+            ...$this->fieldReportRules(),
         ];
     }
 
@@ -76,10 +73,7 @@ class StoreSecurityPatrolRequest extends FormRequest
         return [
             'checkpoint_code.required' => __('Kode titik patroli tidak terbaca.'),
             'checkpoint_code.exists' => __('QR ini tidak dikenali, atau titik patroli sudah dinonaktifkan.'),
-            'photo_ids.required' => __('Laporan wajib menyertakan foto.'),
-            'photo_ids.min' => __('Laporan wajib menyertakan foto.'),
-            'photo_ids.max' => __('Maksimal 10 foto per laporan.'),
-            'photo_ids.*.exists' => __('Ada foto yang tidak ditemukan. Unggah ulang foto tersebut.'),
+            ...$this->fieldReportMessages(),
         ];
     }
 }

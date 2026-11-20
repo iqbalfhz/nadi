@@ -81,6 +81,19 @@ class FieldReportTime
     }
 
     /**
+     * Both stored times of a field report, ready to spread into its attributes.
+     *
+     * @return array{submitted_at: ?Carbon, submitted_at_claimed: ?Carbon}
+     */
+    public static function attributes(?string $value): array
+    {
+        return [
+            'submitted_at' => self::clamp($value),
+            'submitted_at_claimed' => self::claimed($value),
+        ];
+    }
+
+    /**
      * No older than a week, no later than now.
      */
     private static function intoRange(Carbon $time): Carbon

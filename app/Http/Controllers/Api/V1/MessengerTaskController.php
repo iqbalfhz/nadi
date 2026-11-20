@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\MessengerDeliveryResource;
 use App\Models\ApiUpload;
 use App\Models\MessengerDelivery;
-use App\Support\MediaAccessLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -142,17 +141,7 @@ class MessengerTaskController extends Controller
             Response::HTTP_FORBIDDEN,
         );
 
-        MediaAccessLog::record($messengerDelivery, __('Foto Bukti Pengiriman'));
-
-        $expiresAt = now()->addMinutes(30);
-
-        $photos = $messengerDelivery->getMedia('proof')->map(fn ($media): array => [
-            'id' => $media->uuid,
-            'url' => $media->getTemporaryUrl($expiresAt),
-            'expires_at' => $expiresAt->toIso8601String(),
-        ]);
-
-        return response()->json(['data' => $photos]);
+        return $this->photoLinks($messengerDelivery, 'proof', __('Foto Bukti Pengiriman'));
     }
 
     /**

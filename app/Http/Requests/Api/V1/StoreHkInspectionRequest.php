@@ -4,6 +4,7 @@ namespace App\Http\Requests\Api\V1;
 
 use App\Enums\HkCondition;
 use App\Enums\HkShift;
+use App\Http\Requests\Api\V1\Concerns\ValidatesFieldReport;
 use App\Models\HkArea;
 use App\Models\HkInspection;
 use Illuminate\Foundation\Http\FormRequest;
@@ -18,6 +19,8 @@ use Illuminate\Validation\Rule;
  */
 class StoreHkInspectionRequest extends FormRequest
 {
+    use ValidatesFieldReport;
+
     public function authorize(): bool
     {
         return $this->user()?->can('create', HkInspection::class) ?? false;
@@ -61,13 +64,7 @@ class StoreHkInspectionRequest extends FormRequest
 
             'notes' => ['nullable', 'string', 'max:1000'],
 
-            'photo_ids' => ['required', 'array', 'min:1', 'max:10'],
-            'photo_ids.*' => [
-                'uuid',
-                Rule::exists('api_uploads', 'id')->where('user_id', $this->user()?->id),
-            ],
-
-            'submitted_at' => ['nullable', 'date'],
+            ...$this->fieldReportRules(),
         ];
     }
 
@@ -84,10 +81,7 @@ class StoreHkInspectionRequest extends FormRequest
             'condition.required' => __('Kondisi wajib dipilih.'),
             'floor.required' => __('Lantai wajib diisi untuk kategori ini.'),
             'follow_up.required' => __('Tindak lanjut wajib diisi kalau kondisinya bukan Bersih.'),
-            'photo_ids.required' => __('Laporan wajib menyertakan foto.'),
-            'photo_ids.min' => __('Laporan wajib menyertakan foto.'),
-            'photo_ids.max' => __('Maksimal 10 foto per laporan.'),
-            'photo_ids.*.exists' => __('Ada foto yang tidak ditemukan. Unggah ulang foto tersebut.'),
+            ...$this->fieldReportMessages(),
         ];
     }
 

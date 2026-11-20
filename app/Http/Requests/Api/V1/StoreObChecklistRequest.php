@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Http\Requests\Api\V1\Concerns\ValidatesFieldReport;
 use App\Models\ObArea;
 use App\Models\ObChecklist;
 use Illuminate\Foundation\Http\FormRequest;
@@ -17,6 +18,8 @@ use Illuminate\Validation\Rule;
  */
 class StoreObChecklistRequest extends FormRequest
 {
+    use ValidatesFieldReport;
+
     /**
      * Reaching the mobile app is not the same as being an OB.
      *
@@ -45,19 +48,7 @@ class StoreObChecklistRequest extends FormRequest
 
             'notes' => ['nullable', 'string', 'max:1000'],
 
-            'photo_ids' => ['required', 'array', 'min:1', 'max:10'],
-            'photo_ids.*' => [
-                'uuid',
-                // Scoped to the uploader, so another worker's upload id reads
-                // as simply not existing — which is the right answer, and
-                // gives away nothing about whether it does.
-                Rule::exists('api_uploads', 'id')->where('user_id', $this->user()?->id),
-            ],
-
-            // When the worker says they did it, for reports queued offline.
-            // Out-of-range values are clamped rather than rejected — see
-            // ObChecklistController::submittedAt().
-            'submitted_at' => ['nullable', 'date'],
+            ...$this->fieldReportRules(),
         ];
     }
 
@@ -69,10 +60,7 @@ class StoreObChecklistRequest extends FormRequest
         return [
             'ob_area_id.required' => __('Area wajib dipilih.'),
             'ob_area_id.exists' => __('Area yang dipilih sudah tidak aktif.'),
-            'photo_ids.required' => __('Laporan wajib menyertakan foto.'),
-            'photo_ids.min' => __('Laporan wajib menyertakan foto.'),
-            'photo_ids.max' => __('Maksimal 10 foto per laporan.'),
-            'photo_ids.*.exists' => __('Ada foto yang tidak ditemukan. Unggah ulang foto tersebut.'),
+            ...$this->fieldReportMessages(),
         ];
     }
 }

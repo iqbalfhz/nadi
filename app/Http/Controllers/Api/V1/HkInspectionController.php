@@ -14,7 +14,6 @@ use App\Models\HkArea;
 use App\Models\HkCategory;
 use App\Models\HkInspection;
 use App\Support\FieldReportTime;
-use App\Support\MediaAccessLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -119,9 +118,7 @@ class HkInspectionController extends Controller
             'floor' => $area->category->requires_floor ? ($data['floor'] ?? null) : null,
             'follow_up' => $condition->needsFollowUp() ? ($data['follow_up'] ?? null) : null,
             'notes' => $data['notes'] ?? null,
-            'submitted_at' => FieldReportTime::clamp($data['submitted_at'] ?? null),
-            // Null unless the clock was implausible. See FieldReportTime::claimed().
-            'submitted_at_claimed' => FieldReportTime::claimed($data['submitted_at'] ?? null),
+            ...FieldReportTime::attributes($data['submitted_at'] ?? null),
         ]);
 
         ApiUpload::claim($inspection, $data['photo_ids'], $request->user()->id);
@@ -140,17 +137,7 @@ class HkInspectionController extends Controller
     {
         $this->authorize('view', $hkInspection);
 
-        MediaAccessLog::record($hkInspection, __('Foto Inspeksi HK'));
-
-        $expiresAt = now()->addMinutes(30);
-
-        $photos = $hkInspection->getMedia('photos')->map(fn ($media): array => [
-            'id' => $media->uuid,
-            'url' => $media->getTemporaryUrl($expiresAt),
-            'expires_at' => $expiresAt->toIso8601String(),
-        ]);
-
-        return response()->json(['data' => $photos]);
+        return $this->photoLinks($hkInspection, 'photos', __('Foto Inspeksi HK'));
     }
 
     /**

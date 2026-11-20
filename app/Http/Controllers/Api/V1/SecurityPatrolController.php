@@ -10,7 +10,6 @@ use App\Models\ApiUpload;
 use App\Models\SecurityCheckpoint;
 use App\Models\SecurityPatrol;
 use App\Support\FieldReportTime;
-use App\Support\MediaAccessLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -130,9 +129,7 @@ class SecurityPatrolController extends Controller
             'security_checkpoint_id' => $checkpoint->id,
             'user_id' => $request->user()->id,
             'incident_report' => $data['incident_report'] ?? null,
-            'submitted_at' => FieldReportTime::clamp($data['submitted_at'] ?? null),
-            // Null unless the clock was implausible. See FieldReportTime::claimed().
-            'submitted_at_claimed' => FieldReportTime::claimed($data['submitted_at'] ?? null),
+            ...FieldReportTime::attributes($data['submitted_at'] ?? null),
         ]);
 
         ApiUpload::claim($patrol, $data['photo_ids'], $request->user()->id);
@@ -147,17 +144,7 @@ class SecurityPatrolController extends Controller
         $this->authorizeGuard($request);
         $this->authorizeOwnership($request, $securityPatrol);
 
-        MediaAccessLog::record($securityPatrol, __('Foto Patroli Security'));
-
-        $expiresAt = now()->addMinutes(30);
-
-        $photos = $securityPatrol->getMedia('photos')->map(fn ($media): array => [
-            'id' => $media->uuid,
-            'url' => $media->getTemporaryUrl($expiresAt),
-            'expires_at' => $expiresAt->toIso8601String(),
-        ]);
-
-        return response()->json(['data' => $photos]);
+        return $this->photoLinks($securityPatrol, 'photos', __('Foto Patroli Security'));
     }
 
     private function authorizeGuard(Request $request): void

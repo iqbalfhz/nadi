@@ -78,6 +78,50 @@ class ApiContractTest extends TestCase
     }
 
     /**
+     * The shape test above only ever sees empty collections; this pins what
+     * each item carries once a photo exists.
+     */
+    public function test_every_photo_is_a_signed_expiring_link(): void
+    {
+        $worker = $this->actingAsMobileUser(self::ALL_FIELD_PERMISSIONS);
+
+        $records = [
+            'photos' => [
+                ObChecklist::factory()->create(['user_id' => $worker->id]),
+                SecurityPatrol::factory()->create(['user_id' => $worker->id]),
+                HkInspection::factory()->create(['user_id' => $worker->id]),
+            ],
+            'proof' => [
+                MessengerDelivery::factory()->create([
+                    'status' => MessengerDeliveryStatus::Delivered,
+                    'messenger_id' => $worker->id,
+                ]),
+            ],
+        ];
+
+        foreach ($records as $collection => $models) {
+            foreach ($models as $model) {
+                $model->addMedia(UploadedFile::fake()->image('bukti.jpg'))->toMediaCollection($collection);
+            }
+        }
+
+        [$ob, $patrol, $hk] = $records['photos'];
+        $delivery = $records['proof'][0];
+
+        foreach ([
+            "/api/v1/ob/checklists/{$ob->id}/photos",
+            "/api/v1/security/patrols/{$patrol->id}/photos",
+            "/api/v1/hk/inspections/{$hk->id}/photos",
+            "/api/v1/messenger/tasks/{$delivery->id}/proof",
+        ] as $endpoint) {
+            $this->getJson($endpoint)
+                ->assertOk()
+                ->assertJsonCount(1, 'data')
+                ->assertJsonStructure(['data' => [['id', 'url', 'expires_at']]]);
+        }
+    }
+
+    /**
      * §6 says master data comes back as a plain array with no meta. The app
      * caches the whole thing and files reports offline against that cache, so
      * paginating either list later would silently leave every area past the

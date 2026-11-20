@@ -10,7 +10,6 @@ use App\Models\ApiUpload;
 use App\Models\ObArea;
 use App\Models\ObChecklist;
 use App\Support\FieldReportTime;
-use App\Support\MediaAccessLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -76,9 +75,7 @@ class ObChecklistController extends Controller
             // rule CreateObChecklist::mutateFormDataBeforeCreate() enforces.
             'user_id' => $request->user()->id,
             'notes' => $data['notes'] ?? null,
-            'submitted_at' => FieldReportTime::clamp($data['submitted_at'] ?? null),
-            // Null unless the clock was implausible. See FieldReportTime::claimed().
-            'submitted_at_claimed' => FieldReportTime::claimed($data['submitted_at'] ?? null),
+            ...FieldReportTime::attributes($data['submitted_at'] ?? null),
         ]);
 
         ApiUpload::claim($checklist, $data['photo_ids'], $request->user()->id);
@@ -88,26 +85,10 @@ class ObChecklistController extends Controller
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    /**
-     * Signed, expiring links to a report's photos.
-     *
-     * The collection lives on the private 'internal' disk, so there is no
-     * permanent URL to hand out and each view mints its own.
-     */
     public function photos(ObChecklist $obChecklist): JsonResponse
     {
         $this->authorize('view', $obChecklist);
 
-        MediaAccessLog::record($obChecklist, __('Foto Checklist OB'));
-
-        $expiresAt = now()->addMinutes(30);
-
-        $photos = $obChecklist->getMedia('photos')->map(fn ($media): array => [
-            'id' => $media->uuid,
-            'url' => $media->getTemporaryUrl($expiresAt),
-            'expires_at' => $expiresAt->toIso8601String(),
-        ]);
-
-        return response()->json(['data' => $photos]);
+        return $this->photoLinks($obChecklist, 'photos', __('Foto Checklist OB'));
     }
 }
