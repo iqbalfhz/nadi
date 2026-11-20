@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\VendorSales\Tables;
 
+use App\Enums\PricingUnit;
 use App\Enums\TicketPaymentMethod;
 use App\Filament\Tables\DateRangeFilter;
 use App\Models\Bazaar;
@@ -11,9 +12,10 @@ use Filament\Actions\EditAction;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use pxlrbt\FilamentExcel\Columns\Column as ExportColumn;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 /**
  * Shared between the admin ("Riwayat Penjualan Bazar") and /app ("Laporan
@@ -113,6 +115,33 @@ class VendorSalesTable
             ])
             ->recordActions([
                 ...($canEdit ? [EditAction::make()] : []),
+            ]);
+    }
+
+    /**
+     * The Export Excel sheet, identical in both panels.
+     */
+    public static function excelExport(): ExcelExport
+    {
+        return ExcelExport::make('penjualan-bazar')
+            ->withFilename(fn (): string => 'penjualan-bazar-'.now()->format('Y-m-d'))
+            ->withColumns([
+                ExportColumn::make('transaction_number')->heading(__('No. Transaksi')),
+                ExportColumn::make('bazaar.name')->heading(__('Bazar')),
+                ExportColumn::make('vendor.name')->heading(__('Kios')),
+                ExportColumn::make('vendorProduct.name')->heading(__('Produk')),
+                ExportColumn::make('quantity')->heading(__('Jumlah')),
+                ExportColumn::make('pricing_unit')
+                    ->heading(__('Satuan'))
+                    ->formatStateUsing(fn (PricingUnit $state): string => $state->label()),
+                ExportColumn::make('payment_method')
+                    ->heading(__('Metode Bayar'))
+                    ->formatStateUsing(fn (TicketPaymentMethod $state): string => $state->label()),
+                ExportColumn::make('price')->heading(__('Subtotal')),
+                ExportColumn::make('tax_rate')->heading(__('Tarif PB1 (%)')),
+                ExportColumn::make('tax_amount')->heading(__('PB1')),
+                ExportColumn::make('soldByUser.name')->heading(__('Kasir')),
+                ExportColumn::make('created_at')->heading(__('Waktu')),
             ]);
     }
 }

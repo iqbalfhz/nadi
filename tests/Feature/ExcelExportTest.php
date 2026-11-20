@@ -71,6 +71,37 @@ class ExcelExportTest extends TestCase
         $this->assertContains(__('Kios'), $rows[0]);
     }
 
+    public function test_both_panels_export_the_same_ticket_columns(): void
+    {
+        Ticket::factory()->create();
+
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
+        $this->actingAsSuperAdmin();
+        $admin = $this->exportedRows(AdminListTickets::class, 'penjualan-tiket-event')[0];
+
+        Filament::setCurrentPanel(Filament::getPanel('app'));
+        $this->actingAsEmployeeWithPermissions('ViewAny:Ticket');
+        $app = $this->exportedRows(AppListTickets::class, 'penjualan-tiket-event')[0];
+
+        $this->assertSame($admin, $app);
+        $this->assertContains(__('No. Transaksi'), $app);
+    }
+
+    public function test_both_panels_export_the_same_bazaar_columns(): void
+    {
+        VendorSale::factory()->create();
+
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
+        $this->actingAsSuperAdmin();
+        $admin = $this->exportedRows(AdminListVendorSales::class, 'penjualan-bazar')[0];
+
+        Filament::setCurrentPanel(Filament::getPanel('app'));
+        $this->actingAsEmployeeWithPermissions('ViewAny:VendorSale');
+        $app = $this->exportedRows(AppListVendorSales::class, 'penjualan-bazar')[0];
+
+        $this->assertSame($admin, $app);
+    }
+
     /**
      * @param  class-string  $page
      * @return array<int, array<int, mixed>>
